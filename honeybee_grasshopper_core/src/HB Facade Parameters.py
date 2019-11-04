@@ -1,0 +1,47 @@
+# Honeybee: A Plugin for Environmental Analysis (GPL)
+# This file is part of Honeybee.
+#
+# Copyright (c) 2019, Ladybug Tools.
+# You should have received a copy of the GNU General Public License
+# along with Honeybee; If not, see <http://www.gnu.org/licenses/>.
+# 
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+Generate lists of facadce properties ordanized by the four primary cardinal
+directions.
+_
+Such properties can be glazing ratios, glazing heigths, sill heights, horizontal/
+vertical glazing splits for the "HB Apertures by Ratio" component. Or they could
+be shade depths, angles, etc. for the "HB Louver Shades" component.
+-
+
+    Args:
+        _north_: Glazing parameter (boolean, float) for the north.
+        _east_: Glazing parameter (boolean, float) for the east.
+        _south_: Glazing parameter (boolean, float) for the south.
+        _west_: Glazing parameter (boolean, float) for the west.
+    
+    Returns:
+        fac_par: A list of properties for different cardinal directions to be
+            plugged into the "HB Apertures by Ratio" component or the "HB Louver
+            Shades" component.
+"""
+ghenv.Component.Name = "HB Facade Parameters"
+ghenv.Component.NickName = 'FacParam'
+ghenv.Component.Message = '0.1.0'
+ghenv.Component.Category = "HoneybeeCore"
+ghenv.Component.SubCategory = '0 :: Create'
+ghenv.Component.AdditionalHelpFromDocStrings = "4"
+
+
+def check_param(parameter):
+    if isinstance(parameter, bool):
+        return parameter
+    try:
+        return float(parameter)
+    except TypeError:
+        return parameter
+
+
+fac_par = [check_param(par) for par in (_north_, _east_, _south_, _west_)]
