@@ -1,5 +1,5 @@
 # honeybee-grasshopper-plugin
-:honeybee: :green_book: Core hHoneybee plugin for Grasshopper (aka. honeybee[+]).
+:honeybee: :green_book: Core Honeybee plugin for Grasshopper (aka. honeybee[+]).
 
 This repository contains all "core" Grasshopper components for the honeybee plugin
 (aka. those components that are shared across all extensions). The package includes
