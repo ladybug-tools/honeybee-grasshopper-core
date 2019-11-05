@@ -56,12 +56,20 @@ try:  # import the core honeybee dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
-try:  # import the honeybee-energy dependencies
+try:  # import the honeybee-energy extension
     from honeybee_energy.lib.programtypes import program_type_by_name, office_program
     from honeybee_energy.lib.constructionsets import construction_set_by_name
     from honeybee_energy.idealair import IdealAirSystem
-except ImportError:
-    pass  # honeybee-energy is not installed and ep_constr_ will not be avaialble
+except ImportError as e:
+    if _program_ is not None:
+        raise ValueError('_program_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+    elif _constr_set_ is not None:
+        raise ValueError('_constr_set_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+    elif conditioned_ is not None:
+        raise ValueError('conditioned_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
 
 
 if all_required_inputs(ghenv.Component):
@@ -84,14 +92,10 @@ if all_required_inputs(ghenv.Component):
     
     # try to assign the program
     if _program_ is not None:
-        try:
-            if isinstance(_program_, str):
-                _program_ = program_type_by_name(_program_)
-            room.properties.energy.program_type = _program_
-        except (NameError, AttributeError):
-            raise ValueError('honeybee-energy is not installed but '
-                             '_program_ has been specified.')
-    else:
+        if isinstance(_program_, str):
+            _program_ = program_type_by_name(_program_)
+        room.properties.energy.program_type = _program_
+    else:  # generic office program by default
         try:
             room.properties.energy.program_type = office_program
         except (NameError, AttributeError):
@@ -99,22 +103,12 @@ if all_required_inputs(ghenv.Component):
     
     # try to assign the construction set
     if _constr_set_ is not None:
-        try:
-            if isinstance(_constr_set_, str):
-                _constr_set_ = construction_set_by_name(_constr_set_)
-            room.properties.energy.construction_set = _constr_set_
-        except (NameError, AttributeError):
-            raise ValueError('honeybee-energy is not installed but '
-                             '_constr_set_ has been specified.')
+        if isinstance(_constr_set_, str):
+            _constr_set_ = construction_set_by_name(_constr_set_)
+        room.properties.energy.construction_set = _constr_set_
     
     # try to assign an ideal air system
-    if conditioned_:
-        try:
-            room.properties.energy.hvac = IdealAirSystem()
-        except (NameError, AttributeError):
-            raise ValueError('honeybee-energy is not installed but '
-                             'conditioned_ has been set to True.')
-    if conditioned_ is None:  # set it to be conditioned by default
+    if conditioned_ or conditioned_ is None:  # conditioned by default
         try:
             room.properties.energy.hvac = IdealAirSystem()
         except (NameError, AttributeError):

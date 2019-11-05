@@ -47,19 +47,12 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 
-if all_required_inputs(ghenv.Component) and _run is True:
-    # duplicate all of the input objects
-    rooms = [room.duplicate() for room in rooms_]
-    faces = [face.duplicate() for face in faces_]
-    shades = [shade.duplicate() for shade in shades_]
-    apertures = [ap.duplicate() for ap in apertures_]
-    doors = [door.duplicate() for door in doors_]
-    
+if all_required_inputs(ghenv.Component) and _run:
     # set a default name
     name = _name_ if _name_ is not None else 'unnamed'
     
     # create the model
-    model = Model(name, rooms, faces, shades, apertures, doors)
+    model = Model(name, rooms_, faces_, shades_, apertures_, doors_)
     
     # set the north if it is not defaulted
     if _north_ is not None:

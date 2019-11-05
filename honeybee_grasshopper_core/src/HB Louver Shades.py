@@ -8,11 +8,11 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Add extruded border Shades to all the outdoor Apertures of an input Room, Face
-or Aperture.
+Add louverd Shades, overhangs or fins to all the outdoor Apertures of an input
+Room, Face or Aperture.
 _
-This is particularly useful for accounting for the depths of walls/roofs in Radiance
-simulations or in the solar distribution calculation of EnergyPlus.
+Note that, if a Face or Room is input, Shades will only be added to those Faces
+that are Walls (not Floors or Roofs).
 -
 
     Args:
@@ -55,7 +55,8 @@ simulations or in the solar distribution calculation of EnergyPlus.
             indoor_shades instead of outdoor_shades. If an array of values are
             input here, different indoor booleans will be assigned based on
             cardinal direction, starting with north and moving clockwise.
-            Default: False.
+            Note that, by default, indoor shades are not used in energy simulations
+            but they are used in all simulations involving Radiance. Default: False.
         ep_trans_sch_: Optional text for the Shade's energy transmittance schedule
             to be looked up in the schedule library. This can also be a custom
             schedule object. If no energy schedule is input here, the default
@@ -95,12 +96,19 @@ try:  # import the core honeybee dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
-try:  # import the honeybee-energy dependencies
+try:  # import the honeybee-energy extension
     from honeybee_energy.lib.schedules import schedule_by_name
-    from honeybee_energy.schedule.ruleset import ScheduleRuleset
-    from honeybee_energy.schedule.fixedinterval import ScheduleFixedInterval
-except ImportError:
-    pass  # honeybee-energy is not installed and ep_constr_ will not be avaialble
+except ImportError as e:
+    if len(ep_trans_sch_) != 0:
+        raise ValueError('ep_trans_sch_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+
+try:  # import the honeybee-radiance extension
+    import honeybee_radiance
+except ImportError as e:
+    if len(rad_mat_) != 0:
+        raise ValueError('rad_mat_ has been specified but honeybee-radiance '
+                         'has failed to import.\n{}'.format(e))
 
 
 def can_host_louvers(face):
@@ -137,7 +145,7 @@ def inputs_by_index(count, all_inputs):
     return (inp[count] for inp in all_inputs)
 
 
-if all_required_inputs(ghenv.Component) and _run is True:
+if all_required_inputs(ghenv.Component) and _run:
     # duplicate the initial objects
     hb_obj = [obj.duplicate() for obj in _hb_obj]
     
@@ -168,16 +176,9 @@ if all_required_inputs(ghenv.Component) and _run is True:
     
     # get energyplus constructions if they are requested
     if len(ep_trans_sch_) != 0:
-        try:
-            for i, sch in enumerate(ep_trans_sch_):
-                if isinstance(sch, str):
-                    ep_trans_sch_[i] = schedule_by_name(sch)
-                else:
-                    assert isinstance(sch, (ScheduleRuleset, ScheduleFixedInterval)), \
-                        'Expected schedule for ep_trans_sch_. Got {}.'.format(type(sch))
-        except (NameError, AttributeError):
-            raise ValueError('honeybee-energy is not installed but '
-                             'ep_trans_sch_ has been specified.')
+        for i, sch in enumerate(ep_trans_sch_):
+            if isinstance(sch, str):
+                ep_trans_sch_[i] = schedule_by_name(sch)
     else:
         ep_trans_sch_ = [None]
     
