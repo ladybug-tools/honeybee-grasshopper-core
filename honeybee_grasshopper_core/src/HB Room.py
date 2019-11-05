@@ -14,7 +14,7 @@ Create Honeybee Room from Honeybee Faces.
     Args:
         _faces: A list of honeybee Faces to be joined together into a Room.
         _name_: A name for the Room. If the name is not provided a random
-            name will be assigned
+            name will be assigned.
         _program_: Text for the program of the Room (to be looked up in the
             ProgramType library) such as that output from the "HB List Programs"
             component. This can also be a custom ProgramType object. If no program
@@ -78,7 +78,7 @@ if all_required_inputs(ghenv.Component):
     
     # generate a default name
     if _name_ is None:  # get a default Room name
-        _name_ = "Room_{}".format(counter)
+        _name_ = "Room_{}".format(scriptcontext.sticky["room_count"])
         scriptcontext.sticky["room_count"] += 1
     
     # create the Room

@@ -42,8 +42,8 @@ adjacent.
     
     Returns:
         report: Reports, errors, warnings, etc.
-        hb_obj: The input Honeybee Aperture, Face or a Room with the input shades
-            added to it.
+        adj_rooms: The input Honeybee Rooms with adjacencies solved between
+            matching Faces.
 """
 
 ghenv.Component.Name = "HB Solve Adjacency"

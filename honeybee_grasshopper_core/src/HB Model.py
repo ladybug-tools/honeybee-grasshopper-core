@@ -21,7 +21,7 @@ Create a Honeybee Model, which can be sent for simulation.
             that apertures without a parent Face are not allowed for energy models.
         doors_: A list of honeybee Doors to be added to the Model. Note
             that doors without a parent Face are not allowed for energy models.
-        _north_: An number between 0 and 360 to set the clockwise north
+        _north_: A number between 0 and 360 to set the clockwise north
             direction in degrees. This can also be a vector to set the North.
             Default is 0.
         _run: Set to "True" to run the component and create the Model.
@@ -46,8 +46,13 @@ try:  # import the core honeybee dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
+def check_all_geo_none():
+    """Check whether all of the geometry inputs to this component are None."""
+    return all(obj_list == [] or obj_list == [None] for obj_list in
+               (rooms_, faces_, shades_, apertures_, doors_))
 
-if all_required_inputs(ghenv.Component) and _run:
+
+if all_required_inputs(ghenv.Component) and _run and not check_all_geo_none():
     # set a default name
     name = _name_ if _name_ is not None else 'unnamed'
     

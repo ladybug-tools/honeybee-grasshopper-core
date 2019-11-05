@@ -13,15 +13,16 @@ Create Honeybee Rooms from solids (closed Rhino polysurfaces).
 
     Args:
         _geo: A list of closed Rhino polysurfaces to be converted into Rooms.
-        _name_: A list of names for the Rooms. If a single name is input here,
-            it will be used as the base name for all of the connected polysurfaces.
+        _name_: A base name to be used for the Rooms. This will be combined with
+            the index of each input _geo to yield a unique name for each output
+            Room.
         _program_: Text for the program of the Rooms (to be looked up in the
             ProgramType library) such as that output from the "HB List Programs"
             component. This can also be a custom ProgramType object. If no program
             is input here, the Rooms will have a generic office program.
         _constr_set_: Text for the construction set of the Rooms, which is used
             to assign all default energy constructions needed to create an energy
-            model. Text should refer to a ConstructionSet within the library) such
+            model. Text should refer to a ConstructionSet within the library such
             as that output from the "HB List Construction Sets" component. This
             can also be a custom ConstructionSet object. If nothing is input here,
             the Rooms will have a generic construction set that is not sensitive to
@@ -47,7 +48,7 @@ ghenv.Component.AdditionalHelpFromDocStrings = "2"
 # document-wide counter to generate new unique Room names
 import scriptcontext
 try:
-    counter = scriptcontext.sticky["room_count"]
+    scriptcontext.sticky["room_count"]
 except KeyError:  # first time that the component is running
     scriptcontext.sticky["room_count"] = 1
 
@@ -83,8 +84,8 @@ if all_required_inputs(ghenv.Component) and _run:
     rooms = []  # list of rooms that will be returned
     for i, geo in enumerate(_geo):
         # get the name for the Room
-        if _name_ == []:  # make a default Room name
-            name = "Room_{}".format(counter)
+        if _name_ is None:  # make a default Room name
+            name = "Room_{}".format(scriptcontext.sticky["room_count"])
             scriptcontext.sticky["room_count"] += 1
         else:
             name = '{}_{}'.format(_name_, i + 1)
