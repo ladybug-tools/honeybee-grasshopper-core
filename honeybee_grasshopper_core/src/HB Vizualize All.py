@@ -13,8 +13,8 @@ sub-faces and assigned shades.
 -
 
     Args:
-        _hb_obj: A Honeybee Room, Face, Shade, Aperture, or Door to be previewed
-            in the Rhino scene.
+        _hb_obj: A Honeybee Model, Room, Face, Shade, Aperture, or Door to be
+            previewed in the Rhino scene.
     
     Returns:
         geo: The Rhino version of the Honeybee geometry object, which will be
@@ -29,6 +29,7 @@ ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
 
 try:  # import the core honeybee dependencies
+    from honeybee.model import Model
     from honeybee.room import Room
     from honeybee.face import Face
     from honeybee.aperture import Aperture
@@ -76,6 +77,19 @@ def add_room(room, geo, shades):
         add_shade(shd, shades)
     geo.extend(rg.Brep.JoinBreps(face_breps, tolerance))
 
+def add_model(model, geo, shades):
+    """Add Model geometry to a geo and shades list."""
+    for room in model.rooms:
+        add_room(room, geo, shades)
+    for face in model.orphaned_faces:
+        add_face(face, geo, shades)
+    for ap in model.orphaned_apertures:
+        add_aperture(ap, geo, shades)
+    for dr in model.orphaned_doors:
+        add_door(dr, geo)
+    for shd in model.orphaned_shades:
+        add_shade(shd, shades)
+
 
 if all_required_inputs(ghenv.Component):
     # lists of rhino geometry to be filled with content
@@ -94,6 +108,8 @@ if all_required_inputs(ghenv.Component):
             add_shade(hb_obj, shades)
         elif isinstance(hb_obj, Door):
             add_door(hb_obj, geo)
+        elif isinstance(hb_obj, Model):
+            add_model(hb_obj, geo, shades)
         else:
             raise TypeError(
                 'Unrecognized honeybee object type: {}'.format(type(hb_obj)))

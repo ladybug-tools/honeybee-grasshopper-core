@@ -85,18 +85,17 @@ if all_required_inputs(ghenv.Component):
     doors = []
     shades = []
     
-    # loop through all objects and add them
-    for hb_obj in _hb_obj:
-        if isinstance(hb_obj, Room):
-            deconstruct_room(hb_obj, faces, apertures, doors, shades)
-        elif isinstance(hb_obj, Face):
-            deconstruct_face(hb_obj, faces, apertures, doors, shades)
-        elif isinstance(hb_obj, Aperture):
-            deconstruct_aperture(hb_obj, apertures, shades)
-        elif isinstance(hb_obj, Shade):
-            shades.append(hb_obj)
-        elif isinstance(hb_obj, Door):
-            doors.append(hb_obj)
-        else:
-            raise TypeError(
-                'Unrecognized honeybee object type: {}'.format(type(hb_obj)))
+    # deconstruct objects
+    if isinstance(_hb_obj, Room):
+        deconstruct_room(_hb_obj, faces, apertures, doors, shades)
+    elif isinstance(_hb_obj, Face):
+        deconstruct_face(_hb_obj, faces, apertures, doors, shades)
+    elif isinstance(_hb_obj, Aperture):
+        deconstruct_aperture(_hb_obj, apertures, shades)
+    elif isinstance(_hb_obj, Shade):
+        shades.append(_hb_obj)
+    elif isinstance(_hb_obj, Door):
+        doors.append(_hb_obj)
+    else:
+        raise TypeError(
+            'Unrecognized honeybee object type: {}'.format(type(_hb_obj)))

@@ -1,4 +1,4 @@
-# honeybee-grasshopper-plugin
+# honeybee-grasshopper-core
 :honeybee: :green_book: Core Honeybee plugin for Grasshopper (aka. honeybee[+]).
 
 This repository contains all "core" Grasshopper components for the honeybee plugin
@@ -20,7 +20,7 @@ The honeybee-grasshopper plugin has the following dependencies (other than Rhino
 The honeybee-grasshopper plugin has the following extensions:
 
 * honeybee-grasshopper-radiance
-* honeybee-grasshopper-energy
+* [honeybee-grasshopper-energy]((https://github.com/ladybug-tools/honeybee-grasshopper-energy)
 
 # Installation
 To install the most recent version of the Grasshopper plugin, follow these steps:

@@ -44,6 +44,6 @@ if all_required_inputs(ghenv.Component):
     hb_obj = _hb_obj.duplicate()  # duplicate the initial object
     
     if out_shades_ is not None:
-        hb_obj.add_outdoor_shades(out_shades_)
+        hb_obj.add_outdoor_shades((shd.duplicate() for shd in out_shades_))
     if in_shades_ is not None:
-        hb_obj.add_indoor_shades(in_shades_)
+        hb_obj.add_indoor_shades((shd.duplicate() for shd in in_shades_))

@@ -32,8 +32,7 @@ ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
 
 try:  # import the core honeybee dependencies
-    from ladybug_rhino.fromgeometry import from_face3d
-    from ladybug_rhino.fromgeometry import from_polyface3d
+    from ladybug_rhino.fromgeometry import from_face3d, from_polyface3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -47,5 +46,17 @@ if all_required_inputs(ghenv.Component):
     for hb_obj in _hb_obj:
         try:  # Face, Shade, Aperture, or Door
             geo.append(from_face3d(hb_obj.geometry))
-        except AttributeError:  # Room
-            geo.append(from_polyface3d(hb_obj.geometry))
+        except AttributeError:  # probably a Room
+            try:
+                geo.append(from_polyface3d(hb_obj.geometry))
+            except AttributeError:  # it's a whole Model
+                for room in hb_obj.rooms:
+                    geo.append(from_polyface3d(room.geometry))
+                for face in hb_obj.orphaned_faces:
+                    geo.append(from_face3d(face.geometry))
+                for ap in hb_obj.orphaned_apertures:
+                    geo.append(from_face3d(ap.geometry))
+                for dr in hb_obj.orphaned_doors:
+                    geo.append(from_face3d(dr.geometry))
+                for shd in hb_obj.orphaned_shades:
+                    geo.append(from_face3d(shd.geometry))
