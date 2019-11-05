@@ -42,8 +42,9 @@ except ImportError as e:
 
 try:  # import the honeybee-energy dependencies
     from honeybee.boundarycondition import Adiabatic
-except ImportError:
-    Adiabatic = None  # honeybee-energy is not installed
+except ImportError:  # honeybee-energy is not installed
+    Adiabatic = None  # don't worry about the Adiabatic bc
+
 
 def add_face(face, geo_list):
     geo_list.append(from_face3d(face.punched_geometry))

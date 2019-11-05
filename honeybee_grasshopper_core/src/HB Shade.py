@@ -42,18 +42,30 @@ ghenv.Component.AdditionalHelpFromDocStrings = "5"
 
 import uuid
 
-try:
+try:  # import the core honeybee dependencies
     from honeybee.shade import Shade
     from ladybug_rhino.togeometry import to_face3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
-try:  # import the honeybee-energy dependencies
+try:  # import the honeybee-energy extension
     from honeybee_energy.lib.constructions import shade_construction_by_name
     from honeybee_energy.lib.schedules import schedule_by_name
-except ImportError:
-    pass  # honeybee-energy is not installed and ep_constr_ will not be avaialble
+except ImportError as e:
+    if ep_constr_ is not None:
+        raise ValueError('ep_constr_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+    elif ep_trans_sch_ is not None:
+        raise ValueError('ep_trans_sch_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+
+try:  # import the honeybee-radiance extension
+    import honeybee_radiance
+except ImportError as e:
+    if rad_mat_ is not None:
+        raise ValueError('rad_mat_ has been specified but honeybee-radiance '
+                         'has failed to import.\n{}'.format(e))
 
 
 if all_required_inputs(ghenv.Component):
@@ -62,29 +74,23 @@ if all_required_inputs(ghenv.Component):
     # set default name
     name = _name_ if _name_ is not None else str(uuid.uuid4())
     
-    # create the individual Doors
-    for i, lb_face in enumerate(to_face3d(_geo)):
-        hb_shd = Shade('{}{}'.format(name, i), lb_face)
-        
-        # try to assign the energyplus construction
-        if ep_constr_ is not None:
-            try:
+    # create the Shades
+    i = 0  # iterator to ensure each shade gets a unique name
+    for geo in _geo:
+        for lb_face in to_face3d(geo):
+            hb_shd = Shade('{}_{}'.format(name, i), lb_face)
+            
+            # try to assign the energyplus construction
+            if ep_constr_ is not None:
                 if isinstance(ep_constr_, str):
                     ep_constr_ = shade_construction_by_name(ep_constr_)
                 hb_shd.properties.energy.construction = ep_constr_
-            except (NameError, AttributeError):
-                raise ValueError('honeybee-energy is not installed but '
-                                 'ep_constr_ has been specified.')
-        
-        # try to assign the energyplus transmittance schedule
-        if ep_trans_sch_ is not None:
-            try:
+            
+            # try to assign the energyplus transmittance schedule
+            if ep_trans_sch_ is not None:
                 if isinstance(ep_trans_sch_, str):
                     ep_trans_sch_ = schedule_by_name(ep_trans_sch_)
                 hb_shd.properties.energy.transmittance_schedule = ep_trans_sch_
-            except (NameError, AttributeError):
-                raise ValueError('honeybee-energy is not installed but '
-                                 'ep_trans_sch_ has been specified.')
-        
-        # collect the final Doors
-        shades.append(hb_shd)
+            
+            shades.append(hb_shd)  # collect the final Shades
+            i += 1  # advance the iterator

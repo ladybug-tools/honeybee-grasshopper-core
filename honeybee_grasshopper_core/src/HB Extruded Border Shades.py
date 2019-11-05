@@ -21,7 +21,9 @@ simulations or in the solar distribution calculation of EnergyPlus.
         _depth: A number for the extrusion depth.
         indoor_: Boolean for whether the extrusion should be generated facing the
             opposite direction of the aperture normal and added to the Aperture's
-            indoor_shades instead of outdoor_shades. Default: False.
+            indoor_shades instead of outdoor_shades. Note that, by default, indoor
+            shades are not used in energy simulations but they are used in all
+            simulations involving Radiance. Default: False.
         ep_constr_: Optional text for an energy construction to be used for all
             generated shades. This text will be used to look up a construction
             in the shade construction library. This can also be a custom
@@ -39,7 +41,7 @@ simulations or in the solar distribution calculation of EnergyPlus.
 
 ghenv.Component.Name = "HB Extruded Border Shades"
 ghenv.Component.NickName = 'BorderShades'
-ghenv.Component.Message = '0.1.0\nOCT_28_2019'
+ghenv.Component.Message = '0.1.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -53,11 +55,19 @@ try:  # import the core honeybee dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
-try:  # import the honeybee-energy dependencies
+try:  # import the honeybee-energy extension
     from honeybee_energy.lib.constructions import shade_construction_by_name
-    from honeybee_energy.construction.shade import ShadeConstruction
-except ImportError:
-    pass  # honeybee-energy is not installed and ep_constr_ will not be avaialble
+except ImportError as e:
+    if ep_constr_ is not None:
+        raise ValueError('ep_constr_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+
+try:  # import the honeybee-radiance extension
+    import honeybee_radiance
+except ImportError as e:
+    if rad_mat_ is not None:
+        raise ValueError('rad_mat_ has been specified but honeybee-radiance '
+                         'has failed to import.\n{}'.format(e))
 
 
 def assign_shades(aperture, depth, indoor, ep, rad):
@@ -71,7 +81,7 @@ def assign_shades(aperture, depth, indoor, ep, rad):
                 shd.properties.energy.construction = ep
 
 
-if all_required_inputs(ghenv.Component) and _run is True:
+if all_required_inputs(ghenv.Component) and _run:
     # duplicate the initial objects
     hb_obj = [obj.duplicate() for obj in _hb_obj]
     
@@ -80,16 +90,8 @@ if all_required_inputs(ghenv.Component) and _run is True:
     
     # get energyplus constructions if they are requested
     if ep_constr_ is not None:
-        try:
-            if isinstance(ep_constr_, str):
-                ep_constr_ = shade_construction_by_name(ep_constr_)
-            else:
-                assert isinstance(ep_constr_, ShadeConstruction), \
-                    'Expected WindowConstruction for ep_constr_. ' \
-                    'Got {}.'.format(type(ep_constr_))
-        except (NameError, AttributeError):
-            raise ValueError('honeybee-energy is not installed but '
-                             'ep_constr_ has been specified.')
+        if isinstance(ep_constr_, str):
+            ep_constr_ = shade_construction_by_name(ep_constr_)
     
     # loop through the input objects and add shades
     for obj in hb_obj:

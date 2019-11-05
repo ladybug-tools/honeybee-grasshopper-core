@@ -58,10 +58,11 @@ try:  # import the core honeybee dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
-try:  # import the honeybee-energy dependencies
+try:  # import the honeybee-energy extension
     from honeybee.boundarycondition import Adiabatic
-except ImportError:
-    Adiabatic = None  # honeybee-energy is not installed
+except ImportError:  # honeybee-energy not installed
+    Adiabatic = None  # don't worry about Aidabatic; Surface is the only interior bc
+
 
 if all_required_inputs(ghenv.Component):
     # lists of rhino geometry to be filled with content

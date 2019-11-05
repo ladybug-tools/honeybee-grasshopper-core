@@ -8,7 +8,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Create Honeybee Face
+Create Honeybee Aperture
 -
 
     Args:
@@ -45,17 +45,26 @@ ghenv.Component.AdditionalHelpFromDocStrings = "4"
 
 import uuid
 
-try:
+try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
     from ladybug_rhino.togeometry import to_face3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
-try:  # import the honeybee-energy dependencies
+try:  # import the honeybee-energy extension
     from honeybee_energy.lib.constructions import window_construction_by_name
-except ImportError:
-    pass  # honeybee-energy is not installed and ep_constr_ will not be avaialble
+except ImportError as e:
+    if ep_constr_ is not None:
+        raise ValueError('ep_constr_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+
+try:  # import the honeybee-radiance extension
+    import honeybee_radiance
+except ImportError as e:
+    if rad_mat_ is not None:
+        raise ValueError('rad_mat_ has been specified but honeybee-radiance '
+                         'has failed to import.\n{}'.format(e))
 
 
 if all_required_inputs(ghenv.Component):
@@ -64,19 +73,17 @@ if all_required_inputs(ghenv.Component):
     # set default name
     name = _name_ if _name_ is not None else str(uuid.uuid4())
     
-    # create the individual Apertures
-    for i, lb_face in enumerate(to_face3d(_geo)):
-        hb_ap = Aperture('{}{}'.format(name, i), lb_face, is_operable=operable_)
-        
-        # try to assign the energyplus construction
-        if ep_constr_ is not None:
-            try:
+    # create the Apertures
+    i = 0  # iterator to ensure each aperture gets a unique name
+    for geo in _geo:
+        for lb_face in to_face3d(geo):
+            hb_ap = Aperture('{}_{}'.format(name, i), lb_face, is_operable=operable_)
+            
+            # try to assign the energyplus construction
+            if ep_constr_ is not None:
                 if isinstance(ep_constr_, str):
                     ep_constr_ = window_construction_by_name(ep_constr_)
                 hb_ap.properties.energy.construction = ep_constr_
-            except (NameError, AttributeError):
-                raise ValueError('honeybee-energy is not installed but '
-                                 'ep_constr_ has been specified.')
-        
-        # collect the final Apertures
-        apertures.append(hb_ap)
+            
+            apertures.append(hb_ap)  # collect the final Apertures
+            i += 1  # advance the iterator

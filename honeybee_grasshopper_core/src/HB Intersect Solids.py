@@ -121,5 +121,5 @@ def main(bldgMassesBefore):
 
 
 # add an compile toggle, set _compile to True to run the function
-if all_required_inputs(ghenv.Component) and _run is True:
+if all_required_inputs(ghenv.Component) and _run:
     int_solids = main(_solids)

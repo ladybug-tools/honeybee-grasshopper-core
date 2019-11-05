@@ -9,6 +9,9 @@
 
 """
 Add apertures to a Honeybee Face or Room given a ratio of aperture area to face area.
+_
+Note that this component will only add Apertures to Faces that are Walls and have
+an Outdoors boundary condition.
 -
 
     Args:
@@ -75,7 +78,7 @@ Add apertures to a Honeybee Face or Room given a ratio of aperture area to face 
 
 ghenv.Component.Name = "HB Apertures by Ratio"
 ghenv.Component.NickName = 'AperturesByRatio'
-ghenv.Component.Message = '0.1.0\nOCT_28_2019'
+ghenv.Component.Message = '0.1.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -90,11 +93,20 @@ try:  # import the core honeybee dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
-try:  # import the honeybee-energy dependencies
+try:  # import the honeybee-energy extension
     from honeybee_energy.lib.constructions import window_construction_by_name
     from honeybee_energy.construction.window import WindowConstruction
-except ImportError:
-    pass  # honeybee-energy is not installed and ep_constr_ will not be avaialble
+except ImportError as e:
+    if len(ep_constr_) != 0:
+        raise ValueError('ep_constr_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+
+try:  # import the honeybee-radiance extension
+    import honeybee_radiance
+except ImportError as e:
+    if len(rad_mat_) != 0:
+        raise ValueError('rad_mat_ has been specified but honeybee-radiance '
+                         'has failed to import.\n{}'.format(e))
 
 
 def can_host_apeture(face):
@@ -134,7 +146,7 @@ def inputs_by_index(count, all_inputs):
     return (inp[count] for inp in all_inputs)
 
 
-if all_required_inputs(ghenv.Component) and _run is True:
+if all_required_inputs(ghenv.Component) and _run:
     # duplicate the initial objects
     hb_obj = [obj.duplicate() for obj in _hb_obj]
     
@@ -149,17 +161,9 @@ if all_required_inputs(ghenv.Component) and _run is True:
     
     # get energyplus constructions if they are requested
     if len(ep_constr_) != 0:
-        try:
-            for i, constr in enumerate(ep_constr_):
-                if isinstance(constr, str):
-                    ep_constr_[i] = window_construction_by_name(constr)
-                else:
-                    assert isinstance(constr, WindowConstruction), \
-                        'Expected WindowConstruction for ep_constr_. ' \
-                        'Got {}.'.format(type(constr))
-        except (NameError, AttributeError):
-            raise ValueError('honeybee-energy is not installed but '
-                             'ep_constr_ has been specified.')
+        for i, constr in enumerate(ep_constr_):
+            if isinstance(constr, str):
+                ep_constr_[i] = window_construction_by_name(constr)
     else:
         ep_constr_ = [None]
     

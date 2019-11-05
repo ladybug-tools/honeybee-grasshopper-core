@@ -66,11 +66,26 @@ try:  # import the honeybee-energy dependencies
         window_construction_by_name
     from honeybee_energy.construction.opaque import OpaqueConstruction
     from honeybee_energy.construction.window import WindowConstruction
-except ImportError:
-    pass  # honeybee-energy is not installed and ep_constr_ will not be avaialble
+except ImportError as e:
+    if ep_constr_ is not None:
+        raise ValueError('ep_constr_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+    elif ep_glz_constr_ is not None:
+        raise ValueError('ep_glz_constr_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+    elif adiabatic_ is not None:
+        raise ValueError('adiabatic_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+
+try:  # import the honeybee-radiance extension
+    import honeybee_radiance
+except ImportError as e:
+    if rad_mat_ is not None:
+        raise ValueError('rad_mat_ has been specified but honeybee-radiance '
+                         'has failed to import.\n{}'.format(e))
 
 
-if all_required_inputs(ghenv.Component) and _run is True:
+if all_required_inputs(ghenv.Component) and _run:
     adj_rooms = [room.duplicate() for room in _rooms] # duplicate the initial objects
     
     # solve adjacnecy
@@ -78,51 +93,39 @@ if all_required_inputs(ghenv.Component) and _run is True:
     
     # try to assign the energyplus construction
     if ep_constr_ is not None:
-        try:
-            if isinstance(ep_constr_, str):  # get construction from library
-                ep_constr_ = opaque_construction_by_name(ep_constr_)
-            # check to be sure the reversed order of materials matches
-            rev_constr = ep_constr_
-            if not ep_constr_.is_symmetric:
-                rev_constr = OpaqueConstruction(
-                    '{}_Rev'.format(ep_constr_.name),
-                    [mat for mat in reversed(ep_constr_.materials)])
-            # assign the construction to the faces
-            for face_pair in adj_info['adjacent_faces']:
-                face_pair[0].properties.energy.construction = ep_constr_
-                face_pair[1].properties.energy.construction = rev_constr
-        except (NameError, AttributeError):
-            raise ValueError('honeybee-energy is not installed but '
-                             'ep_constr_ has been specified.')
+        if isinstance(ep_constr_, str):  # get construction from library
+            ep_constr_ = opaque_construction_by_name(ep_constr_)
+        # check to be sure the reversed order of materials matches
+        rev_constr = ep_constr_
+        if not ep_constr_.is_symmetric:
+            rev_constr = OpaqueConstruction(
+                '{}_Rev'.format(ep_constr_.name),
+                 [mat for mat in reversed(ep_constr_.materials)])
+        # assign the construction to the faces
+        for face_pair in adj_info['adjacent_faces']:
+            face_pair[0].properties.energy.construction = ep_constr_
+            face_pair[1].properties.energy.construction = rev_constr
     
     # try to assign the glazing energyplus construction
     if ep_glz_constr_ is not None:
-        try:
-            if isinstance(ep_glz_constr_, str):  # get construction from library
-                ep_glz_constr_ = window_construction_by_name(ep_glz_constr_)
-            # check to be sure the reversed order of materials matches
-            rev_constr = ep_glz_constr_
-            if not ep_glz_constr_.is_symmetric:
-                rev_constr = WindowConstruction(
-                    '{}_Rev'.format(ep_glz_constr_.name),
-                    [mat for mat in reversed(ep_glz_constr_.materials)])
-            # assign the construction to the faces
-            for ap_pair in adj_info['adjacent_apertures']:
-                ap_pair[0].properties.energy.construction = ep_glz_constr_
-                ap_pair[1].properties.energy.construction = rev_constr
-        except (NameError, AttributeError):
-            raise ValueError('honeybee-energy is not installed but '
-                             'ep_glz_constr_ has been specified.')
+        if isinstance(ep_glz_constr_, str):  # get construction from library
+            ep_glz_constr_ = window_construction_by_name(ep_glz_constr_)
+        # check to be sure the reversed order of materials matches
+        rev_constr = ep_glz_constr_
+        if not ep_glz_constr_.is_symmetric:
+            rev_constr = WindowConstruction(
+                '{}_Rev'.format(ep_glz_constr_.name),
+                [mat for mat in reversed(ep_glz_constr_.materials)])
+        # assign the construction to the faces
+        for ap_pair in adj_info['adjacent_apertures']:
+            ap_pair[0].properties.energy.construction = ep_glz_constr_
+            ap_pair[1].properties.energy.construction = rev_constr
     
     # try to assign the adiabatic boundary condition
     if adiabatic_:
-        try:
-            for face_pair in adj_info['adjacent_faces']:
-                face_pair[0].boundary_condition = boundary_conditions.adiabatic
-                face_pair[1].boundary_condition = boundary_conditions.adiabatic
-        except (NameError, AttributeError):
-            raise ValueError('honeybee-energy is not installed but '
-                         'adiabatic_ has been set to True.')
+        for face_pair in adj_info['adjacent_faces']:
+            face_pair[0].boundary_condition = boundary_conditions.adiabatic
+            face_pair[1].boundary_condition = boundary_conditions.adiabatic
     
     # report all of the adjacency information
     for adj_face in adj_info['adjacent_faces']:

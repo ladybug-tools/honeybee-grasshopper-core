@@ -8,14 +8,14 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Reflect any Honeybee geometry object or a Model across a plane.
+Mirror any Honeybee geometry object or a Model across a plane.
 -
 
     Args:
         _hb_obj: Any Honeybee geometry object (eg. Room, Face, Aperture, Door or
-            Shade) to be reflected across a plane. This can also be a Honeybee
-            Model object to be reflected.
-        _plane: A Plane across which the object will be reflected.
+            Shade) to be mirrored across a plane. This can also be a Honeybee
+            Model object to be mirrored.
+        _plane: A Plane across which the object will be mirrored.
         prefix_: Optional text string that will be inserted at the start of the
             names of all transformed objects, their child objects, and their
             adjacent Surface boundary condition objects. This is particularly
@@ -28,11 +28,11 @@ Reflect any Honeybee geometry object or a Model across a plane.
             and all names will remain the same. Default: None.
     
     Returns:
-        hb_obj: The input _hb_obj that has been reflected across the input plane.
+        hb_obj: The input _hb_obj that has been mirrored across the input plane.
 """
 
-ghenv.Component.Name = "HB Reflect"
-ghenv.Component.NickName = 'Reflect'
+ghenv.Component.Name = "HB Mirror"
+ghenv.Component.NickName = 'Mirror'
 ghenv.Component.Message = '0.1.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
@@ -48,7 +48,7 @@ if all_required_inputs(ghenv.Component):
     hb_obj = [obj.duplicate() for obj in _hb_obj]  # duplicate the initial objects
     plane = to_plane(_plane)  # translate the plane to ladybug_geometry
     
-    # reflect all of the objects
+    # mirror all of the objects
     for obj in hb_obj:
         obj.reflect(plane)
     

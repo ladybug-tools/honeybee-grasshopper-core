@@ -8,7 +8,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Deconstruct any Honeybee geometry object into all of it's constiuent Honeybee objects.
+Deconstruct any Honeybee geometry object into all of its constituent Honeybee objects.
 _
 This is useful for editing auto-generated child objects separately from their parent.
 For example, if you want to move all of the overhangs that were auto-generated for
@@ -19,7 +19,7 @@ original shade-less Room object.
 
     Args:
         _hb_obj: A Honeybee Room, Face, Aperture, Door or Shade to be deconstructed
-             into its constitient objects. Note that, Doors and Shades do not have
+             into its constituent objects. Note that, Doors and Shades do not have
              sub-objects assigned to them and the original object will be output.
     
     Returns:

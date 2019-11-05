@@ -17,7 +17,9 @@ Add a Honeybee Shades to an Aperture, Face or Room.
         out_shades_: A list of Honeybee Shade objects to be added to the outside
             of the input _hb_objs.
         in_shades_: A list of Honeybee Shade objects to be added to the inside
-            of the input _hb_objs.
+            of the input _hb_objs. Note that, by default, indoor shades are not
+            used in energy simulations but they are used in all simulations
+            involving Radiance.
     
     Returns:
         report: Reports, errors, warnings, etc.
@@ -36,7 +38,6 @@ try:  # import the core honeybee dependencies
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
-
 
 
 if all_required_inputs(ghenv.Component):

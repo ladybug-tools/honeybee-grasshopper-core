@@ -60,27 +60,36 @@ try:  # import the core honeybee dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
-try:  # import the honeybee-energy dependencies
+try:  # import the honeybee-energy extension
     from honeybee_energy.lib.programtypes import program_type_by_name, office_program
     from honeybee_energy.lib.constructionsets import construction_set_by_name
     from honeybee_energy.idealair import IdealAirSystem
-except ImportError:
-    pass  # honeybee-energy is not installed and ep_constr_ will not be avaialble
+except ImportError as e:
+    if _program_ is not None:
+        raise ValueError('_program_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+    elif _constr_set_ is not None:
+        raise ValueError('_constr_set_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
+    elif conditioned_ is not None:
+        raise ValueError('conditioned_ has been specified but honeybee-energy '
+                         'has failed to import.\n{}'.format(e))
 
 
-if all_required_inputs(ghenv.Component) and _run is True:
-    rooms = []
+if all_required_inputs(ghenv.Component) and _run:
+    # set the default roof angle
+    roof_angle = _roof_angle_ if _roof_angle_ is not None else 30
+    
+    rooms = []  # list of rooms that will be returned
     for i, geo in enumerate(_geo):
-        
         # get the name for the Room
         if _name_ == []:  # make a default Room name
             name = "Room_{}".format(counter)
             scriptcontext.sticky["room_count"] += 1
         else:
-            name = '{}_{}'.format(_name_[0], i + 1)
+            name = '{}_{}'.format(_name_, i + 1)
         
-        # create the room
-        roof_angle = _roof_angle_ if _roof_angle_ is not None else 30
+        # create the Room
         room = Room.from_polyface3d(name, to_polyface3d(geo), roof_angle)
         
         # check that the Room geometry is closed.
@@ -91,14 +100,10 @@ if all_required_inputs(ghenv.Component) and _run is True:
         
         # try to assign the program
         if _program_ is not None:
-            try:
-                if isinstance(_program_, str):
-                    _program_ = program_type_by_name(_program_)
-                room.properties.energy.program_type = _program_
-            except (NameError, AttributeError):
-                raise ValueError('honeybee-energy is not installed but '
-                                 '_program_ has been specified.')
-        else:
+            if isinstance(_program_, str):
+                _program_ = program_type_by_name(_program_)
+            room.properties.energy.program_type = _program_
+        else:  # generic office program by default
             try:
                 room.properties.energy.program_type = office_program
             except (NameError, AttributeError):
@@ -106,22 +111,12 @@ if all_required_inputs(ghenv.Component) and _run is True:
         
         # try to assign the construction set
         if _constr_set_ is not None:
-            try:
-                if isinstance(_constr_set_, str):
-                    _constr_set_ = construction_set_by_name(_constr_set_)
-                room.properties.energy.construction_set = _constr_set_
-            except (NameError, AttributeError):
-                raise ValueError('honeybee-energy is not installed but '
-                                 '_constr_set_ has been specified.')
+            if isinstance(_constr_set_, str):
+                _constr_set_ = construction_set_by_name(_constr_set_)
+            room.properties.energy.construction_set = _constr_set_
         
         # try to assign an ideal air system
-        if conditioned_:
-            try:
-                room.properties.energy.hvac = IdealAirSystem()
-            except (NameError, AttributeError):
-                raise ValueError('honeybee-energy is not installed but '
-                                 'conditioned_ has been set to True.')
-        if conditioned_ is None:  # set it to be conditioned by default
+        if conditioned_ or conditioned_ is None:  # conditioned by default
             try:
                 room.properties.energy.hvac = IdealAirSystem()
             except (NameError, AttributeError):
