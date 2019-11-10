@@ -88,7 +88,7 @@ try:  # import the core honeybee dependencies
     from honeybee.facetype import Wall
     from honeybee.room import Room
     from honeybee.face import Face
-    from ladybug_rhino.config import tolerance, conversion_factor
+    from ladybug_rhino.config import tolerance, conversion_to_meters
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -151,7 +151,7 @@ if all_required_inputs(ghenv.Component) and _run:
     hb_obj = [obj.duplicate() for obj in _hb_obj]
     
     # set defaults for any blank inputs
-    conversion = conversion_factor()
+    conversion = conversion_to_meters()
     _subdivide_ = _subdivide_ if len(_subdivide_) != 0 else [True]
     _glz_height_ = _glz_height_ if len(_glz_height_) != 0 else [2.0 / conversion]
     _sill_height_ = _sill_height_ if len(_sill_height_) != 0 else [0.8 / conversion]
