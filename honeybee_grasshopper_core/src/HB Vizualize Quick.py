@@ -31,11 +31,11 @@ ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
 
-try:  # import the core honeybee dependencies
+try:  # import the core ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3d, from_polyface3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 
 if all_required_inputs(ghenv.Component):

@@ -51,9 +51,13 @@ try:  # import the core honeybee dependencies
     from honeybee.room import Room
     from honeybee.face import Face
     from honeybee.face import Aperture
-    from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the ladybug_rhino dependencies
+    from ladybug_rhino.grasshopper import all_required_inputs
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
     from honeybee_energy.lib.constructions import shade_construction_by_name

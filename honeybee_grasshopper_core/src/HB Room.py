@@ -51,10 +51,14 @@ except KeyError:  # first time that the component is running
 
 try:  # import the core honeybee dependencies
     from honeybee.room import Room
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.config import tolerance, angle_tolerance
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
     from honeybee_energy.lib.programtypes import program_type_by_name, office_program

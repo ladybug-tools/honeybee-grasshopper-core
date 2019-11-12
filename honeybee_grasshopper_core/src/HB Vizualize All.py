@@ -35,11 +35,15 @@ try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
     from honeybee.door import Door
     from honeybee.shade import Shade
-    from ladybug_rhino.togeometry import tolerance
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the core ladybug_rhino dependencies
+    from ladybug_rhino.config import tolerance
     from ladybug_rhino.fromgeometry import from_face3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 import Rhino.Geometry as rg
 

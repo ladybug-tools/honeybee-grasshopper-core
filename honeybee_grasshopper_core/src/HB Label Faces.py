@@ -47,17 +47,26 @@ ghenv.Component.AdditionalHelpFromDocStrings = "3"
 
 import math
 
+try:  # import the ladybug_geometry dependencies
+    from ladybug_geometry.geometry3d.plane import Plane
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
+
 try:  # import the core honeybee dependencies
     from honeybee.room import Room
     from honeybee.face import Face
     from honeybee.aperture import Aperture
     from honeybee.door import Door
-    from ladybug_geometry.geometry3d.plane import Plane
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3d_to_wireframe, from_plane
     from ladybug_rhino.text import text_objects
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
+
 
 # hide the base_pts output from the scene
 ghenv.Component.Params.Output[1].Hidden = True
@@ -84,7 +93,7 @@ def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_fra
         except AttributeError:
             face_prop = 'N/A'
     
-    # create the text label
+    # get a base plane and text height for the text label
     cent_pt = face.geometry.center  # base point for the text
     base_plane = Plane(face.normal, cent_pt)
     if base_plane.y.z < 0:  # base plane pointing downwards; rotate it
@@ -96,6 +105,15 @@ def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_fra
         txt_h = largest_dim / (txt_len * 2)
     else:
         txt_h = _txt_height_
+    
+    # move base plane origin a little to avoid overlaps of adjacent labels
+    if base_plane.n.x != 0:
+        m_vec = base_plane.y if base_plane.n.x < 0 else -base_plane.y
+    else:
+        m_vec = base_plane.y if base_plane.n.z < 0 else -base_plane.y
+    base_plane = base_plane.move(m_vec * txt_h)
+    
+    # create the text label
     label = text_objects(face_prop, base_plane, txt_h, font=_font_,
                          horizontal_alignment=1, vertical_alignment=3)
     

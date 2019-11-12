@@ -35,10 +35,14 @@ ghenv.Component.AdditionalHelpFromDocStrings = "2"
 
 try:  # import the core honeybee dependencies
     from honeybee.boundarycondition import Outdoors, Surface, Ground
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy dependencies
     from honeybee.boundarycondition import Adiabatic

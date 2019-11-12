@@ -62,10 +62,14 @@ try:  # import the core honeybee dependencies
     from honeybee.face import Face
     from honeybee.facetype import face_types
     from honeybee.boundarycondition import boundary_conditions
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.togeometry import to_face3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
     from honeybee_energy.lib.constructions import opaque_construction_by_name

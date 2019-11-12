@@ -45,15 +45,23 @@ ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "3"
 
-try:  # import the core honeybee dependencies
-    from honeybee.room import Room
+try:  # import the ladybug_geometry dependencies
     from ladybug_geometry.geometry3d.pointvector import Vector3D
     from ladybug_geometry.geometry3d.plane import Plane
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
+
+try:  # import the core honeybee dependencies
+    from honeybee.room import Room
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_polyface3d_to_wireframe, from_plane
     from ladybug_rhino.text import text_objects
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 # hide the base_pts output from the scene
 ghenv.Component.Params.Output[1].Hidden = True
