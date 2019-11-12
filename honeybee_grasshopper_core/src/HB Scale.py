@@ -42,12 +42,17 @@ ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
 
-try:
+try:  # import the honeybee core dependencies
     from honeybee.model import Model
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.togeometry import to_point3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
+
 
 if all_required_inputs(ghenv.Component):
     hb_obj = [obj.duplicate() for obj in _hb_obj]  # duplicate the initial objects

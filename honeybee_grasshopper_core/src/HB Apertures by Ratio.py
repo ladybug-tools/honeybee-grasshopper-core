@@ -28,7 +28,7 @@ an Outdoors boundary condition.
             thermal comfort simulations but the former is likely better when the
             only concern is building energy use since energy use doesn't change
             much while the glazing ratio remains constant. Default: True.
-        _glz_height_: A number for the target height of the output apertures.
+        _win_height_: A number for the target height of the output apertures.
             Note that, if the ratio is too large for the height, the ratio will
             take precedence and the actual aperture height will be larger
             than this value. If an array of values are input here, different
@@ -88,10 +88,14 @@ try:  # import the core honeybee dependencies
     from honeybee.facetype import Wall
     from honeybee.room import Room
     from honeybee.face import Face
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.config import tolerance, conversion_to_meters
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
     from honeybee_energy.lib.constructions import window_construction_by_name
@@ -153,7 +157,7 @@ if all_required_inputs(ghenv.Component) and _run:
     # set defaults for any blank inputs
     conversion = conversion_to_meters()
     _subdivide_ = _subdivide_ if len(_subdivide_) != 0 else [True]
-    _glz_height_ = _glz_height_ if len(_glz_height_) != 0 else [2.0 / conversion]
+    _win_height_ = _win_height_ if len(_win_height_) != 0 else [2.0 / conversion]
     _sill_height_ = _sill_height_ if len(_sill_height_) != 0 else [0.8 / conversion]
     _horiz_separ_ = _horiz_separ_ if len(_horiz_separ_) != 0 else [3.0 / conversion]
     vert_separ_ = vert_separ_ if len(vert_separ_) != 0 else [0.0]
@@ -171,7 +175,7 @@ if all_required_inputs(ghenv.Component) and _run:
     rad_mat_ = [None]
     
     # gather all of the inputs together
-    all_inputs = [_subdivide_, _ratio, _glz_height_, _sill_height_, _horiz_separ_,
+    all_inputs = [_subdivide_, _ratio, _win_height_, _sill_height_, _horiz_separ_,
                   vert_separ_, operable_, ep_constr_, rad_mat_]
     
     # ensure matching list lengths across all values

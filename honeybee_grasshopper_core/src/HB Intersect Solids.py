@@ -54,10 +54,10 @@ import Rhino.Geometry as rg
 import scriptcontext
 tol = scriptcontext.doc.ModelAbsoluteTolerance
 
-try:  # import the core honeybee dependencies
+try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 
 def intersectMasses(building, otherBldg):

@@ -84,17 +84,25 @@ ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
 
+try:  # import the ladybug_geometry dependencies
+    from ladybug_geometry.geometry2d.pointvector import Vector2D
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
+
 try:  # import the core honeybee dependencies
     from honeybee.boundarycondition import Outdoors
     from honeybee.room import Room
     from honeybee.face import Face
     from honeybee.face import Aperture
     from honeybee.facetype import Wall
-    from ladybug_geometry.geometry2d.pointvector import Vector2D
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.config import tolerance
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
     from honeybee_energy.lib.schedules import schedule_by_name
