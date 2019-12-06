@@ -24,6 +24,8 @@ Create a Honeybee Model, which can be sent for simulation.
         _north_: A number between 0 and 360 to set the clockwise north
             direction in degrees. This can also be a vector to set the North.
             Default is 0.
+        _name_: A name for the Model. If the name is not provided the name
+            "unnamed" will be used.
         _run: Set to "True" to run the component and create the Model.
     
     Returns:
@@ -34,7 +36,7 @@ Create a Honeybee Model, which can be sent for simulation.
 
 ghenv.Component.Name = "HB Model"
 ghenv.Component.NickName = 'Model'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
