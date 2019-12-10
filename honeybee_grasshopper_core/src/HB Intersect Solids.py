@@ -23,6 +23,10 @@ an energy simulation.
             into Rooms that do not have perfectly matching surfaces between
             adjacent Faces (this matching is needed to contruct a correct
             multi-room energy model).
+        parallel_: Set to "True" to run the intersection calculation in parallel,
+            which can greatly increase the speed of calculation but may not be
+            desired when other simulations are running on your machine.
+            If None or False, the calculation will be run on a single core.
         _run: Set to True to run the component.
     
     Returns:
@@ -34,92 +38,26 @@ an energy simulation.
 
 ghenv.Component.Name = "HB Intersect Solids"
 ghenv.Component.NickName = 'IntSolid'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
 
 
-###############################################################################
-#########################     NOTE TO DEVELOPERS    ###########################
-###############################################################################
-"""
-The code within this component will be replaced with a much more efficient
-version in its own module of ladybug_rhino shortly.
-"""
-
-from collections import deque
-
-import Rhino.Geometry as rg
-import scriptcontext
-tol = scriptcontext.doc.ModelAbsoluteTolerance
-
 try:  # import the ladybug_rhino dependencies
+    from ladybug_rhino.intersect import intersect_solids, intersect_solids_parallel
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 
-def intersectMasses(building, otherBldg):
-    changed = False
-    joinedLines = []
-    done = False # keep looking until done is True
 
-    # prevent dead loop, will break when no more intersection detected
-    while(not done):
-        tempBldg = building.Duplicate()
-        for face1 in building.Faces:
-            if face1.IsSurface:
-                # if it is a untrimmed surface just find intersection lines
-                intersectLines = rg.Intersect.Intersection.BrepSurface(otherBldg, face1.DuplicateSurface(), tol)[1]
-            else:
-                # if it is a trimmed surface
-                edgesIdx = face1.AdjacentEdges()
-                edges = []
-                for ix in edgesIdx:
-                    edges.append(building.Edges.Item[ix])
-                crv = rg.Curve.JoinCurves(edges, tol)
-                # potential bugs: multiple brep of one face?
-                intersectLines = rg.Intersect.Intersection.BrepBrep(rg.Brep.CreatePlanarBreps(crv)[0], otherBldg, tol)[1]
-            temp = rg.Curve.JoinCurves(intersectLines, tol)
-            joinedLines = [crv for crv in temp if rg.Brep.CreatePlanarBreps(crv)]
-            if len(joinedLines) > 0:
-                newBrep = face1.Split(joinedLines, tol) # return None on Failure
-                if not newBrep:
-                    continue
-                if newBrep.Faces.Count > building.Faces.Count:
-                    changed = True
-                    building = newBrep
-                    break
-        if tempBldg.Faces.Count == building.Faces.Count:
-            done = True
-    return building, changed
-
-
-
-def main(bldgMassesBefore):
-    buildingDict = {}
-
-    for bldgCount, bldg in enumerate(bldgMassesBefore):
-        buildingDict[bldgCount] = bldg
-    need_change = deque(buildingDict.keys())
-
-    i = 0 # to prevent dead loop
-    while(len(need_change) > 0 and i < 10e2 * len(bldgMassesBefore)):
-        bldgNum = need_change.pop()
-        building = buildingDict[bldgNum]
-        for num_other in buildingDict.keys():
-            if num_other == bldgNum: continue
-            otherBldg = buildingDict[num_other]
-            building, changed = intersectMasses(building, otherBldg)
-            buildingDict[bldgNum] = building
-            if changed and num_other not in need_change:
-                # for reinforcement of matching, not neccessary
-                need_change.appendleft(num_other)
-        i += 1
-    return buildingDict.values()
-
-
-# add an compile toggle, set _compile to True to run the function
 if all_required_inputs(ghenv.Component) and _run:
-    int_solids = main(_solids)
+    # generate bounding boxes for all inputs
+    b_boxes = [brep.GetBoundingBox(False) for brep in _solids]
+    
+    # intersect all of the solid geometries
+    if parallel_:
+        int_solids = intersect_solids_parallel(_solids, b_boxes)
+    else:
+        int_solids = intersect_solids(_solids, b_boxes)
