@@ -8,11 +8,12 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Separate a Honeybee Model object into all of its constituent Honeybee objects.
+Deconstruct a Honeybee Model object into all of its constituent Honeybee objects.
 -
 
     Args:
-        _model: A Honeybee Model to be separated into into its constituent objects.
+        _model: A Honeybee Model to be deconstructed into into its constituent
+            objects (Rooms, Faces, Apertures, Doors Shades).
     
     Returns:
         rooms: All of the Room objects contained within the input Model.
@@ -30,8 +31,8 @@ Separate a Honeybee Model object into all of its constituent Honeybee objects.
             that belong to an Aperture, Face, or Room.
 """
 
-ghenv.Component.Name = "HB Separate Model"
-ghenv.Component.NickName = 'SeparateModel'
+ghenv.Component.Name = "HB Deconstruct Model"
+ghenv.Component.NickName = 'DeconstructModel'
 ghenv.Component.Message = '0.1.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
