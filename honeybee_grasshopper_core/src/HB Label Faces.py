@@ -15,7 +15,7 @@ different faces and sub-faces.
 -
 
     Args:
-        _hb_obj: Honeybee Faces or Rooms to be labeled with their attributes in
+        _hb_objs: Honeybee Faces or Rooms to be labeled with their attributes in
             the Rhino scene.
         _attribute_: Text for the name of the attribute with which the faces or
             sub-faces should be labeled. The Honeybee "Face Attributes" component
@@ -40,7 +40,7 @@ different faces and sub-faces.
 
 ghenv.Component.Name = "HB Label Faces"
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "3"
@@ -139,7 +139,7 @@ if all_required_inputs(ghenv.Component):
     
     # generate the labels
     if not sub_faces_:
-        for obj in _hb_obj:
+        for obj in _hb_objs:
             if isinstance(obj, Room):
                 for face in obj.faces:
                     label_face(face, _attribute_, _font_, label_text, base_pts,
@@ -148,7 +148,7 @@ if all_required_inputs(ghenv.Component):
                 label_face(obj, _attribute_, _font_, label_text, base_pts,
                            labels, wire_frame)
     else:
-        for obj in _hb_obj:
+        for obj in _hb_objs:
             if isinstance(obj, Room):
                 for face in obj.faces:
                     for ap in face.apertures:
