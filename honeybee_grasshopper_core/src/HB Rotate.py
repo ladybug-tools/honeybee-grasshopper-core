@@ -12,7 +12,7 @@ Rotate any Honeybee geometry object or a Model by an angle.
 -
 
     Args:
-        _hb_obj: Any Honeybee geometry object (eg. Room, Face, Aperture, Door or
+        _hb_objs: Any Honeybee geometry object (eg. Room, Face, Aperture, Door or
             Shade) to be rotated by an angle. This can also be a Honeybee Model
             object to be rotated.
         _angle: An angle for rotation in degrees.
@@ -35,12 +35,12 @@ Rotate any Honeybee geometry object or a Model by an angle.
             and all names will remain the same. Default: None.
     
     Returns:
-        hb_obj: The input _hb_obj that has been rotated by the input angle.
+        hb_objs: The input _hb_objs that has been rotated by the input angle.
 """
 
 ghenv.Component.Name = "HB Rotate"
 ghenv.Component.NickName = 'Rotate'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
@@ -63,34 +63,34 @@ except ImportError as e:
 
 
 if all_required_inputs(ghenv.Component):
-    hb_obj = [obj.duplicate() for obj in _hb_obj]  # duplicate the initial objects
+    hb_objs = [obj.duplicate() for obj in _hb_objs]  # duplicate the initial objects
     
     # set the default origin
     if _origin_ is not None:
         pt = to_point3d(_origin_)
     else:
         pt = []
-        for obj in hb_obj:
+        for obj in hb_objs:
             origin = obj.center if not isinstance(obj, Model) else Point3D(0, 0, 0)
             pt.append(origin)
     
     # rotate all of the objects
     if _origin_ is None and _axis_ is None:
-        for i, obj in enumerate(hb_obj):
+        for i, obj in enumerate(hb_objs):
             obj.rotate_xy(_angle, pt[i])
     elif _origin_ is not None and _axis_ is None:
-        for obj in hb_obj:
+        for obj in hb_objs:
             obj.rotate_xy(_angle, pt)
     elif _origin_ is not None and _axis_ is not None:
         _axis_ = to_vector3d(_axis_)
-        for obj in hb_obj:
+        for obj in hb_objs:
             obj.rotate(_angle, pt, _axis_)
     else:
         _axis_ = to_vector3d(_axis_)
-        for i, obj in enumerate(hb_obj):
+        for i, obj in enumerate(hb_objs):
             obj.rotate(_angle, pt[i], _axis_)
     
     # add the prefix if specified
     if prefix_ is not None:
-        for obj in hb_obj:
+        for obj in hb_objs:
             obj.add_prefix(prefix_)

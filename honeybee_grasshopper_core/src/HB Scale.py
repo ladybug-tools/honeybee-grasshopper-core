@@ -12,7 +12,7 @@ Scale any Honeybee geometry object or a Model by a factor.
 -
 
     Args:
-        _hb_obj: Any Honeybee geometry object (eg. Room, Face, Aperture, Door or
+        _hb_objs: Any Honeybee geometry object (eg. Room, Face, Aperture, Door or
             Shade) to be scaled by a factor. This can also be a Honeybee Model
             object to be scaled.
         _factor: A number representing how much the object should be scaled.
@@ -32,12 +32,12 @@ Scale any Honeybee geometry object or a Model by a factor.
             and all names will remain the same. Default: None.
     
     Returns:
-        hb_obj: The input _hb_obj that has been scaled by the input factor.
+        hb_objs: The input _hb_objs that has been scaled by the input factor.
 """
 
 ghenv.Component.Name = "HB Scale"
 ghenv.Component.NickName = 'Scale'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
@@ -55,7 +55,7 @@ except ImportError as e:
 
 
 if all_required_inputs(ghenv.Component):
-    hb_obj = [obj.duplicate() for obj in _hb_obj]  # duplicate the initial objects
+    hb_objs = [obj.duplicate() for obj in _hb_objs]  # duplicate the initial objects
     
     # check that the factor is positive
     assert _factor > 0, 'Input _factor must be greater than 0.'
@@ -65,19 +65,19 @@ if all_required_inputs(ghenv.Component):
         pt = to_point3d(_origin_)
     else:
         pt = []
-        for obj in hb_obj:
+        for obj in hb_objs:
             origin = obj.center if not isinstance(obj, Model) else None
             pt.append(origin)
     
     # scale all of the objects
     if _origin_ is not None:
-        for obj in hb_obj:
+        for obj in hb_objs:
             obj.scale(_factor, pt)
     else:  # unique origin point for each object
-        for i, obj in enumerate(hb_obj):
+        for i, obj in enumerate(hb_objs):
             obj.scale(_factor, pt[i])
     
     # add the prefix if specified
     if prefix_ is not None:
-        for obj in hb_obj:
+        for obj in hb_objs:
             obj.add_prefix(prefix_)

@@ -16,7 +16,7 @@ simulations or in the solar distribution calculation of EnergyPlus.
 -
 
     Args:
-        _hb_obj: A list of honeybee Rooms, Faces, or Apertures to which extruded
+        _hb_objs: A list of honeybee Rooms, Faces, or Apertures to which extruded
             border shades will be added.
         _depth: A number for the extrusion depth.
         indoor_: Boolean for whether the extrusion should be generated facing the
@@ -35,13 +35,13 @@ simulations or in the solar distribution calculation of EnergyPlus.
     
     Returns:
         report: Reports, errors, warnings, etc.
-        hb_obj: The input Honeybee Face or Room or Aperture with extruded border
+        hb_objs: The input Honeybee Face or Room or Aperture with extruded border
             shades added to it.
 """
 
 ghenv.Component.Name = "HB Extruded Border Shades"
 ghenv.Component.NickName = 'BorderShades'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -87,7 +87,7 @@ def assign_shades(aperture, depth, indoor, ep, rad):
 
 if all_required_inputs(ghenv.Component) and _run:
     # duplicate the initial objects
-    hb_obj = [obj.duplicate() for obj in _hb_obj]
+    hb_objs = [obj.duplicate() for obj in _hb_objs]
     
     # assign default indoor_ property
     indoor_ = indoor_ if indoor_ is not None else False
@@ -98,7 +98,7 @@ if all_required_inputs(ghenv.Component) and _run:
             ep_constr_ = shade_construction_by_name(ep_constr_)
     
     # loop through the input objects and add shades
-    for obj in hb_obj:
+    for obj in hb_objs:
         if isinstance(obj, Room):
             for face in obj.faces:
                 for ap in face.apertures:
@@ -109,5 +109,5 @@ if all_required_inputs(ghenv.Component) and _run:
         elif isinstance(obj, Aperture):
             assign_shades(obj, _depth, indoor_, ep_constr_, rad_mat_)
         else:
-            raise TypeError('Input _hb_obj must be a Room, Face or Aperture. '
+            raise TypeError('Input _hb_objs must be a Room, Face or Aperture. '
                             'Not {}.'.format(type(obj)))

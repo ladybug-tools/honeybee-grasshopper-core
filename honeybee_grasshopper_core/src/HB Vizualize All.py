@@ -13,7 +13,7 @@ sub-faces and assigned shades.
 -
 
     Args:
-        _hb_obj: A Honeybee Model, Room, Face, Shade, Aperture, or Door to be
+        _hb_objs: A Honeybee Model, Room, Face, Shade, Aperture, or Door to be
             previewed in the Rhino scene.
     
     Returns:
@@ -23,7 +23,7 @@ sub-faces and assigned shades.
 
 ghenv.Component.Name = "HB Vizualize All"
 ghenv.Component.NickName = 'VizAll'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
@@ -101,7 +101,7 @@ if all_required_inputs(ghenv.Component):
     shades = []
     
     # loop through all objects and add them
-    for hb_obj in _hb_obj:
+    for hb_obj in _hb_objs:
         if isinstance(hb_obj, Room):
             add_room(hb_obj, geo, shades)
         elif isinstance(hb_obj, Face):
