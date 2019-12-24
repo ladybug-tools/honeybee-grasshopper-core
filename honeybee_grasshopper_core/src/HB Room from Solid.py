@@ -9,6 +9,10 @@
 
 """
 Create Honeybee Rooms from solids (closed Rhino polysurfaces).
+_
+Note that each Room is mapped to a single zone in EnergyPlus/OpenStudio and
+should always be a closed volume to ensure correct volumetric calculations and
+avoid light leaks in Radiance simulations.
 -
 
     Args:
@@ -16,10 +20,11 @@ Create Honeybee Rooms from solids (closed Rhino polysurfaces).
         _name_: A base name to be used for the Rooms. This will be combined with
             the index of each input _geo to yield a unique name for each output
             Room.
-        _program_: Text for the program of the Rooms (to be looked up in the
-            ProgramType library) such as that output from the "HB List Programs"
-            component. This can also be a custom ProgramType object. If no program
-            is input here, the Rooms will have a generic office program.
+        _program_: Text for the program of the Rooms (to be looked up in the ProgramType
+            library) such as that output from the "HB List Programs" component.
+            This can also be a custom ProgramType object. If no program is input
+            here, the Rooms will have a generic office program. Note that ProgramTypes
+            effectively map to OpenStudio space types upon export to OpenStudio.
         _constr_set_: Text for the construction set of the Rooms, which is used
             to assign all default energy constructions needed to create an energy
             model. Text should refer to a ConstructionSet within the library such
@@ -40,7 +45,7 @@ Create Honeybee Rooms from solids (closed Rhino polysurfaces).
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
