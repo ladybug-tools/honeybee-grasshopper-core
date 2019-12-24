@@ -29,7 +29,7 @@ be shade depths, angles, etc. for the "HB Louver Shades" component.
 """
 ghenv.Component.Name = "HB Facade Parameters"
 ghenv.Component.NickName = 'FacParam'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -40,7 +40,7 @@ def check_param(parameter):
         return parameter
     try:
         return float(parameter)
-    except TypeError:
+    except (TypeError, AttributeError):
         return parameter
 
 
