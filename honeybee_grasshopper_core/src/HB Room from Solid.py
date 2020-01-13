@@ -45,7 +45,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -73,7 +73,6 @@ except ImportError as e:
 try:  # import the honeybee-energy extension
     from honeybee_energy.lib.programtypes import program_type_by_name, office_program
     from honeybee_energy.lib.constructionsets import construction_set_by_name
-    from honeybee_energy.idealair import IdealAirSystem
 except ImportError as e:
     if _program_ is not None:
         raise ValueError('_program_ has been specified but honeybee-energy '
@@ -128,7 +127,7 @@ if all_required_inputs(ghenv.Component) and _run:
         # try to assign an ideal air system
         if conditioned_ or conditioned_ is None:  # conditioned by default
             try:
-                room.properties.energy.hvac = IdealAirSystem()
+                room.properties.energy.add_default_ideal_air()
             except (NameError, AttributeError):
                 pass  # honeybee-energy is not installed
         
