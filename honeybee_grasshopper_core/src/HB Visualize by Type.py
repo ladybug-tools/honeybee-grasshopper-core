@@ -45,7 +45,7 @@ Visualize room geometry in the Rhino scene organized by object and face type.
 
 ghenv.Component.Name = "HB Visualize by Type"
 ghenv.Component.NickName = 'VizByType'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -124,6 +124,7 @@ if all_required_inputs(ghenv.Component):
                 else:
                     apertures.append(from_face3d(ap.geometry))
             for dr in face.doors:
+                add_shade(dr)
                 if isinstance(bc, Surface):
                     interior_doors.append(from_face3d(dr.geometry))
                 else:

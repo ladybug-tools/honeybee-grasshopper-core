@@ -38,7 +38,7 @@ original shade-less Room object.
 
 ghenv.Component.Name = "HB Deconstruct Object"
 ghenv.Component.NickName = 'DecnstrObj'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
@@ -57,6 +57,12 @@ try:  # import the ladybug_rhino dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
+def deconstruct_door(door, doors, shades):
+    """Deconstruct Door object."""
+    doors.append(door)
+    for shd in door.shades:
+        shades.append(shd)
+
 def deconstruct_aperture(aperture, apertures, shades):
     """Deconstruct Aperture object."""
     apertures.append(aperture)
@@ -69,7 +75,7 @@ def deconstruct_face(face, faces, apertures, doors, shades):
     for ap in face.apertures:
         deconstruct_aperture(ap, apertures, shades)
     for dr in face.doors:
-        doors.append(dr)
+        deconstruct_door(dr, doors, shades)
     for shd in face.shades:
         shades.append(shd)
 
@@ -95,10 +101,10 @@ if all_required_inputs(ghenv.Component):
         deconstruct_face(_hb_obj, faces, apertures, doors, shades)
     elif isinstance(_hb_obj, Aperture):
         deconstruct_aperture(_hb_obj, apertures, shades)
+    elif isinstance(_hb_obj, Door):
+        deconstruct_door(_hb_obj, doors, shades)
     elif isinstance(_hb_obj, Shade):
         shades.append(_hb_obj)
-    elif isinstance(_hb_obj, Door):
-        doors.append(_hb_obj)
     else:
         raise TypeError(
             'Unrecognized honeybee object type: {}'.format(type(_hb_obj)))

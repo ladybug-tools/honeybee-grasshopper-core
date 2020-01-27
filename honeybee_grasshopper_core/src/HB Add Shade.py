@@ -8,11 +8,11 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Add a Honeybee Shades to an Aperture, Face or Room.
+Add a Honeybee Shades to an Aperture, Door, Face or Room.
 -
 
     Args:
-        _hb_obj: A Honeybee Aperture, Face or a Room to which the shades should
+        _hb_obj: A Honeybee Aperture, Door, Face or a Room to which the shades should
             be added.
         out_shades_: A list of Honeybee Shade objects to be added to the outside
             of the input _hb_objs.
@@ -29,7 +29,7 @@ Add a Honeybee Shades to an Aperture, Face or Room.
 
 ghenv.Component.Name = "HB Add Shade"
 ghenv.Component.NickName = 'AddShade'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"

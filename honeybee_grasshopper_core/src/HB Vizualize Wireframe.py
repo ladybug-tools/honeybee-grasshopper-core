@@ -23,7 +23,7 @@ scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = "HB Vizualize Wireframe"
 ghenv.Component.NickName = 'VizWireF'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
@@ -45,6 +45,12 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 
+def add_door(door, geo):
+    """Add Door geometry to a geo list."""
+    geo.append(from_face3d_to_wireframe(door.geometry))
+    for shd in door.shades:
+        geo.append(from_face3d_to_wireframe(shd.geometry))
+
 def add_aperture(aperture, geo):
     """Add Aperture geometry to a geo list."""
     geo.append(from_face3d_to_wireframe(aperture.geometry))
@@ -57,7 +63,7 @@ def add_face(face, geo):
     for ap in face.apertures:
         add_aperture(ap, geo)
     for dr in face.doors:
-        geo.append(from_face3d_to_wireframe(dr.geometry))
+        add_door(ap, geo)
     for shd in face.shades:
         geo.append(from_face3d_to_wireframe(shd.geometry))
 
@@ -94,9 +100,9 @@ if all_required_inputs(ghenv.Component):
             add_face(hb_obj, geo)
         elif isinstance(hb_obj, Aperture):
             add_aperture(hb_obj, geo)
-        elif isinstance(hb_obj, Shade):
-            geo.append(from_face3d_to_wireframe(hb_obj.geometry))
         elif isinstance(hb_obj, Door):
+            add_door(hb_obj, geo)
+        elif isinstance(hb_obj, Shade):
             geo.append(from_face3d_to_wireframe(hb_obj.geometry))
         elif isinstance(hb_obj, Model):
             add_model(hb_obj, geo)
