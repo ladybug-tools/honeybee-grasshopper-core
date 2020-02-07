@@ -26,7 +26,6 @@ Create a Honeybee Model, which can be sent for simulation.
             Default is 0.
         _name_: A name for the Model. If the name is not provided the name
             "unnamed" will be used.
-        _run: Set to "True" to run the component and create the Model.
     
     Returns:
         report: Reports, errors, warnings, etc.
@@ -36,7 +35,7 @@ Create a Honeybee Model, which can be sent for simulation.
 
 ghenv.Component.Name = "HB Model"
 ghenv.Component.NickName = 'Model'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
@@ -49,6 +48,7 @@ except ImportError as e:
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.togeometry import to_vector2d
     from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.config import units_system, tolerance, angle_tolerance
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -59,12 +59,14 @@ def check_all_geo_none():
                (rooms_, faces_, shades_, apertures_, doors_))
 
 
-if all_required_inputs(ghenv.Component) and _run and not check_all_geo_none():
-    # set a default name
+if all_required_inputs(ghenv.Component) and not check_all_geo_none():
+    # set a default name and get the Rhino Model units
     name = _name_ if _name_ is not None else 'unnamed'
+    units = units_system()
     
     # create the model
-    model = Model(name, rooms_, faces_, shades_, apertures_, doors_)
+    model = Model(name, rooms_, faces_, shades_, apertures_, doors_,
+                  units=units, tolerance=tolerance, angle_tolerance=angle_tolerance)
     
     # set the north if it is not defaulted
     if _north_ is not None:
