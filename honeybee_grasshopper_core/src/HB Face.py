@@ -24,7 +24,7 @@ Create Honeybee Face
                 - Wall
                 - RoofCeiling
                 - Floor
-                - AirWall
+                - AirBoundary
         _bc_: Text for the boundary condition of the face. The boundary condition
             is also used to assign default materials and constructions as well as
             the nature of heat excahnge across the face in energy simulation.
@@ -51,7 +51,7 @@ Create Honeybee Face
 
 ghenv.Component.Name = "HB Face"
 ghenv.Component.NickName = 'Face'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "3"

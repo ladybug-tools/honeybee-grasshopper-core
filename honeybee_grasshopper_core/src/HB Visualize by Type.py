@@ -45,14 +45,14 @@ Visualize room geometry in the Rhino scene organized by object and face type.
 
 ghenv.Component.Name = "HB Visualize by Type"
 ghenv.Component.NickName = 'VizByType'
-ghenv.Component.Message = '0.2.0'
+ghenv.Component.Message = '0.2.1'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
 
 try:  # import the core honeybee dependencies
     from honeybee.boundarycondition import Surface
-    from honeybee.facetype import Wall, RoofCeiling, Floor, AirWall
+    from honeybee.facetype import Wall, RoofCeiling, Floor, AirBoundary
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -113,7 +113,7 @@ if all_required_inputs(ghenv.Component):
                     interior_floors.append(from_face3d(face.punched_geometry))
                 else:
                     exterior_floors.append(from_face3d(face.punched_geometry))
-            elif isinstance(type, AirWall):
+            elif isinstance(type, AirBoundary):
                 air_walls.append(from_face3d(face.punched_geometry))
             
             # add the apertures, doors, and shades
