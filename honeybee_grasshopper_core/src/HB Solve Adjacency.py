@@ -36,6 +36,10 @@ adjacent.
             boundary condition will be used for all adjacencies. Note that adabatic
             conditions are not allowed if interior windows are assigned to interior
             faces. Default: False.
+        air_boundary_: Set to True to have all of the face adjacencies discovered
+            by this component set to an AirBoundary face type. Note that AirBoundary
+            face types are not allowed if interior windows are assigned to interior
+            faces. Default: False.
         _run: Set to True to run the component and solve adjacencies.
     
     Returns:
@@ -46,14 +50,14 @@ adjacent.
 
 ghenv.Component.Name = "HB Solve Adjacency"
 ghenv.Component.NickName = 'SolveAdj'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
 
 try:  # import the core honeybee dependencies
     from honeybee.boundarycondition import boundary_conditions
-    from honeybee.facetype import Wall, RoofCeiling, Floor
+    from honeybee.facetype import face_types, Wall, RoofCeiling, Floor
     from honeybee.room import Room
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -157,6 +161,12 @@ if all_required_inputs(ghenv.Component) and _run:
         for face_pair in adj_info['adjacent_faces']:
             face_pair[0].boundary_condition = boundary_conditions.adiabatic
             face_pair[1].boundary_condition = boundary_conditions.adiabatic
+    
+    # try to assign the air boundary face type
+    if air_boundary_:
+        for face_pair in adj_info['adjacent_faces']:
+            face_pair[0].type = face_types.air_boundary
+            face_pair[1].type = face_types.air_boundary
     
     # report all of the adjacency information
     for adj_face in adj_info['adjacent_faces']:
