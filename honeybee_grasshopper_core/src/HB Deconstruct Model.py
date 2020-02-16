@@ -33,10 +33,15 @@ Deconstruct a Honeybee Model object into all of its constituent Honeybee objects
 
 ghenv.Component.Name = "HB Deconstruct Model"
 ghenv.Component.NickName = 'DeconstructModel'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
+
+try:  # import the honeybee dependencies
+    from honeybee.model import Model
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs
@@ -45,6 +50,9 @@ except ImportError as e:
 
 
 if all_required_inputs(ghenv.Component):
+    assert isinstance(_model, Model), \
+        'Input _model must be a Model. Got {}'.format(type(_model))
+
     rooms = _model.rooms
     faces = _model.orphaned_faces
     apertures = _model.orphaned_apertures
