@@ -26,7 +26,7 @@ an energy simulation.
         parallel_: Set to "True" to run the intersection calculation in parallel,
             which can greatly increase the speed of calculation but may not be
             desired when other simulations are running on your machine. If False,
-            the calculation will be run on a single core. Default: True.
+            the calculation will be run on a single core. Default: False.
         _run: Set to True to run the component.
     
     Returns:
@@ -38,7 +38,7 @@ an energy simulation.
 
 ghenv.Component.Name = "HB Intersect Solids"
 ghenv.Component.NickName = 'IntSolid'
-ghenv.Component.Message = '0.2.1'
+ghenv.Component.Message = '0.2.2'
 ghenv.Component.Category = "HoneybeeCore"
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -57,7 +57,7 @@ if all_required_inputs(ghenv.Component) and _run:
     b_boxes = [brep.GetBoundingBox(False) for brep in _solids]
     
     # intersect all of the solid geometries
-    if parallel_ or parallel_ is None:
+    if parallel_:
         int_solids = intersect_solids_parallel(_solids, b_boxes)
     else:
         int_solids = intersect_solids(_solids, b_boxes)
