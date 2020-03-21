@@ -39,7 +39,7 @@ Create Honeybee Aperture
 ghenv.Component.Name = "HB Aperture"
 ghenv.Component.NickName = 'Aperture'
 ghenv.Component.Message = '0.1.0'
-ghenv.Component.Category = "HoneybeeCore"
+ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
 

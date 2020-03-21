@@ -46,7 +46,7 @@ Visualize room geometry in the Rhino scene organized by object and face type.
 ghenv.Component.Name = "HB Visualize by Type"
 ghenv.Component.NickName = 'VizByType'
 ghenv.Component.Message = '0.2.1'
-ghenv.Component.Category = "HoneybeeCore"
+ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
 
