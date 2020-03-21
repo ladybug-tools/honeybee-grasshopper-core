@@ -52,7 +52,7 @@ Create Honeybee Face
 ghenv.Component.Name = "HB Face"
 ghenv.Component.NickName = 'Face'
 ghenv.Component.Message = '0.1.1'
-ghenv.Component.Category = "HoneybeeCore"
+ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "3"
 

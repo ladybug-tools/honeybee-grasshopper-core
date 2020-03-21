@@ -38,7 +38,7 @@ Create Honeybee Door
 ghenv.Component.Name = "HB Door"
 ghenv.Component.NickName = 'Door'
 ghenv.Component.Message = '0.1.0'
-ghenv.Component.Category = "HoneybeeCore"
+ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
 

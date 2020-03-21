@@ -39,7 +39,7 @@ original shade-less Room object.
 ghenv.Component.Name = "HB Deconstruct Object"
 ghenv.Component.NickName = 'DecnstrObj'
 ghenv.Component.Message = '0.2.0'
-ghenv.Component.Category = "HoneybeeCore"
+ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
 

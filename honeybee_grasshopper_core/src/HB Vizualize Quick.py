@@ -27,7 +27,7 @@ assignment of child objects.
 ghenv.Component.Name = "HB Vizualize Quick"
 ghenv.Component.NickName = 'VizQuick'
 ghenv.Component.Message = '0.1.1'
-ghenv.Component.Category = "HoneybeeCore"
+ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
 

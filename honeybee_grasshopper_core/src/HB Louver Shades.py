@@ -68,7 +68,7 @@ that are Walls (not Floors or Roofs).
 ghenv.Component.Name = "HB Louver Shades"
 ghenv.Component.NickName = 'LouverShades'
 ghenv.Component.Message = '0.1.1'
-ghenv.Component.Category = "HoneybeeCore"
+ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
 

@@ -34,7 +34,7 @@ Mirror any Honeybee geometry object or a Model across a plane.
 ghenv.Component.Name = "HB Mirror"
 ghenv.Component.NickName = 'Mirror'
 ghenv.Component.Message = '0.1.1'
-ghenv.Component.Category = "HoneybeeCore"
+ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
 
