@@ -18,8 +18,13 @@ The honeybee-grasshopper plugin has the following dependencies (other than Rhino
 * [ladybug-geometry](https://github.com/ladybug-tools/ladybug-geometry)
 * [ladybug-dotnet](https://github.com/ladybug-tools/ladybug-dotnet)
 * [ladybug-rhino](https://github.com/ladybug-tools/ladybug-rhino)
-* [ladybug-grasshopper](https://github.com/ladybug-tools/ladybug-grasshopper)
 * [honeybee-core](https://github.com/ladybug-tools/honeybee-core)
+
+# Oher Required Components
+The honeybee-grasshopper plugin also requires the Grasshopper components within the
+following repositories to be installed in order to work correctly:
+
+* [ladybug-grasshopper](https://github.com/ladybug-tools/ladybug-grasshopper)
 
 # Extensions
 The honeybee-grasshopper plugin has the following extensions:
