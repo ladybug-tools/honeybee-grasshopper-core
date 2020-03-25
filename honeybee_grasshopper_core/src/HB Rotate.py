@@ -40,7 +40,7 @@ Rotate any Honeybee geometry object or a Model by an angle.
 
 ghenv.Component.Name = "HB Rotate"
 ghenv.Component.NickName = 'Rotate'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
