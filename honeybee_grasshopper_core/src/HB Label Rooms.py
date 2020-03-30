@@ -40,10 +40,10 @@ different Rooms.
 
 ghenv.Component.Name = "HB Label Rooms"
 ghenv.Component.NickName = 'LabelRooms'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
-ghenv.Component.AdditionalHelpFromDocStrings = "3"
+ghenv.Component.AdditionalHelpFromDocStrings = '4'
 
 try:  # import the ladybug_geometry dependencies
     from ladybug_geometry.geometry3d.pointvector import Vector3D
@@ -53,6 +53,7 @@ except ImportError as e:
 
 try:  # import the core honeybee dependencies
     from honeybee.room import Room
+    from honeybee.search import get_attr_nested
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -81,27 +82,8 @@ if all_required_inputs(ghenv.Component):
         _font_ = 'Arial'
     
     for room in _rooms:
-        # check that the input objects are correct
-        assert isinstance(room, Room), 'Expected Honeybee Room. ' \
-            'Got {}.'.format(type(room))
-        
-        # get the attribute from the Room
-        if _attribute_.startswith('properties.'):  # extension attribute
-            attributes = _attribute_.split('.')  # get all the sub-attributes
-            current_obj = room
-            try:
-                for attribute in attributes:
-                    current_obj = getattr(current_obj, attribute)
-                room_prop = str(current_obj)  # in case the property is float or int
-            except AttributeError as e:
-                if 'NoneType' in str(e):  # it's a valid attribute but it's not assigned
-                    room_prop = 'None'
-                else:  # it's not a valid attribute; raise exception
-                    raise AttributeError(str(e))
-        else:  # honeybee-core attribute
-            room_prop = str(getattr(room, _attribute_))
-        
-        
+        room_prop = get_attr_nested(room, _attribute_)
+
         # create the text label
         cent_pt = room.geometry.center  # base point for the text
         base_plane = Plane(Vector3D(0, 0, 1), cent_pt)
@@ -112,7 +94,7 @@ if all_required_inputs(ghenv.Component):
             txt_h = _txt_height_
         label = text_objects(room_prop, base_plane, txt_h, font=_font_,
                              horizontal_alignment=1, vertical_alignment=3)
-        
+
         # append everything to the lists
         label_text.append(room_prop)
         base_pts.append(from_plane(base_plane))

@@ -12,7 +12,7 @@ Visualize room geometry in the Rhino scene organized by object and face type.
 -
 
     Args:
-        rooms: Honeybee Rooms for which you would like to preview geometry
+        _rooms: Honeybee Rooms for which you would like to preview geometry
             in the Rhino scene based on type.
     
     Returns:
@@ -41,14 +41,20 @@ Visualize room geometry in the Rhino scene organized by object and face type.
             of their parent objects.
         indoor_shades: Rhino geometry for the Shades assigned to the indoors
             of their parent objects.
+        wire_frame: A list of lines representing the outlines of the rooms.
 """
 
-ghenv.Component.Name = "HB Visualize by Type"
+ghenv.Component.Name = 'HB Visualize by Type'
 ghenv.Component.NickName = 'VizByType'
-ghenv.Component.Message = '0.2.1'
+ghenv.Component.Message = '0.3.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
-ghenv.Component.AdditionalHelpFromDocStrings = "2"
+ghenv.Component.AdditionalHelpFromDocStrings = '5'
+
+try:  # import the ladybug dependencies
+    from ladybug.color import Colorset
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug:\n\t{}'.format(e))
 
 try:  # import the core honeybee dependencies
     from honeybee.boundarycondition import Surface
@@ -57,7 +63,8 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.fromgeometry import from_face3d
+    from ladybug_rhino.fromgeometry import from_face3ds_to_colored_mesh, \
+        from_face3d_to_wireframe
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -70,27 +77,25 @@ except ImportError:  # honeybee-energy not installed
 
 if all_required_inputs(ghenv.Component):
     # lists of rhino geometry to be filled with content
-    walls = []
-    interior_walls = []
-    roofs = []
-    ceilings = []
-    exterior_floors = []
-    interior_floors = []
-    air_walls = []
-    apertures = []
-    interior_apertures = []
-    doors = []
-    interior_doors = []
-    outdoor_shades = []
-    indoor_shades = []
-    
+    _walls = []
+    _interior_walls = []
+    _roofs = []
+    _ceilings = []
+    _exterior_floors = []
+    _interior_floors = []
+    _air_walls = []
+    _apertures = []
+    _interior_apertures = []
+    _doors = []
+    _interior_doors = []
+    _outdoor_shades = []
+    _indoor_shades = []
+
     # method to add shades
     def add_shade(hb_obj):
-        outdoor_shades.extend([from_face3d(shd.geometry)
-                               for shd in hb_obj.outdoor_shades])
-        indoor_shades.extend([from_face3d(shd.geometry)
-                               for shd in hb_obj.indoor_shades])
-    
+        _outdoor_shades.extend([shd.geometry for shd in hb_obj.outdoor_shades])
+        _indoor_shades.extend([shd.geometry for shd in hb_obj.indoor_shades])
+
     # loop through all objects and add them
     for room in _rooms:
         add_shade(room)
@@ -100,32 +105,67 @@ if all_required_inputs(ghenv.Component):
             type = face.type
             if isinstance(type, Wall):
                 if isinstance(bc, (Surface, Adiabatic)):
-                    interior_walls.append(from_face3d(face.punched_geometry))
+                    _interior_walls.append(face.punched_geometry)
                 else:
-                    walls.append(from_face3d(face.punched_geometry))
+                    _walls.append(face.punched_geometry)
             elif isinstance(type, RoofCeiling):
                 if isinstance(bc, (Surface, Adiabatic)):
-                    ceilings.append(from_face3d(face.punched_geometry))
+                    _ceilings.append(face.punched_geometry)
                 else:
-                    roofs.append(from_face3d(face.punched_geometry))
+                    _roofs.append(face.punched_geometry)
             elif isinstance(type, Floor):
                 if isinstance(bc, (Surface, Adiabatic)):
-                    interior_floors.append(from_face3d(face.punched_geometry))
+                    _interior_floors.append(face.punched_geometry)
                 else:
-                    exterior_floors.append(from_face3d(face.punched_geometry))
+                    _exterior_floors.append(face.punched_geometry)
             elif isinstance(type, AirBoundary):
-                air_walls.append(from_face3d(face.punched_geometry))
-            
+                _air_walls.append(face.punched_geometry)
+
             # add the apertures, doors, and shades
             for ap in face.apertures:
                 add_shade(ap)
                 if isinstance(bc, Surface):
-                    interior_apertures.append(from_face3d(ap.geometry))
+                    _interior_apertures.append(ap.geometry)
                 else:
-                    apertures.append(from_face3d(ap.geometry))
+                    _apertures.append(ap.geometry)
             for dr in face.doors:
                 add_shade(dr)
                 if isinstance(bc, Surface):
-                    interior_doors.append(from_face3d(dr.geometry))
+                    _interior_doors.append(dr.geometry)
                 else:
-                    doors.append(from_face3d(dr.geometry))
+                    _doors.append(dr.geometry)
+
+    # color all of the geometry with its respective surface type
+    palette = Colorset.openstudio_palette()
+    walls = from_face3ds_to_colored_mesh(_walls, palette[0]) \
+        if len(_walls) != 0 else None
+    interior_walls = from_face3ds_to_colored_mesh(_interior_walls, palette[1]) \
+        if len(_interior_walls) != 0 else None
+    roofs = from_face3ds_to_colored_mesh(_roofs, palette[3]) \
+        if len(_roofs) != 0 else None
+    ceilings = from_face3ds_to_colored_mesh(_ceilings, palette[4]) \
+        if len(_ceilings) != 0 else None
+    exterior_floors = from_face3ds_to_colored_mesh(_exterior_floors, palette[6]) \
+        if len(_exterior_floors) != 0 else None
+    interior_floors = from_face3ds_to_colored_mesh(_interior_floors, palette[7]) \
+        if len(_interior_floors) != 0 else None
+    air_walls = from_face3ds_to_colored_mesh(_air_walls, palette[12]) \
+        if len(_air_walls) != 0 else None
+    apertures = from_face3ds_to_colored_mesh(_apertures, palette[9]) \
+        if len(_apertures) != 0 else None
+    interior_apertures = from_face3ds_to_colored_mesh(_interior_apertures, palette[9]) \
+        if len(_interior_apertures) != 0 else None
+    doors = from_face3ds_to_colored_mesh(_doors, palette[10]) \
+        if len(_doors) != 0 else None
+    interior_doors = from_face3ds_to_colored_mesh(_interior_doors, palette[10]) \
+        if len(_interior_doors) != 0 else None
+    outdoor_shades = from_face3ds_to_colored_mesh(_outdoor_shades, palette[11]) \
+        if len(_outdoor_shades) != 0 else None
+    indoor_shades = from_face3ds_to_colored_mesh(_indoor_shades, palette[11]) \
+        if len(_indoor_shades) != 0 else None
+
+    # create the wire frame
+    all_geo = _walls + _interior_walls + _roofs + _ceilings + _exterior_floors + \
+        _interior_floors + _air_walls + _apertures + _interior_apertures + _doors + \
+        _interior_doors + _outdoor_shades + _indoor_shades
+    wire_frame = [from_face3d_to_wireframe(face) for face in all_geo]
