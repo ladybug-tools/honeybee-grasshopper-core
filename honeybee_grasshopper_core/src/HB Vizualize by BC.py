@@ -24,14 +24,20 @@ Visualize room geometry in the Rhino scene organized by boundary condition.
             boundary condition.
         other: Rhino geometry for all faces with a boundary condition other than
             the four above.
+        wire_frame: A list of lines representing the outlines of the rooms.
 """
 
 ghenv.Component.Name = "HB Vizualize by BC"
 ghenv.Component.NickName = 'VizByBC'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
-ghenv.Component.AdditionalHelpFromDocStrings = "2"
+ghenv.Component.AdditionalHelpFromDocStrings = '5'
+
+try:  # import the ladybug dependencies
+    from ladybug.color import Colorset
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug:\n\t{}'.format(e))
 
 try:  # import the core honeybee dependencies
     from honeybee.boundarycondition import Outdoors, Surface, Ground
@@ -39,7 +45,8 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.fromgeometry import from_face3d
+    from ladybug_rhino.fromgeometry import from_face3ds_to_colored_mesh, \
+        from_face3d_to_wireframe
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -51,32 +58,49 @@ except ImportError:  # honeybee-energy is not installed
 
 
 def add_face(face, geo_list):
-    geo_list.append(from_face3d(face.punched_geometry))
+    geo_list.append(face.punched_geometry)
     for ap in face.apertures:
-        geo_list.append(from_face3d(ap.geometry))
+        geo_list.append(ap.geometry)
     for dr in face.doors:
-        geo_list.append(from_face3d(dr.geometry))
+        geo_list.append(dr.geometry)
 
 
 if all_required_inputs(ghenv.Component):
     # lists of rhino geometry to be filled with content
-    outdoors = []
-    surface = []
-    ground = []
-    adiabatic = []
-    other = []
-    
+    _outdoors = []
+    _surface = []
+    _ground = []
+    _adiabatic = []
+    _other = []
+
     # loop through all objects and add them
     for room in _rooms:
         for face in room:
             bc = face.boundary_condition
             if isinstance(bc, Outdoors):
-                add_face(face, outdoors)
+                add_face(face, _outdoors)
             elif isinstance(bc, Surface):
-                add_face(face, surface)
+                add_face(face, _surface)
             elif isinstance(bc, Ground):
-                add_face(face, ground)
+                add_face(face, _ground)
             elif isinstance(bc, Adiabatic):
-                add_face(face, adiabatic)
+                add_face(face, _adiabatic)
             else:
-                add_face(face, other)
+                add_face(face, _other)
+
+    # color all of the geometry with its respective surface type
+    palette = Colorset.openstudio_palette()
+    outdoors = from_face3ds_to_colored_mesh(_outdoors, palette[9]) \
+        if len(_outdoors) != 0 else None
+    surface = from_face3ds_to_colored_mesh(_surface, palette[13]) \
+        if len(_surface) != 0 else None
+    ground = from_face3ds_to_colored_mesh(_ground, palette[2]) \
+        if len(_ground) != 0 else None
+    adiabatic = from_face3ds_to_colored_mesh(_adiabatic, palette[4]) \
+        if len(_adiabatic) != 0 else None
+    other = from_face3ds_to_colored_mesh(_other, palette[9]) \
+        if len(_other) != 0 else None
+
+    # create the wire frame
+    all_geo = _outdoors + _surface + _ground + _adiabatic + _other
+    wire_frame = [from_face3d_to_wireframe(face) for face in all_geo]

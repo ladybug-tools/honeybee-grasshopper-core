@@ -15,8 +15,8 @@ different faces and sub-faces.
 -
 
     Args:
-        _hb_objs: Honeybee Faces or Rooms to be labeled with their attributes in
-            the Rhino scene.
+        _hb_objs: Honeybee Faces, Rooms or a Model to be labeled with their attributes
+            in the Rhino scene.
         _attribute_: Text for the name of the attribute with which the faces or
             sub-faces should be labeled. The Honeybee "Face Attributes" component
             lists all of the core attributes of the room. Also, each Honeybee
@@ -38,12 +38,12 @@ different faces and sub-faces.
             each label corresponds to.
 """
 
-ghenv.Component.Name = "HB Label Faces"
+ghenv.Component.Name = 'HB Label Faces'
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
-ghenv.Component.AdditionalHelpFromDocStrings = "3"
+ghenv.Component.AdditionalHelpFromDocStrings = '4'
 
 import math
 
@@ -57,6 +57,7 @@ try:  # import the core honeybee dependencies
     from honeybee.face import Face
     from honeybee.aperture import Aperture
     from honeybee.door import Door
+    from honeybee.search import get_attr_nested
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -74,25 +75,8 @@ ghenv.Component.Params.Output[1].Hidden = True
 
 def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_frame):
     """Generate labels for a face or sub-face and add it to a list."""
-    # get the attribute from the object
-    if _attribute_.startswith('properties.'):  # extension attribute
-        attributes = _attribute_.split('.')  # get all the sub-attributes
-        current_obj = face
-        try:
-            for attribute in attributes:
-                current_obj = getattr(current_obj, attribute)
-            face_prop = str(current_obj)  # in case the property is float or int
-        except AttributeError as e:
-            if 'NoneType' in str(e):  # it's a valid attribute but it's not assigned
-                face_prop = 'None'
-            else:  # it's not a valid attribute
-                face_prop = 'N/A'
-    else:  # honeybee-core attribute
-        try:
-            face_prop = str(getattr(face, _attribute_))
-        except AttributeError:
-            face_prop = 'N/A'
-    
+    face_prop = get_attr_nested(face, _attribute_)
+
     # get a base plane and text height for the text label
     cent_pt = face.geometry.center  # base point for the text
     base_plane = Plane(face.normal, cent_pt)
@@ -105,18 +89,18 @@ def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_fra
         txt_h = largest_dim / (txt_len * 2)
     else:
         txt_h = _txt_height_
-    
+
     # move base plane origin a little to avoid overlaps of adjacent labels
     if base_plane.n.x != 0:
         m_vec = base_plane.y if base_plane.n.x < 0 else -base_plane.y
     else:
         m_vec = base_plane.y if base_plane.n.z < 0 else -base_plane.y
     base_plane = base_plane.move(m_vec * txt_h)
-    
+
     # create the text label
     label = text_objects(face_prop, base_plane, txt_h, font=_font_,
                          horizontal_alignment=1, vertical_alignment=3)
-    
+
     # append everything to the lists
     label_text.append(face_prop)
     base_pts.append(from_plane(base_plane))
