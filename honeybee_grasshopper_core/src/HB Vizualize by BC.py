@@ -13,7 +13,8 @@ Visualize room geometry in the Rhino scene organized by boundary condition.
 
     Args:
         _rooms: Honeybee Rooms for which you would like to preview geometry
-            in the Rhino scene based on boundary condition.
+            in the Rhino scene based on boundary condition. This can also be an
+            entire honeybee Model.
     
     Returns:
         outdoors: Rhino geometry for the faces with an Outdoors boundary condition.
@@ -29,7 +30,7 @@ Visualize room geometry in the Rhino scene organized by boundary condition.
 
 ghenv.Component.Name = "HB Vizualize by BC"
 ghenv.Component.NickName = 'VizByBC'
-ghenv.Component.Message = '0.2.0'
+ghenv.Component.Message = '0.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
@@ -40,6 +41,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug:\n\t{}'.format(e))
 
 try:  # import the core honeybee dependencies
+    from honeybee.model import Model
     from honeybee.boundarycondition import Outdoors, Surface, Ground
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -73,8 +75,16 @@ if all_required_inputs(ghenv.Component):
     _adiabatic = []
     _other = []
 
+    # extract any rooms from input Models
+    rooms = []
+    for hb_obj in _rooms:
+        if isinstance(hb_obj, Model):
+            rooms.extend(hb_obj.rooms)
+        else:
+            rooms.append(hb_obj)
+
     # loop through all objects and add them
-    for room in _rooms:
+    for room in rooms:
         for face in room:
             bc = face.boundary_condition
             if isinstance(bc, Outdoors):
