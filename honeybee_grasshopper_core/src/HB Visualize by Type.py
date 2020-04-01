@@ -13,7 +13,8 @@ Visualize room geometry in the Rhino scene organized by object and face type.
 
     Args:
         _rooms: Honeybee Rooms for which you would like to preview geometry
-            in the Rhino scene based on type.
+            in the Rhino scene based on type. This can also be an entire
+            honeybee Model.
     
     Returns:
         walls: Rhino geometry for the Walls with an Outdoors or Ground boundary
@@ -46,7 +47,7 @@ Visualize room geometry in the Rhino scene organized by object and face type.
 
 ghenv.Component.Name = 'HB Visualize by Type'
 ghenv.Component.NickName = 'VizByType'
-ghenv.Component.Message = '0.3.0'
+ghenv.Component.Message = '0.3.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
@@ -57,6 +58,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug:\n\t{}'.format(e))
 
 try:  # import the core honeybee dependencies
+    from honeybee.model import Model
     from honeybee.boundarycondition import Surface
     from honeybee.facetype import Wall, RoofCeiling, Floor, AirBoundary
 except ImportError as e:
@@ -96,8 +98,17 @@ if all_required_inputs(ghenv.Component):
         _outdoor_shades.extend([shd.geometry for shd in hb_obj.outdoor_shades])
         _indoor_shades.extend([shd.geometry for shd in hb_obj.indoor_shades])
 
+    # extract any rooms from input Models
+    rooms = []
+    for hb_obj in _rooms:
+        if isinstance(hb_obj, Model):
+            rooms.extend(hb_obj.rooms)
+            _outdoor_shades.extend([shd.geometry for shd in hb_obj.orphaned_shades])
+        else:
+            rooms.append(hb_obj)
+
     # loop through all objects and add them
-    for room in _rooms:
+    for room in rooms:
         add_shade(room)
         for face in room:
             add_shade(face)
