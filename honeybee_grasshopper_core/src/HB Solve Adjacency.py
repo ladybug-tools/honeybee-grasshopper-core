@@ -21,15 +21,14 @@ adjacent.
             constructions for the adjacent Faces, Apertures, and Doors found
             in the process of solving adjacency. Note that None values in the
             input list correspond to constructions that will not change from
-            the default. If no energy construction is assigned to a given Face
-            type, Aperture or Door type, the default interior constructions
+            the default. If no value is input here, the default interior constructions
             will be assigned using the adjacent Rooms' ConstructionSet.
-        rad_int_mat_: Optional material subset list. This will be used to assign
-            custom radiance materials for the adjacent Faces, Apertures, and
-            Doors found in the process of solving adjacency. Note that None values
+        rad_int_mat_: Optional Radiance material subset list from the "HB Interior
+            Material Subset" component. This will be used to assign custom
+            radiance materials for the adjacent Faces, Apertures, and Doors
+            found in the process of solving adjacency. Note that None values
             in the input list correspond to materials that will not change from
-            the default. If no energy construction is assigned to a given Face
-            type, Aperture or Door type, the default interior materials
+            the default. If no value is input here, the default interior materials
             will be assigned using the adjacent Rooms' ModifierSet.
         adiabatic_: Set to True to have all of the adjacencies discovered by this
             component set to an adiabatic boundary condition. If False, a Surface
@@ -50,7 +49,7 @@ adjacent.
 
 ghenv.Component.Name = "HB Solve Adjacency"
 ghenv.Component.NickName = 'SolveAdj'
-ghenv.Component.Message = '0.2.0'
+ghenv.Component.Message = '0.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -91,7 +90,7 @@ def reversed_opaque_constr(construction):
     """Get a version of a given OpaqueConstruction that is reversed."""
     if construction.is_symmetric:
         return construction
-    return OpaqueConstruction('{}_Rev'.format(ep_constr_.name),
+    return OpaqueConstruction('{}_Rev'.format(ep_constr_.identifier),
                               [mat for mat in reversed(ep_constr_.materials)])
 
 
@@ -99,7 +98,7 @@ def reversed_window_constr(construction):
     """Get a version of a given WindowConstruction that is reversed."""
     if construction.is_symmetric:
         return construction
-    return WindowConstruction('{}_Rev'.format(ep_constr_.name),
+    return WindowConstruction('{}_Rev'.format(ep_constr_.identifier),
                               [mat for mat in reversed(ep_constr_.materials)])
 
 

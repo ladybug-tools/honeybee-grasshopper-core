@@ -13,8 +13,9 @@ Create Honeybee Aperture
 
     Args:
         _geo: Rhino Brep geometry.
-        _name_: A name for the Aperture. If the name is not provided a random
-            name will be assigned
+        _name_: Text to set the name for the Aperture and to be incorporated into
+            unique Aperture identifier. If the name is not provided, a random name
+            will be assigned.
         operable_: Boolean to note whether the Aperture can be opened for ventilation.
             Default: False.
         ep_constr_: Optional text for the Aperture's energy construction to be looked
@@ -38,7 +39,7 @@ Create Honeybee Aperture
 
 ghenv.Component.Name = "HB Aperture"
 ghenv.Component.NickName = 'Aperture'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -47,6 +48,7 @@ import uuid
 
 try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
+    from honeybee.typing import clean_and_id_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -57,7 +59,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
-    from honeybee_energy.lib.constructions import window_construction_by_name
+    from honeybee_energy.lib.constructions import window_construction_by_identifier
 except ImportError as e:
     if ep_constr_ is not None:
         raise ValueError('ep_constr_ has been specified but honeybee-energy '
@@ -73,21 +75,23 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     apertures = []  # list of apertures that will be returned
-    
+
     # set default name
-    name = _name_ if _name_ is not None else str(uuid.uuid4())
-    
+    name = clean_and_id_string(_name_) if _name_ is not None else str(uuid.uuid4())
+
     # create the Apertures
     i = 0  # iterator to ensure each aperture gets a unique name
     for geo in _geo:
         for lb_face in to_face3d(geo):
             hb_ap = Aperture('{}_{}'.format(name, i), lb_face, is_operable=operable_)
-            
+            if _name_ is not None:
+                hb_ap.display_name = '{}_{}'.format(_name_, i)
+
             # try to assign the energyplus construction
             if ep_constr_ is not None:
                 if isinstance(ep_constr_, str):
-                    ep_constr_ = window_construction_by_name(ep_constr_)
+                    ep_constr_ = window_construction_by_identifier(ep_constr_)
                 hb_ap.properties.energy.construction = ep_constr_
-            
+
             apertures.append(hb_ap)  # collect the final Apertures
             i += 1  # advance the iterator

@@ -24,8 +24,8 @@ Create a Honeybee Model, which can be sent for simulation.
         _north_: A number between 0 and 360 to set the clockwise north
             direction in degrees. This can also be a vector to set the North.
             Default is 0.
-        _name_: A name for the Model. If the name is not provided the name
-            "unnamed" will be used.
+        _name_: Text to be used for the name and identifier of the Model. If no
+            name is provided, it will be "unnamed".
     
     Returns:
         report: Reports, errors, warnings, etc.
@@ -35,13 +35,14 @@ Create a Honeybee Model, which can be sent for simulation.
 
 ghenv.Component.Name = "HB Model"
 ghenv.Component.NickName = 'Model'
-ghenv.Component.Message = '0.2.0'
+ghenv.Component.Message = '0.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
+    from honeybee.typing import clean_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -61,13 +62,15 @@ def check_all_geo_none():
 
 if all_required_inputs(ghenv.Component) and not check_all_geo_none():
     # set a default name and get the Rhino Model units
-    name = _name_ if _name_ is not None else 'unnamed'
+    name = clean_string(_name_) if _name_ is not None else 'unnamed'
     units = units_system()
-    
+
     # create the model
     model = Model(name, rooms_, faces_, shades_, apertures_, doors_,
                   units=units, tolerance=tolerance, angle_tolerance=angle_tolerance)
-    
+    if _name_ is not None:
+        model.display_name = _name_
+
     # set the north if it is not defaulted
     if _north_ is not None:
         try:

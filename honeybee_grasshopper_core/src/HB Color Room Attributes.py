@@ -21,7 +21,7 @@ different Rooms.
             Rooms should be labeled. The Honeybee "Room Attributes" component
             lists all of the core attributes of the room. Also, each Honeybee
             extension (ie. Radiance, Energy) includes its own component that
-            lists the Room attributes of that extension. Default: "name".
+            lists the Room attributes of that extension.
         legend_par_: An optional LegendParameter object to change the display
             of the colored rooms (Default: None).
     
@@ -35,7 +35,7 @@ different Rooms.
 
 ghenv.Component.Name = 'HB Color Room Attributes'
 ghenv.Component.NickName = 'ColorRoomAttr'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'

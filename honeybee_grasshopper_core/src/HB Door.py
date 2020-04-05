@@ -37,7 +37,7 @@ Create Honeybee Door
 
 ghenv.Component.Name = "HB Door"
 ghenv.Component.NickName = 'Door'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -46,6 +46,7 @@ import uuid
 
 try:  # import the core honeybee dependencies
     from honeybee.door import Door
+    from honeybee.typing import clean_and_id_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -73,22 +74,24 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     doors = []  # list of doors that will be returned
-    
+
     # set default name
-    name = _name_ if _name_ is not None else str(uuid.uuid4())
-    
+    name = clean_and_id_string(_name_) if _name_ is not None else str(uuid.uuid4())
+
     # create the Doors
     i = 0  # iterator to ensure each door gets a unique name
     for geo in _geo:
         for lb_face in to_face3d(geo):
             hb_dr = Door('{}_{}'.format(name, i), lb_face, is_glass=glass_)
-            
+            if _name_ is not None:
+                hb_dr.display_name = '{}_{}'.format(_name_, i)
+
             # try to assign the energyplus construction
             if ep_constr_ is not None:
                 if isinstance(ep_constr_, str):
                     ep_constr_ = opaque_construction_by_name(ep_constr_) if not \
                         hb_dr.is_glass else window_construction_by_name(ep_constr_)
                 hb_dr.properties.energy.construction = ep_constr_
-            
+
             doors.append(hb_dr)  # collect the final Doors
             i += 1  # advance the iterator
