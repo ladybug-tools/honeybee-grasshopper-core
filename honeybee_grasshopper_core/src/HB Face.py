@@ -13,8 +13,9 @@ Create Honeybee Face
 
     Args:
         _geo: Rhino Brep geometry.
-        _name_: A name for the Face. If the name is not provided a random
-            name will be assigned
+        _name_: Text to set the name for the Face and to be incorporated into
+            unique Face identifier. If the name is not provided, a random name
+            will be assigned.
         _type_: Text for the face type. The face type will be used to set the
             material and construction for the surface if they are not assigned
             through the inputs below. The default is automatically set based
@@ -51,7 +52,7 @@ Create Honeybee Face
 
 ghenv.Component.Name = "HB Face"
 ghenv.Component.NickName = 'Face'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "3"
@@ -62,6 +63,7 @@ try:  # import the core honeybee dependencies
     from honeybee.face import Face
     from honeybee.facetype import face_types
     from honeybee.boundarycondition import boundary_conditions
+    from honeybee.typing import clean_and_id_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -72,7 +74,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
-    from honeybee_energy.lib.constructions import opaque_construction_by_name
+    from honeybee_energy.lib.constructions import opaque_construction_by_identifier
 except ImportError as e:
     if ep_constr_ is not None:
         raise ValueError('ep_constr_ has been specified but honeybee-energy '
@@ -88,25 +90,27 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     faces = []  # list of faces that will be returned
-    
+
     # set default name, type, and boundary condition
-    name = _name_ if _name_ is not None else str(uuid.uuid4())
+    name = clean_and_id_string(_name_) if _name_ is not None else str(uuid.uuid4())
     if _type_ is not None and _type_ not in face_types:
         _type_ = face_types.by_name(_type_)
     if _bc_ is not None and _bc_ not in boundary_conditions:
         _bc_ = boundary_conditions.by_name(_bc_)
-    
+
     # create the Faces
     i = 0  # iterator to ensure each face gets a unique name
     for geo in _geo:
         for lb_face in to_face3d(geo):
             hb_face = Face('{}_{}'.format(name, i), lb_face, _type_, _bc_)
-            
+            if _name_ is not None:
+                hb_face.display_name = '{}_{}'.format(_name_, i)
+
             # try to assign the energyplus construction
             if ep_constr_ is not None:
                 if isinstance(ep_constr_, str):
-                    ep_constr_ = opaque_construction_by_name(ep_constr_)
+                    ep_constr_ = opaque_construction_by_identifier(ep_constr_)
                 hb_face.properties.energy.construction = ep_constr_
-            
+
             faces.append(hb_face)  # collect the final Faces
             i += 1  # advance the iterator

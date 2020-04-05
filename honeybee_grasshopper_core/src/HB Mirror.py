@@ -17,15 +17,16 @@ Mirror any Honeybee geometry object or a Model across a plane.
             Model object to be mirrored.
         _plane: A Plane across which the object will be mirrored.
         prefix_: Optional text string that will be inserted at the start of the
-            names of all transformed objects, their child objects, and their
-            adjacent Surface boundary condition objects. This is particularly
-            useful in workflows where you duplicate and edit a starting object
-            and then want to combine it with the original object into one Model
-            (like making a model of repeated rooms) since all objects within a
-            Model must have unique names. It is recommended that this name be
-            short to avoid maxing out the 100 allowable characters for honeybee
-            names. If None, no prefix will be added to the input object names
-            and all names will remain the same. Default: None.
+            identifiers and display names of all transformed objects, their child
+            objects, and their adjacent Surface boundary condition objects. This
+            is particularly useful in workflows where you duplicate and edit a
+            starting object and then want to combine it with the original object
+            into one Model (like making a model of repeated rooms) since all
+            objects within a Model must have unique identifiers. It is recommended
+            that this prefix be short to avoid maxing out the 100 allowable
+            characters for honeybee identifiers. If None, no prefix will be
+            added to the input objects and all identifiers and display names
+            will remain the same. Default: None.
     
     Returns:
         hb_objs: The input _hb_objs that has been mirrored across the input plane.
@@ -33,7 +34,7 @@ Mirror any Honeybee geometry object or a Model across a plane.
 
 ghenv.Component.Name = "HB Mirror"
 ghenv.Component.NickName = 'Mirror'
-ghenv.Component.Message = '0.1.2'
+ghenv.Component.Message = '0.1.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"

@@ -17,9 +17,9 @@ avoid light leaks in Radiance simulations.
 
     Args:
         _geo: A list of closed Rhino polysurfaces to be converted into Rooms.
-        _name_: A base name to be used for the Rooms. This will be combined with
-            the index of each input _geo to yield a unique name for each output
-            Room.
+        _name_: Text to set the base name for the Room, which will also be incorporated
+            into unique Room identifier. If the name is not provided, a random name
+            will be assigned.
         _program_: Text for the program of the Rooms (to be looked up in the ProgramType
             library) such as that output from the "HB List Programs" component.
             This can also be a custom ProgramType object. If no program is input
@@ -45,7 +45,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '0.1.2'
+ghenv.Component.Message = '0.1.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -60,6 +60,7 @@ except KeyError:  # first time that the component is running
 try:  # import the core honeybee dependencies
     from honeybee.room import Room
     from honeybee.facetype import get_type_from_normal
+    from honeybee.typing import clean_and_id_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -71,8 +72,8 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
-    from honeybee_energy.lib.programtypes import program_type_by_name, office_program
-    from honeybee_energy.lib.constructionsets import construction_set_by_name
+    from honeybee_energy.lib.programtypes import program_type_by_identifier, office_program
+    from honeybee_energy.lib.constructionsets import construction_set_by_identifier
 except ImportError as e:
     if _program_ is not None:
         raise ValueError('_program_ has been specified but honeybee-energy '
@@ -84,51 +85,56 @@ except ImportError as e:
         raise ValueError('conditioned_ has been specified but honeybee-energy '
                          'has failed to import.\n{}'.format(e))
 
+import uuid
+
 
 if all_required_inputs(ghenv.Component) and _run:
     # set the default roof angle
     roof_angle = _roof_angle_ if _roof_angle_ is not None else 30
-    
+
     rooms = []  # list of rooms that will be returned
     for i, geo in enumerate(_geo):
         # get the name for the Room
         if _name_ is None:  # make a default Room name
-            name = "Room_{}".format(scriptcontext.sticky["room_count"])
+            name = "Room_{}_{}".format(scriptcontext.sticky["room_count"], str(uuid.uuid4())[:8])
             scriptcontext.sticky["room_count"] += 1
         else:
-            name = '{}_{}'.format(_name_, i + 1)
-        
+            display_name = '{}_{}'.format(_name_, i + 1)
+            name = clean_and_id_string(display_name)
+
         # create the Room
         room = Room.from_polyface3d(name, to_polyface3d(geo), roof_angle)
-        
+        if _name_ is not None:
+            room.display_name = display_name
+
         # check that the Room geometry is closed.
         if not room.check_solid(tolerance, angle_tolerance, False):
             give_warning(ghenv.Component, 'Input _geo is not a closed volume.\n'
                          'Room volume must be closed to access most honeybee features.\n'
                          'Preview the output Room to see the holes in your model.')
-        
+
         # try to assign the program
         if _program_ is not None:
             if isinstance(_program_, str):
-                _program_ = program_type_by_name(_program_)
+                _program_ = program_type_by_identifier(_program_)
             room.properties.energy.program_type = _program_
         else:  # generic office program by default
             try:
                 room.properties.energy.program_type = office_program
             except (NameError, AttributeError):
                 pass  # honeybee-energy is not installed
-        
+
         # try to assign the construction set
         if _constr_set_ is not None:
             if isinstance(_constr_set_, str):
-                _constr_set_ = construction_set_by_name(_constr_set_)
+                _constr_set_ = construction_set_by_identifier(_constr_set_)
             room.properties.energy.construction_set = _constr_set_
-        
+
         # try to assign an ideal air system
         if conditioned_ or conditioned_ is None:  # conditioned by default
             try:
                 room.properties.energy.add_default_ideal_air()
             except (NameError, AttributeError):
                 pass  # honeybee-energy is not installed
-        
+
         rooms.append(room)

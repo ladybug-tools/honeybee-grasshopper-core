@@ -23,7 +23,7 @@ different faces.
             sub-faces should be labeled. The Honeybee "Face Attributes" component
             lists all of the core attributes of the room. Also, each Honeybee
             extension (ie. Radiance, Energy) includes its own component that lists
-            the face and sub-face attributes of that extension. Default: "name".
+            the face and sub-face attributes of that extension.
         legend_par_: An optional LegendParameter object to change the display
             of the colored faces and sub-faces (Default: None).
     
@@ -39,7 +39,7 @@ different faces.
 
 ghenv.Component.Name = 'HB Color Face Attributes'
 ghenv.Component.NickName = 'ColorFaceAttr'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'

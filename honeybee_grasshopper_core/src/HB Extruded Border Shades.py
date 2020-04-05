@@ -41,7 +41,7 @@ simulations or in the solar distribution calculation of EnergyPlus.
 
 ghenv.Component.Name = "HB Extruded Border Shades"
 ghenv.Component.NickName = 'BorderShades'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -60,7 +60,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
-    from honeybee_energy.lib.constructions import shade_construction_by_name
+    from honeybee_energy.lib.constructions import shade_construction_by_identifier
 except ImportError as e:
     if ep_constr_ is not None:
         raise ValueError('ep_constr_ has been specified but honeybee-energy '
@@ -88,15 +88,15 @@ def assign_shades(aperture, depth, indoor, ep, rad):
 if all_required_inputs(ghenv.Component) and _run:
     # duplicate the initial objects
     hb_objs = [obj.duplicate() for obj in _hb_objs]
-    
+
     # assign default indoor_ property
     indoor_ = indoor_ if indoor_ is not None else False
-    
+
     # get energyplus constructions if they are requested
     if ep_constr_ is not None:
         if isinstance(ep_constr_, str):
-            ep_constr_ = shade_construction_by_name(ep_constr_)
-    
+            ep_constr_ = shade_construction_by_identifier(ep_constr_)
+
     # loop through the input objects and add shades
     for obj in hb_objs:
         if isinstance(obj, Room):

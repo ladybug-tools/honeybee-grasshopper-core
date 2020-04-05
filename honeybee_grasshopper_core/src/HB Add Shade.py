@@ -29,7 +29,7 @@ Add a Honeybee Shades to an Aperture, Door, Face or Room.
 
 ghenv.Component.Name = "HB Add Shade"
 ghenv.Component.NickName = 'AddShade'
-ghenv.Component.Message = '0.2.0'
+ghenv.Component.Message = '0.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -42,7 +42,7 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     hb_obj = _hb_obj.duplicate()  # duplicate the initial object
-    
+
     if out_shades_ is not None:
         hb_obj.add_outdoor_shades((shd.duplicate() for shd in out_shades_))
     if in_shades_ is not None:

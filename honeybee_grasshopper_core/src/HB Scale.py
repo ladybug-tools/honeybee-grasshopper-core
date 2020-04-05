@@ -21,15 +21,16 @@ Scale any Honeybee geometry object or a Model by a factor.
             object is a Model, in which case, it will be scaled from the world
             origin (0, 0, 0).
         prefix_: Optional text string that will be inserted at the start of the
-            names of all transformed objects, their child objects, and their
-            adjacent Surface boundary condition objects. This is particularly
-            useful in workflows where you duplicate and edit a starting object
-            and then want to combine it with the original object into one Model
-            (like making a model of repeated rooms) since all objects within a
-            Model must have unique names. It is recommended that this name be
-            short to avoid maxing out the 100 allowable characters for honeybee
-            names. If None, no prefix will be added to the input object names
-            and all names will remain the same. Default: None.
+            identifiers and display names of all transformed objects, their child
+            objects, and their adjacent Surface boundary condition objects. This
+            is particularly useful in workflows where you duplicate and edit a
+            starting object and then want to combine it with the original object
+            into one Model (like making a model of repeated rooms) since all
+            objects within a Model must have unique identifiers. It is recommended
+            that this prefix be short to avoid maxing out the 100 allowable
+            characters for honeybee identifiers. If None, no prefix will be
+            added to the input objects and all identifiers and display names
+            will remain the same. Default: None.
     
     Returns:
         hb_objs: The input _hb_objs that has been scaled by the input factor.
@@ -37,7 +38,7 @@ Scale any Honeybee geometry object or a Model by a factor.
 
 ghenv.Component.Name = "HB Scale"
 ghenv.Component.NickName = 'Scale'
-ghenv.Component.Message = '0.1.2'
+ghenv.Component.Message = '0.1.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
