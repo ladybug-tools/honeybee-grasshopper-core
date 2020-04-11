@@ -38,10 +38,10 @@ original shade-less Room object.
 
 ghenv.Component.Name = "HB Deconstruct Object"
 ghenv.Component.NickName = 'DecnstrObj'
-ghenv.Component.Message = '0.2.0'
+ghenv.Component.Message = '0.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = "1"
+ghenv.Component.AdditionalHelpFromDocStrings = "2"
 
 try:  # import the core honeybee dependencies
     from honeybee.room import Room
