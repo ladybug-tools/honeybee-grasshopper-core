@@ -16,7 +16,9 @@ avoid light leaks in Radiance simulations.
 -
 
     Args:
-        _geo: A list of closed Rhino polysurfaces to be converted into Rooms.
+        _geo: A list of closed Rhino polysurfaces (aka.breps) to be converted
+            into honeybee Rooms. This list can also include closed meshes that
+            represent the rooms.
         _name_: Text to set the base name for the Room, which will also be incorporated
             into unique Room identifier. If the name is not provided, a random name
             will be assigned.
@@ -45,7 +47,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '0.1.3'
+ghenv.Component.Message = '0.1.4'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
