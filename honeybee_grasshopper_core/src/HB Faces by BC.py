@@ -26,10 +26,10 @@ boundary condition.
 
 ghenv.Component.Name = 'HB Faces by BC'
 ghenv.Component.NickName = 'FacesByBC'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
-ghenv.Component.AdditionalHelpFromDocStrings = '1'
+ghenv.Component.AdditionalHelpFromDocStrings = '3'
 
 try:  # import the core honeybee dependencies
     from honeybee.room import Room
