@@ -22,9 +22,9 @@ Create Honeybee Door
             assigned based on the properties of the parent face that the Door
             is assigned to (ie. whether the Face is a RoofCeiling, whether it has
             a Surface boundary condition, etc.)
-        rad_mat_: Optional text for the Door's radiance material to be looked
-            up in the material library. This can also be a custom material object.
-            If no radiance material is input here, a default will be assigned
+        rad_mod_: Optional text for the Door's radiance modifier to be looked
+            up in the modifier library. This can also be a custom modifier object.
+            If no radiance modifier is input here, a default will be assigned
             based on the properties of the parent face that the Door is
             assigned to (ie. whether the Face is a RoofCeiling, whether it has a
             Surface boundary condition, etc.)
@@ -37,7 +37,7 @@ Create Honeybee Door
 
 ghenv.Component.Name = "HB Door"
 ghenv.Component.NickName = 'Door'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -65,10 +65,10 @@ except ImportError as e:
                          'has failed to import.\n{}'.format(e))
 
 try:  # import the honeybee-radiance extension
-    import honeybee_radiance
+    from honeybee_radiance.lib.modifiers import modifier_by_identifier
 except ImportError as e:
-    if rad_mat_ is not None:
-        raise ValueError('rad_mat_ has been specified but honeybee-radiance '
+    if rad_mod_ is not None:
+        raise ValueError('rad_mod_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
 
 
@@ -92,6 +92,12 @@ if all_required_inputs(ghenv.Component):
                     ep_constr_ = opaque_construction_by_name(ep_constr_) if not \
                         hb_dr.is_glass else window_construction_by_name(ep_constr_)
                 hb_dr.properties.energy.construction = ep_constr_
+
+            # try to assign the radiance modifier
+            if rad_mod_ is not None:
+                if isinstance(rad_mod_, str):
+                    rad_mod_ = modifier_by_identifier(rad_mod_)
+                hb_dr.properties.radiance.modifier = rad_mod_
 
             doors.append(hb_dr)  # collect the final Doors
             i += 1  # advance the iterator

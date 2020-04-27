@@ -28,10 +28,9 @@ simulations or in the solar distribution calculation of EnergyPlus.
             generated shades. This text will be used to look up a construction
             in the shade construction library. This can also be a custom
             ShadeConstruction object.
-        rad_mat_: Optional text for a radiance material to be used for all
-            generated shades. This text will be used to look up a material
-            in the material library. This can also be a custom material object.
-        _run: Set to True to run the component.
+        rad_mod_: Optional text for a radiance modifier to be used for all
+            generated shades. This text will be used to look up a modifier
+            in the modifier library. This can also be a custom modifier object.
     
     Returns:
         report: Reports, errors, warnings, etc.
@@ -41,7 +40,7 @@ simulations or in the solar distribution calculation of EnergyPlus.
 
 ghenv.Component.Name = "HB Extruded Border Shades"
 ghenv.Component.NickName = 'BorderShades'
-ghenv.Component.Message = '0.1.2'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -67,10 +66,10 @@ except ImportError as e:
                          'has failed to import.\n{}'.format(e))
 
 try:  # import the honeybee-radiance extension
-    import honeybee_radiance
+    from honeybee_radiance.lib.modifiers import modifier_by_identifier
 except ImportError as e:
-    if rad_mat_ is not None:
-        raise ValueError('rad_mat_ has been specified but honeybee-radiance '
+    if rad_mod_ is not None:
+        raise ValueError('rad_mod_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
 
 
@@ -83,9 +82,13 @@ def assign_shades(aperture, depth, indoor, ep, rad):
         if ep is not None:
             for shd in new_shades:
                 shd.properties.energy.construction = ep
+        # try to assign the radiance modifier
+        if rad is not None:
+            for shd in new_shades:
+                shd.properties.radiance.modifier = rad
 
 
-if all_required_inputs(ghenv.Component) and _run:
+if all_required_inputs(ghenv.Component):
     # duplicate the initial objects
     hb_objs = [obj.duplicate() for obj in _hb_objs]
 
@@ -97,17 +100,22 @@ if all_required_inputs(ghenv.Component) and _run:
         if isinstance(ep_constr_, str):
             ep_constr_ = shade_construction_by_identifier(ep_constr_)
 
+    # get radiance modifiers if they are requested
+    if rad_mod_ is not None:
+        if isinstance(rad_mod_, str):
+            rad_mod_ = modifier_by_identifier(rad_mod_)
+
     # loop through the input objects and add shades
     for obj in hb_objs:
         if isinstance(obj, Room):
             for face in obj.faces:
                 for ap in face.apertures:
-                    assign_shades(ap, _depth, indoor_, ep_constr_, rad_mat_)
+                    assign_shades(ap, _depth, indoor_, ep_constr_, rad_mod_)
         elif isinstance(obj, Face):
             for ap in obj.apertures:
-                assign_shades(ap, _depth, indoor_, ep_constr_, rad_mat_)
+                assign_shades(ap, _depth, indoor_, ep_constr_, rad_mod_)
         elif isinstance(obj, Aperture):
-            assign_shades(obj, _depth, indoor_, ep_constr_, rad_mat_)
+            assign_shades(obj, _depth, indoor_, ep_constr_, rad_mod_)
         else:
             raise TypeError('Input _hb_objs must be a Room, Face or Aperture. '
                             'Not {}.'.format(type(obj)))

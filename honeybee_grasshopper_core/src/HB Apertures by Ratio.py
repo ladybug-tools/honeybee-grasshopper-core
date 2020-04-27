@@ -56,7 +56,6 @@ an Outdoors boundary condition.
             here, different operable properties will be assigned based on
             cardinal direction, starting with north and moving clockwise.
             Default: False.
-        _run: Set to True to run the component.
     
     Returns:
         report: Reports, errors, warnings, etc.
@@ -66,7 +65,7 @@ an Outdoors boundary condition.
 
 ghenv.Component.Name = "HB Apertures by Ratio"
 ghenv.Component.NickName = 'AperturesByRatio'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -107,7 +106,7 @@ def assign_apertures(face, sub, rat, hgt, sil, hor, vert, op):
             ap.is_operable = op
 
 
-if all_required_inputs(ghenv.Component) and _run:
+if all_required_inputs(ghenv.Component):
     # duplicate the initial objects
     hb_objs = [obj.duplicate() for obj in _hb_objs]
     
