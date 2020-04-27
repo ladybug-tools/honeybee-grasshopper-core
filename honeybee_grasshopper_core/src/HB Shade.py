@@ -24,9 +24,9 @@ Create Honeybee Shade
             to be looked up in the schedule library. This can also be a custom
             schedule object. If no energy schedule is input here, the default will
             be always opaque.
-        rad_mat_: Optional text for the Shade's radiance material to be looked
-            up in the material library. This can also be a custom material object.
-            If no radiance material is input here, a default will be assigned.
+        rad_mod_: Optional text for the Shade's radiance modifier to be looked
+            up in the modifier library. This can also be a custom modifier object.
+            If no radiance modifier is input here, a default will be assigned.
     
     Returns:
         report: Reports, errors, warnings, etc.
@@ -36,7 +36,7 @@ Create Honeybee Shade
 
 ghenv.Component.Name = "HB Shade"
 ghenv.Component.NickName = 'Shade'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -67,10 +67,10 @@ except ImportError as e:
                          'has failed to import.\n{}'.format(e))
 
 try:  # import the honeybee-radiance extension
-    import honeybee_radiance
+    from honeybee_radiance.lib.modifiers import modifier_by_identifier
 except ImportError as e:
-    if rad_mat_ is not None:
-        raise ValueError('rad_mat_ has been specified but honeybee-radiance '
+    if rad_mod_ is not None:
+        raise ValueError('rad_mod_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
 
 
@@ -99,6 +99,12 @@ if all_required_inputs(ghenv.Component):
                 if isinstance(ep_trans_sch_, str):
                     ep_trans_sch_ = schedule_by_identifier(ep_trans_sch_)
                 hb_shd.properties.energy.transmittance_schedule = ep_trans_sch_
+
+            # try to assign the radiance modifier
+            if rad_mod_ is not None:
+                if isinstance(rad_mod_, str):
+                    rad_mod_ = modifier_by_identifier(rad_mod_)
+                hb_shd.properties.radiance.modifier = rad_mod_
 
             shades.append(hb_shd)  # collect the final Shades
             i += 1  # advance the iterator

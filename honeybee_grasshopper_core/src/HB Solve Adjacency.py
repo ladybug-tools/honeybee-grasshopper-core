@@ -23,12 +23,12 @@ adjacent.
             input list correspond to constructions that will not change from
             the default. If no value is input here, the default interior constructions
             will be assigned using the adjacent Rooms' ConstructionSet.
-        rad_int_mat_: Optional Radiance material subset list from the "HB Interior
+        rad_int_mod_: Optional Radiance modifier subset list from the "HB Interior
             Material Subset" component. This will be used to assign custom
-            radiance materials for the adjacent Faces, Apertures, and Doors
+            radiance modifiers for the adjacent Faces, Apertures, and Doors
             found in the process of solving adjacency. Note that None values
-            in the input list correspond to materials that will not change from
-            the default. If no value is input here, the default interior materials
+            in the input list correspond to modifiers that will not change from
+            the default. If no value is input here, the default interior modifiers
             will be assigned using the adjacent Rooms' ModifierSet.
         adiabatic_: Set to True to have all of the adjacencies discovered by this
             component set to an adiabatic boundary condition. If False, a Surface
@@ -49,7 +49,7 @@ adjacent.
 
 ghenv.Component.Name = "HB Solve Adjacency"
 ghenv.Component.NickName = 'SolveAdj'
-ghenv.Component.Message = '0.2.1'
+ghenv.Component.Message = '0.3.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -81,8 +81,8 @@ except ImportError as e:
 try:  # import the honeybee-radiance extension
     import honeybee_radiance
 except ImportError as e:
-    if len(rad_int_mat_) != 0:
-        raise ValueError('rad_int_mat_ has been specified but honeybee-radiance '
+    if len(rad_int_mod_) != 0:
+        raise ValueError('rad_int_mod_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
 
 
@@ -145,28 +145,71 @@ def apply_ep_int_constr(adj_info, ep_int_constr):
         apply_constr_to_door(adj_info['adjacent_doors'], ep_int_constr[5], True)
 
 
+def apply_mod_to_face(adjacent_faces, modifier, face_type):
+    """Apply a given modifier to adjacent faces of a certain type."""
+    for face_pair in adjacent_faces:
+        if isinstance(face_pair[0].type, face_type):
+            face_pair[0].properties.energy.modifier = modifier
+            face_pair[1].properties.energy.modifier = modifier
+        elif isinstance(face_pair[1].type, face_type):
+            face_pair[1].properties.energy.modifier = modifier
+            face_pair[0].properties.energy.modifier = modifier
+
+
+def apply_mod_to_door(adjacent_doors, modifier, is_glass):
+    """Apply a given modifier to adjacent doors of a certain type."""
+    for dr_pair in adjacent_doors:
+        if dr_pair[0].is_glass is is_glass:
+            dr_pair[1].properties.energy.modifier = modifier
+            dr_pair[0].properties.energy.modifier = modifier
+
+
+def apply_rad_int_mod(adj_info, rad_int_mod):
+    """Apply the interior modifier subset list to adjacent objects."""
+    assert len(rad_int_mod) == 6, 'Input rad_int_mod_ is not valid.'
+    
+    if rad_int_mod[0] is not None:
+        apply_mod_to_face(adj_info['adjacent_faces'], rad_int_mod[0], Wall)
+    if rad_int_mod[1] is not None:
+        apply_mod_to_face(adj_info['adjacent_faces'], rad_int_mod[1], RoofCeiling)
+    if rad_int_mod[2] is not None:
+        apply_mod_to_face(adj_info['adjacent_faces'], rad_int_mod[2], Floor)
+    if rad_int_mod[3] is not None:
+        for ap_pair in adj_info['adjacent_apertures']:
+            ap_pair[1].properties.energy.modifier = rad_int_mod[3]
+            ap_pair[0].properties.energy.modifier = rad_int_mod[3]
+    if rad_int_mod[4] is not None:
+        apply_mod_to_door(adj_info['adjacent_doors'], rad_int_mod[4], False)
+    if rad_int_mod[5] is not None:
+        apply_mod_to_door(adj_info['adjacent_doors'], rad_int_mod[5], True)
+
+
 if all_required_inputs(ghenv.Component) and _run:
     adj_rooms = [room.duplicate() for room in _rooms] # duplicate the initial objects
-    
+
     # solve adjacnecy
     adj_info = Room.solve_adjacency(adj_rooms, tolerance)
-    
+
     # try to assign the energyplus constructions if specified
     if len(ep_int_constr_) != 0:
         apply_ep_int_constr(adj_info, ep_int_constr_)
-    
+
+    # try to assign the radiance modifiers if specified
+    if len(rad_int_mod_) != 0:
+        apply_rad_int_mod(adj_info, rad_int_mod_)
+
     # try to assign the adiabatic boundary condition
     if adiabatic_:
         for face_pair in adj_info['adjacent_faces']:
             face_pair[0].boundary_condition = boundary_conditions.adiabatic
             face_pair[1].boundary_condition = boundary_conditions.adiabatic
-    
+
     # try to assign the air boundary face type
     if air_boundary_:
         for face_pair in adj_info['adjacent_faces']:
             face_pair[0].type = face_types.air_boundary
             face_pair[1].type = face_types.air_boundary
-    
+
     # report all of the adjacency information
     for adj_face in adj_info['adjacent_faces']:
         print('"{}" is adjacent to "{}"'.format(adj_face[0], adj_face[1]))

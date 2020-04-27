@@ -22,11 +22,13 @@ avoid light leaks in Radiance simulations.
         _name_: Text to set the base name for the Room, which will also be incorporated
             into unique Room identifier. If the name is not provided, a random name
             will be assigned.
-        _program_: Text for the program of the Rooms (to be looked up in the ProgramType
-            library) such as that output from the "HB List Programs" component.
-            This can also be a custom ProgramType object. If no program is input
-            here, the Rooms will have a generic office program. Note that ProgramTypes
-            effectively map to OpenStudio space types upon export to OpenStudio.
+        _mod_set_: Text for the modifier set of the Rooms, which is used to
+            assign all default radiance modifiers needed to create a radiance
+            model. Text should refer to a ModifierSet within the library) such
+            as that output from the "HB List Modifier Sets" component. This
+            can also be a custom ModifierSet object. If nothing is input here,
+            the Room will have a generic construction set that is not sensitive to
+            the Room's climate or building energy code.
         _constr_set_: Text for the construction set of the Rooms, which is used
             to assign all default energy constructions needed to create an energy
             model. Text should refer to a ConstructionSet within the library such
@@ -34,10 +36,14 @@ avoid light leaks in Radiance simulations.
             can also be a custom ConstructionSet object. If nothing is input here,
             the Rooms will have a generic construction set that is not sensitive to
             the Rooms's climate or building energy code.
+        _program_: Text for the program of the Rooms (to be looked up in the ProgramType
+            library) such as that output from the "HB List Programs" component.
+            This can also be a custom ProgramType object. If no program is input
+            here, the Rooms will have a generic office program. Note that ProgramTypes
+            effectively map to OpenStudio space types upon export to OpenStudio.
         conditioned_: Boolean to note whether the Rooms have heating and cooling
             systems.
         _roof_angle_: Cutting angle for roof from Z axis in degrees. Default: 30.
-        _run: Set to True to run the component and create Honeybee Rooms.
     
     Returns:
         report: Reports, errors, warnings, etc.
@@ -47,7 +53,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '0.1.4'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -87,10 +93,17 @@ except ImportError as e:
         raise ValueError('conditioned_ has been specified but honeybee-energy '
                          'has failed to import.\n{}'.format(e))
 
+try:  # import the honeybee-radiance extension
+    from honeybee_radiance.lib.modifiersets import modifier_set_by_identifier
+except ImportError as e:
+    if _mod_set_ is not None:
+        raise ValueError('_mod_set_ has been specified but honeybee-radiance '
+                         'has failed to import.\n{}'.format(e))
+
 import uuid
 
 
-if all_required_inputs(ghenv.Component) and _run:
+if all_required_inputs(ghenv.Component):
     # set the default roof angle
     roof_angle = _roof_angle_ if _roof_angle_ is not None else 30
 
@@ -115,6 +128,18 @@ if all_required_inputs(ghenv.Component) and _run:
                          'Room volume must be closed to access most honeybee features.\n'
                          'Preview the output Room to see the holes in your model.')
 
+        # try to assign the modifier set
+        if _mod_set_ is not None:
+            if isinstance(_mod_set_, str):
+                _mod_set_ = modifier_set_by_identifier(_mod_set_)
+            room.properties.radiance.modifier_set = _mod_set_
+
+        # try to assign the construction set
+        if _constr_set_ is not None:
+            if isinstance(_constr_set_, str):
+                _constr_set_ = construction_set_by_identifier(_constr_set_)
+            room.properties.energy.construction_set = _constr_set_
+
         # try to assign the program
         if _program_ is not None:
             if isinstance(_program_, str):
@@ -125,12 +150,6 @@ if all_required_inputs(ghenv.Component) and _run:
                 room.properties.energy.program_type = office_program
             except (NameError, AttributeError):
                 pass  # honeybee-energy is not installed
-
-        # try to assign the construction set
-        if _constr_set_ is not None:
-            if isinstance(_constr_set_, str):
-                _constr_set_ = construction_set_by_identifier(_constr_set_)
-            room.properties.energy.construction_set = _constr_set_
 
         # try to assign an ideal air system
         if conditioned_ or conditioned_ is None:  # conditioned by default

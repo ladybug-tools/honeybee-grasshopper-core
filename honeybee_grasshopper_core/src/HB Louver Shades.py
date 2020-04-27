@@ -57,7 +57,6 @@ that are Walls (not Floors or Roofs).
             cardinal direction, starting with north and moving clockwise.
             Note that, by default, indoor shades are not used in energy simulations
             but they are used in all simulations involving Radiance. Default: False.
-        _run: Set to True to run the component.
     
     Returns:
         report: Reports, errors, warnings, etc.
@@ -67,7 +66,7 @@ that are Walls (not Floors or Roofs).
 
 ghenv.Component.Name = "HB Louver Shades"
 ghenv.Component.NickName = 'LouverShades'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -111,7 +110,7 @@ def assign_louvers(ap, depth, count, dist, off, angle, vec, flip, indr):
                                        flip, indr, tolerance)
 
 
-if all_required_inputs(ghenv.Component) and _run:
+if all_required_inputs(ghenv.Component):
     # duplicate the initial objects
     hb_objs = [obj.duplicate() for obj in _hb_objs]
     

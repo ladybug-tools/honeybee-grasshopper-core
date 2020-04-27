@@ -39,9 +39,9 @@ Create Honeybee Face
             up in the construction library. This can also be a custom OpaqueConstruction
             object. If no energy construction is input here, the face type and
             boundary condition will be used to assign a default.
-        rad_mat_: Optional text for the Face's radiance material to be looked
-            up in the material library. This can also be a custom material object.
-            If no radiance material is input here, the face type and boundary
+        rad_mod_: Optional text for the Face's radiance modifier to be looked
+            up in the modifier library. This can also be a custom modifier object.
+            If no radiance modifier is input here, the face type and boundary
             condition will be used to assign a default.
     
     Returns:
@@ -52,7 +52,7 @@ Create Honeybee Face
 
 ghenv.Component.Name = "HB Face"
 ghenv.Component.NickName = 'Face'
-ghenv.Component.Message = '0.1.2'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "3"
@@ -81,10 +81,10 @@ except ImportError as e:
                          'has failed to import.\n{}'.format(e))
 
 try:  # import the honeybee-radiance extension
-    import honeybee_radiance
+    from honeybee_radiance.lib.modifiers import modifier_by_identifier
 except ImportError as e:
-    if rad_mat_ is not None:
-        raise ValueError('rad_mat_ has been specified but honeybee-radiance '
+    if rad_mod_ is not None:
+        raise ValueError('rad_mod_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
 
 
@@ -111,6 +111,12 @@ if all_required_inputs(ghenv.Component):
                 if isinstance(ep_constr_, str):
                     ep_constr_ = opaque_construction_by_identifier(ep_constr_)
                 hb_face.properties.energy.construction = ep_constr_
+
+            # try to assign the radiance modifier
+            if rad_mod_ is not None:
+                if isinstance(rad_mod_, str):
+                    rad_mod_ = modifier_by_identifier(rad_mod_)
+                hb_face.properties.radiance.modifier = rad_mod_
 
             faces.append(hb_face)  # collect the final Faces
             i += 1  # advance the iterator
