@@ -40,7 +40,7 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Dump Objects'
 ghenv.Component.NickName = 'DumpObjects'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -79,9 +79,9 @@ if all_required_inputs(ghenv.Component) and _dump:
         obj_dict = {}
         for obj in _hb_objs:
             try:
-                obj_dict[obj.name] = obj.to_dict(abridged=abridged)
+                obj_dict[obj.identifier] = obj.to_dict(abridged=abridged)
             except TypeError:  # no abridged option
-                obj_dict[obj.name] = obj.to_dict()
+                obj_dict[obj.identifier] = obj.to_dict()
 
     # write the dictionary into a file
     with open(hb_file, 'w') as fp:
