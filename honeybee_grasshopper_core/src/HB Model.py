@@ -21,9 +21,6 @@ Create a Honeybee Model, which can be sent for simulation.
             that apertures without a parent Face are not allowed for energy models.
         doors_: A list of honeybee Doors to be added to the Model. Note
             that doors without a parent Face are not allowed for energy models.
-        _north_: A number between 0 and 360 to set the clockwise north
-            direction in degrees. This can also be a vector to set the North.
-            Default is 0.
         _name_: Text to be used for the name and identifier of the Model. If no
             name is provided, it will be "unnamed".
     
@@ -35,7 +32,7 @@ Create a Honeybee Model, which can be sent for simulation.
 
 ghenv.Component.Name = "HB Model"
 ghenv.Component.NickName = 'Model'
-ghenv.Component.Message = '0.2.1'
+ghenv.Component.Message = '0.2.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
@@ -47,7 +44,6 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.togeometry import to_vector2d
     from ladybug_rhino.grasshopper import all_required_inputs
     from ladybug_rhino.config import units_system, tolerance, angle_tolerance
 except ImportError as e:
@@ -70,10 +66,3 @@ if all_required_inputs(ghenv.Component) and not check_all_geo_none():
                   units=units, tolerance=tolerance, angle_tolerance=angle_tolerance)
     if _name_ is not None:
         model.display_name = _name_
-
-    # set the north if it is not defaulted
-    if _north_ is not None:
-        try:
-            model.north_vector = to_vector2d(_north_)
-        except AttributeError:  # north angle instead of vector
-            model.north_angle = _north_
