@@ -16,7 +16,7 @@ assignment of child objects.
 -
 
     Args:
-        _hb_objs: A Honeybee Room, Face, Shade, Aperture, or Door to be previewed
+        _hb_objs: A Honeybee Model, Room, Face, Shade, Aperture, or Door to be previewed
             in the Rhino scene.
     
     Returns:
@@ -26,7 +26,7 @@ assignment of child objects.
 
 ghenv.Component.Name = "HB Vizualize Quick"
 ghenv.Component.NickName = 'VizQuick'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
