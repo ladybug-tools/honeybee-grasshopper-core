@@ -13,7 +13,7 @@ scene, including all sub-faces and assigned shades.
 -
 
     Args:
-        _hb_objs: A Honeybee Room, Face, Shade, Aperture, or Door to be previewed
+        _hb_objs: A Honeybee Model, Room, Face, Shade, Aperture, or Door to be previewed
             as a wire frame in the Rhino scene.
     
     Returns:
@@ -23,7 +23,7 @@ scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = "HB Vizualize Wireframe"
 ghenv.Component.NickName = 'VizWireF'
-ghenv.Component.Message = '0.2.0'
+ghenv.Component.Message = '0.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
