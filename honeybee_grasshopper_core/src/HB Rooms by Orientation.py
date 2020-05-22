@@ -33,7 +33,7 @@ with an Outdoors boundary condition.
 
 ghenv.Component.Name = "HB Rooms by Orientation"
 ghenv.Component.NickName = 'Orientation'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -44,7 +44,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
 
 try:  # import the core honeybee dependencies
-    from honeybee.orientation import angles_from_num_orient, orient_index
+    from honeybee.room import Room
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
 
@@ -67,35 +67,9 @@ if all_required_inputs(ghenv.Component):
     else:
         north_vec = Vector2D(0, 1)
 
-    # loop through each of the rooms and get the orientation
-    orient_dict = {}
-    core_rooms = []
-    for room in _rooms:
-        ori = room.average_orientation(north_vec)
-        if ori is None:
-            core_rooms.append(room)
-        else:
-            try:
-                orient_dict[ori].append(room)
-            except KeyError:
-                orient_dict[ori] = []
-                orient_dict[ori].append(room)
+    # group the rooms by orientation
+    perim_rooms, core_rooms, orientations, = \
+        Room.group_by_orientation(_rooms, n_groups_, north_vec)
 
-    # sort the rooms by orientation values
-    room_mtx = sorted(orient_dict.items(), key = lambda d: float(d[0]))
-    orientations = [r_tup[0] for r_tup in room_mtx]
-    perim_rooms = [r_tup[1] for r_tup in room_mtx]
-
-    # group orientations if there is an input n_groups_
-    if n_groups_ is not None:
-        angs = angles_from_num_orient(n_groups_)
-        p_rooms = [[] for i in range(n_groups_)]
-        for ori, rm in zip(orientations, perim_rooms):
-            or_ind = orient_index(ori, angs)
-            p_rooms[or_ind].extend(rm)
-        orientations = ['{} - {}'.format(int(angs[i - 1]), int(angs[i]))
-                        for i in range(n_groups_)]
-        perim_rooms = p_rooms
-
-    # convert matrix to data tree
+    # convert list of lists to data tree
     perim_rooms = list_to_data_tree(perim_rooms)
