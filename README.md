@@ -18,7 +18,7 @@ The honeybee-grasshopper plugin has the following dependencies (other than Rhino
 
 * [ladybug-core](https://github.com/ladybug-tools/ladybug)
 * [ladybug-geometry](https://github.com/ladybug-tools/ladybug-geometry)
-* [ladybug-dotnet](https://github.com/ladybug-tools/ladybug-dotnet)
+* [ladybug-comfort](https://github.com/ladybug-tools/ladybug-comfort)
 * [ladybug-rhino](https://github.com/ladybug-tools/ladybug-rhino)
 * [honeybee-core](https://github.com/ladybug-tools/honeybee-core)
 
