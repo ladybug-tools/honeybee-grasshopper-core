@@ -31,7 +31,7 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Load Objects'
 ghenv.Component.NickName = 'LoadObjects'
-ghenv.Component.Message = '0.1.2'
+ghenv.Component.Message = '0.1.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -85,7 +85,7 @@ if all_required_inputs(ghenv.Component) and _load:
     try:
         hb_objs = hb_dict_util.dict_to_object(data, False)  # re-serialize as a core object
         if hb_objs is None:  # try to re-serialize it as an energy object
-            hb_objs = energy_dict_util.dict_to_object(hb_dict, False)
+            hb_objs = energy_dict_util.dict_to_object(data, False)
         elif isinstance(hb_objs, Model):
             model_units_tolerance_check(hb_objs)
     except ValueError:  # no 'type' key; assume that its a group of objects
