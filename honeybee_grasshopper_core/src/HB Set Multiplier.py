@@ -33,7 +33,7 @@ speed up the calculation.
 
 ghenv.Component.Name = "HB Set Multiplier"
 ghenv.Component.NickName = 'Multiplier'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -45,7 +45,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.grasshopper import all_required_inputs, longest_list
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -56,9 +56,5 @@ if all_required_inputs(ghenv.Component):
         assert isinstance(room, Room), \
             'Expected honeybee room. Got {}.'.format(type(room))
         room_dup = room.duplicate()
-        try:
-            mult = _multiplier[i]
-        except IndexError:
-            mult = _multiplier[-1]
-        room_dup.multiplier = mult
+        room_dup.multiplier = longest_list(_multiplier, i)
         rooms.append(room_dup)
