@@ -35,13 +35,13 @@ within a Model must have unique identifiers.
 
 ghenv.Component.Name = "HB Add Prefix"
 ghenv.Component.NickName = 'Prefix'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.grasshopper import all_required_inputs, longest_list
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -50,9 +50,6 @@ if all_required_inputs(ghenv.Component):
     hb_objs = []
     for i, obj in enumerate(_hb_objs):
         obj_dup = obj.duplicate()
-        try:
-            prefix = _prefix[i]
-        except IndexError:
-            prefix = _prefix[-1]
+        prefix = longest_list(_prefix, i)
         obj_dup.add_prefix(prefix)
         hb_objs.append(obj_dup)
