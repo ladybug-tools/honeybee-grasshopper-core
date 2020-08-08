@@ -30,11 +30,13 @@ and that the versions of the engines are as expected.
             by dropping IDF or Honeybee JOSN files into the appropriate sub-folder.
         asset_report: A report of all the assets that have been loaded from the
             standards library.
+        default_sim: The path to the default simulation folder (where simulation
+            files are written if not specified by the user.).
 """
 
 ghenv.Component.Name = 'HB Config'
 ghenv.Component.NickName = 'Config'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -72,6 +74,7 @@ except ImportError:
 report_strs = []
 python_exe = hb_folders.python_exe_path
 py_lib_install = hb_folders.python_package_path
+default_sim = hb_folders.default_simulation_folder
 
 
 if radiance_loaded:  # output all of the paths to radiance_folders
