@@ -31,7 +31,7 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Load Objects'
 ghenv.Component.NickName = 'LoadObjects'
-ghenv.Component.Message = '0.1.3'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -39,6 +39,7 @@ ghenv.Component.AdditionalHelpFromDocStrings = '2'
 try:  # import the core honeybee dependencies
     import honeybee.dictutil as hb_dict_util
     from honeybee.model import Model
+    from honeybee.config import folders
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -46,6 +47,11 @@ try:  # import the core honeybee_energy dependencies
     import honeybee_energy.dictutil as energy_dict_util
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee_energy:\n\t{}'.format(e))
+
+try:  # import the core honeybee_radiance dependencies
+    import honeybee_radiance.dictutil as radiance_dict_util
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee_radiance:\n\t{}'.format(e))
 
 try:  # import the core ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning
@@ -75,17 +81,47 @@ def model_units_tolerance_check(model):
             'current Rhino model tolerance "{}".\nIt is recommended that the ' \
             'Rhino document tolerance be changed to be coarser and this ' \
             'component is re-run.'.format(new_tol, tolerance)
-        give_warning(msg)
+        print msg
+        give_warning(ghenv.Component, msg)
+
+
+def version_check(data):
+    """Check the version of the object if it was included in the dictionary.
+
+    This is most useful in cases of importing entire Models to make sure
+    the Model isn't newer than the currently installed Honeybee.
+
+    Args:
+        data: Dictionary of the object, which optionally has the "version" key.
+    """
+    if 'version' in data and data['version'] is not None:
+        model_ver = tuple(int(d) for d in data['version'].split('.'))
+        hb_ver = folders.honeybee_schema_version
+        if model_ver > hb_ver:
+            msg = 'Imported Model schema version "{}" is newer than that with the ' \
+            'currently installed Honeybee "{}".\nThe Model may fail to import ' \
+            'or (worse) some newer features of the Model might not be imported ' \
+            'without detection.'.format(data['version'], folders.honeybee_schema_version_str)
+            print msg
+            give_warning(ghenv.Component, msg)
+        elif model_ver != hb_ver:
+            msg = 'Imported Model schema version "{}" is older than that with the ' \
+            'currently installed Honeybee "{}".\nThe Model will be upgraded upon ' \
+            'import.'.format(data['version'], folders.honeybee_schema_version_str)
+            print msg
 
 
 if all_required_inputs(ghenv.Component) and _load:
     with open(_hb_file) as json_file:
         data = json.load(json_file)
 
+    version_check(data)  # try to check the version
     try:
         hb_objs = hb_dict_util.dict_to_object(data, False)  # re-serialize as a core object
         if hb_objs is None:  # try to re-serialize it as an energy object
             hb_objs = energy_dict_util.dict_to_object(data, False)
+            if hb_objs is None:  # try to re-serialize it as a radiance object
+                hb_objs = radiance_dict_util.dict_to_object(data, False)
         elif isinstance(hb_objs, Model):
             model_units_tolerance_check(hb_objs)
     except ValueError:  # no 'type' key; assume that its a group of objects
@@ -94,4 +130,6 @@ if all_required_inputs(ghenv.Component) and _load:
             hb_obj = hb_dict_util.dict_to_object(hb_dict, False)  # re-serialize as a core object
             if hb_obj is None:  # try to re-serialize it as an energy object
                 hb_obj = energy_dict_util.dict_to_object(hb_dict, False)
+                if hb_obj is None:  # try to re-serialize it as a radiance object
+                    hb_obj = radiance_dict_util.dict_to_object(hb_dict, False)
             hb_objs.append(hb_obj)

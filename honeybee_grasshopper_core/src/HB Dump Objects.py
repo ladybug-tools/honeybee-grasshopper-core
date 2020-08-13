@@ -32,7 +32,7 @@ Schedule, Load, ProgramType, or Simulation object.
             on their own but they are used throughout honeybee to minimize
             file size and unnecessary duplication.
         _dump: Set to "True" to save the honeybee objects to file.
-    
+
     Returns:
         report: Errors, warnings, etc.
         hb_file: The location of the file where the honeybee JSON is saved.
@@ -40,13 +40,13 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Dump Objects'
 ghenv.Component.NickName = 'DumpObjects'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
 
 try:  # import the core honeybee dependencies
-    import honeybee.model as Model
+    from honeybee.model import Model
     from honeybee.config import folders
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -63,7 +63,8 @@ import json
 if all_required_inputs(ghenv.Component) and _dump:
     # set the component defaults
     name = _name_ if _name_ is not None else 'unnamed'
-    file_name = '{}.json'.format(name)
+    file_name = '{}.json'.format(name) if len(_hb_objs) > 1 or not \
+        isinstance(_hb_objs[0], Model) else '{}.hbjson'.format(name)
     folder = _folder_ if _folder_ is not None else folders.default_simulation_folder
     hb_file = os.path.join(folder, file_name)
     indent = indent_ if indent_ is not None else 0
