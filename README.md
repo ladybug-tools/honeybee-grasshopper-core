@@ -35,3 +35,9 @@ The honeybee-grasshopper plugin has the following extensions:
 
 * [honeybee-grasshopper-radiance]]((https://github.com/ladybug-tools/honeybee-grasshopper-radiance)
 * [honeybee-grasshopper-energy]((https://github.com/ladybug-tools/honeybee-grasshopper-energy)
+
+## Installation
+
+See the [Wiki of the lbt-grasshopper repository](https://github.com/ladybug-tools/lbt-grasshopper/wiki)
+for the installation instructions for the entire Ladybug Tools Grasshopper plugin
+(including this repository).
