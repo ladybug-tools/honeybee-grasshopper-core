@@ -30,7 +30,7 @@ Execute any Queenbee workflow on this machine using queenbee-luigi.
 
 ghenv.Component.Name = 'HB Run Workflow'
 ghenv.Component.NickName = 'RunWorkflow'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '4 :: Simulate'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -44,7 +44,12 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug:\n\t{}'.format(e))
 
 try:
-    from honeybee.config import folders
+    from honeybee.config import folders as hb_folders
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:
+    from honeybee_radiance.config import folders as rad_folders
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -74,10 +79,15 @@ if all_required_inputs(ghenv.Component) and _run:
     inputs_json = _workflow.write_inputs_json(_folder_)
 
     # execute the queenbee luigi CLI to obtain the results via CPython
-    queenbee_exe = os.path.join(folders.python_scripts_path, 'queenbee.exe') \
-        if os.name == 'nt' else os.path.join(folders.python_scripts_path, 'queenbee')
+    queenbee_exe = os.path.join(hb_folders.python_scripts_path, 'queenbee.exe') \
+        if os.name == 'nt' else os.path.join(hb_folders.python_scripts_path, 'queenbee')
     cmds = [queenbee_exe, 'luigi', 'translate', _workflow.path, _folder_,
-            '-i', inputs_json, '--workers', _cpu_count_, '--run']
+            '-i', inputs_json, '--workers', _cpu_count_]
+    if rad_folders.radlib_path:  # set the RAYPATH environment variable
+        cmds.extend(['--env', 'RAYPATH={}'.format(rad_folders.radlib_path)])
+    if rad_folders.radbin_path:  # set the PATH environment variable
+        cmds.extend(['--env', 'PATH={}'.format(rad_folders.radbin_path)])
+    cmds.append('--run')
     process = subprocess.Popen(cmds)
     result = process.communicate()
 
