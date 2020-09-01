@@ -24,7 +24,7 @@ Add a Honeybee Aperture or Door to a parent Face or Room.
 
 ghenv.Component.Name = "HB Add Subface"
 ghenv.Component.NickName = 'AddSubface'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -42,11 +42,17 @@ try:  # import the ladybug_rhino dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
+already_added_ids = set()  # track whether a given sub-face is already added
 
 def check_and_add_sub_face(face, sub_faces):
     """Check whether a sub-face is valid for a face and, if so, add it."""
     for sf in sub_faces:
         if face.geometry.is_sub_face(sf.geometry, tolerance, angle_tolerance):
+            if sf.identifier in already_added_ids:
+                sf = sf.duplicate()  # make sure the sub-face isn't added twice
+                sf.add_prefix('Ajd')
+                print sf.identifier
+            already_added_ids.add(sf.identifier)
             if isinstance(sf, Aperture):  # the sub-face is an Aperture
                 face.add_aperture(sf)
             else:  # the sub-face is a Door
@@ -55,14 +61,16 @@ def check_and_add_sub_face(face, sub_faces):
 
 if all_required_inputs(ghenv.Component):
     # duplicate the initial objects
-    hb_obj = _hb_obj.duplicate()
-    sub_faces = (sf.duplicate() for sf in _sub_faces)
-    
-    if isinstance(hb_obj, Face):
-        check_and_add_sub_face(hb_obj, _sub_faces)
-    elif isinstance(hb_obj, Room):
-        for face in hb_obj.faces:
-            check_and_add_sub_face(face, _sub_faces)
-    else:
-        raise TypeError('Expected Honeybee Face or Room. '
-                        'Got {}.'.format(type(hb_obj)))
+    hb_obj = [obj.duplicate() for obj in _hb_obj]
+    sub_faces = [sf.duplicate() for sf in _sub_faces]
+
+    # check and add the sub-faces
+    for obj in hb_obj:
+        if isinstance(obj, Face):
+            check_and_add_sub_face(obj, sub_faces)
+        elif isinstance(obj, Room):
+            for face in obj.faces:
+                check_and_add_sub_face(face, sub_faces)
+        else:
+            raise TypeError('Expected Honeybee Face or Room. '
+                            'Got {}.'.format(type(obj)))
