@@ -21,12 +21,12 @@ scene, including all sub-faces and assigned shades.
             will be visible in the Rhino scene.
 """
 
-ghenv.Component.Name = "HB Vizualize Wireframe"
+ghenv.Component.Name = 'HB Vizualize Wireframe'
 ghenv.Component.NickName = 'VizWireF'
-ghenv.Component.Message = '0.2.1'
+ghenv.Component.Message = '0.2.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
-ghenv.Component.AdditionalHelpFromDocStrings = "1"
+ghenv.Component.AdditionalHelpFromDocStrings = '1'
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
@@ -63,7 +63,7 @@ def add_face(face, geo):
     for ap in face.apertures:
         add_aperture(ap, geo)
     for dr in face.doors:
-        add_door(ap, geo)
+        add_door(dr, geo)
     for shd in face.shades:
         geo.append(from_face3d_to_wireframe(shd.geometry))
 
@@ -83,7 +83,7 @@ def add_model(model, geo):
     for ap in model.orphaned_apertures:
         add_aperture(ap, geo)
     for dr in model.orphaned_doors:
-        geo.append(from_face3d_to_wireframe(dr.geometry))
+        add_door(dr, geo)
     for shd in model.orphaned_shades:
         geo.append(from_face3d_to_wireframe(shd.geometry))
 
