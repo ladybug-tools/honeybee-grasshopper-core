@@ -40,7 +40,7 @@ different faces and sub-faces.
 
 ghenv.Component.Name = 'HB Label Faces'
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '0.1.3'
+ghenv.Component.Message = '0.1.4'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -53,6 +53,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
 
 try:  # import the core honeybee dependencies
+    from honeybee.model import Model
     from honeybee.room import Room
     from honeybee.face import Face
     from honeybee.aperture import Aperture
@@ -131,6 +132,14 @@ if all_required_inputs(ghenv.Component):
             elif isinstance(obj, Face):
                 label_face(obj, _attribute_, _font_, label_text, base_pts,
                            labels, wire_frame)
+            elif isinstance(obj, Model):
+                for room in obj.rooms:
+                    for face in room.faces:
+                        label_face(face, _attribute_, _font_, label_text, base_pts,
+                                   labels, wire_frame)
+                for face in obj.orphaned_faces:
+                    label_face(face, _attribute_, _font_, label_text, base_pts,
+                               labels, wire_frame)
     else:
         for obj in _hb_objs:
             if isinstance(obj, Room):
@@ -151,3 +160,25 @@ if all_required_inputs(ghenv.Component):
             elif isinstance(obj, (Aperture, Door)):
                 label_face(obj, _attribute_, _font_, label_text, base_pts,
                           labels, wire_frame)
+            elif isinstance(obj, Model):
+                for room in obj.rooms:
+                    for face in room.faces:
+                        for ap in face.apertures:
+                            label_face(ap, _attribute_, _font_, label_text, base_pts,
+                                       labels, wire_frame)
+                        for dr in face.doors:
+                             label_face(dr, _attribute_, _font_, label_text, base_pts,
+                                        labels, wire_frame)
+                for face in obj.orphaned_faces:
+                    for ap in face.apertures:
+                        label_face(ap, _attribute_, _font_, label_text, base_pts,
+                                   labels, wire_frame)
+                    for dr in face.doors:
+                         label_face(dr, _attribute_, _font_, label_text, base_pts,
+                                    labels, wire_frame)
+                for ap in obj.orphaned_apertures:
+                    label_face(ap, _attribute_, _font_, label_text, base_pts,
+                               labels, wire_frame)
+                for dr in obj.orphaned_doors:
+                     label_face(dr, _attribute_, _font_, label_text, base_pts,
+                                labels, wire_frame)

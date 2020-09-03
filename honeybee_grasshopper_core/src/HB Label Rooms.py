@@ -15,8 +15,8 @@ different Rooms.
 -
 
     Args:
-        _rooms: Honeybee Rooms to be labeled with their attributes in the Rhino
-            scene.
+        _rooms_model: An array of honeybee Rooms or honeybee Models to be labeled
+            with their attributes in the Rhinoscene.
         _attribute_: Text for the name of the Room attribute with which the
             Rooms should be labeled. The Honeybee "Room Attributes" component
             lists all of the core attributes of the room. Also, each Honeybee
@@ -40,7 +40,7 @@ different Rooms.
 
 ghenv.Component.Name = "HB Label Rooms"
 ghenv.Component.NickName = 'LabelRooms'
-ghenv.Component.Message = '0.1.2'
+ghenv.Component.Message = '0.1.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -52,7 +52,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
 
 try:  # import the core honeybee dependencies
-    from honeybee.room import Room
+    from honeybee.model import Model
     from honeybee.search import get_attr_nested
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -74,14 +74,22 @@ if all_required_inputs(ghenv.Component):
     base_pts = []
     labels = []
     wire_frame = []
-    
+
     # set the default attribute and font
     if _attribute_ is None:
         _attribute_ = 'display_name'
     if _font_ is None:
         _font_ = 'Arial'
-    
-    for room in _rooms:
+
+    # extract any rooms from input Models
+    rooms = []
+    for hb_obj in _rooms_model:
+        if isinstance(hb_obj, Model):
+            rooms.extend(hb_obj.rooms)
+        else:
+            rooms.append(hb_obj)
+
+    for room in rooms:
         room_prop = get_attr_nested(room, _attribute_)
 
         # create the text label
