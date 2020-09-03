@@ -14,13 +14,19 @@ Execute any Queenbee workflow on this machine using queenbee-luigi.
     Args:
         _workflow: A Queenbee workflow object generated from any Queenbee
             recipe component.
+        _folder_: An optional folder out of which the workflow will be executed.
+            NOTE THAT DIRECTORIES INPUT HERE SHOULD NOT HAVE ANY SPACES OR
+            UNDERSCORES IN THE FILE PATH.
         _cpu_count_: An integer to set the number of CPUs used in the execution
             of the workflow. This number should not exceed the number of CPUs on
             the machine running the simulation and should be lower if other tasks
             are running while the simulation is running.(Default: 2).
-        _folder_: An optional folder out of which the workflow will be executed.
-            NOTE THAT DIRECTORIES INPUT HERE SHOULD NOT HAVE ANY SPACES OR
-            UNDERSCORES IN THE FILE PATH.
+        report_out_: A boolean to indicate whether the workflow progress should be
+            displayed in the cmd window (False) or output form the "report" of
+            this component (True). Outputting from the component can be useful
+            for debugging and capturing what's happening in the process but
+            workflow reports can often be very long and so it can slow
+            Grasshopper slightly. (Default: False).
         _run: Set to "True" to run the workflow.
     
     Returns:
@@ -30,7 +36,7 @@ Execute any Queenbee workflow on this machine using queenbee-luigi.
 
 ghenv.Component.Name = 'HB Run Workflow'
 ghenv.Component.NickName = 'RunWorkflow'
-ghenv.Component.Message = '0.2.0'
+ghenv.Component.Message = '0.3.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '4 :: Simulate'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -88,8 +94,15 @@ if all_required_inputs(ghenv.Component) and _run:
     if rad_folders.radbin_path:  # set the PATH environment variable
         cmds.extend(['--env', 'PATH={}'.format(rad_folders.radbin_path)])
     cmds.append('--run')
-    process = subprocess.Popen(cmds)
-    result = process.communicate()
+
+    if report_out_:
+        process = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = process.communicate()
+        print result[0]
+        print result[1]
+    else:
+        process = subprocess.Popen(cmds)
+        result = process.communicate()
 
     # try to parse the results
     if _workflow.simulation_id:
