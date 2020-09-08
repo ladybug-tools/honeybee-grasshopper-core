@@ -31,15 +31,16 @@ different faces.
         mesh: Meshes of the faces and sub-faces colored according to their attributes.
         legend: Geometry representing the legend for colored meshes.
         wire_frame: A list of lines representing the outlines of the _hb_objs.
-        colors: A list of color objects that align with the output _rooms. These
-            can be connected to a native Grasshopper "Custom Preview" component
-            in order to color room volumes with results.
         values: A list of values noting the attribute assigned to each face/sub-face.
+        colors: A list of colors noting the color of each face/sub-face in the
+            Rhino scene. This can be used in conjunction with the native
+            Grasshopper "Custom Preview" component to create custom
+            visualizations in the Rhino scene.
 """
 
 ghenv.Component.Name = 'HB Color Face Attributes'
 ghenv.Component.NickName = 'ColorFaceAttr'
-ghenv.Component.Message = '0.1.2'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -55,6 +56,7 @@ try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3ds_to_colored_mesh, \
         from_face3d_to_wireframe
     from ladybug_rhino.fromobjects import legend_objects
+    from ladybug_rhino.color import color_to_color
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -88,3 +90,4 @@ if all_required_inputs(ghenv.Component):
         wire_frame.append(from_face3d_to_wireframe(face.geometry))
     legend = legend_objects(graphic.legend)
     values = color_obj.attributes
+    colors = [color_to_color(col) for col in graphic.value_colors]

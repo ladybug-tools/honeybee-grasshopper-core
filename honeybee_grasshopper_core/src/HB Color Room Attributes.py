@@ -24,18 +24,23 @@ different Rooms.
             lists the Room attributes of that extension.
         legend_par_: An optional LegendParameter object to change the display
             of the colored rooms (Default: None).
-    
+
     Returns:
         mesh: Meshes of the room floors colored according to their attributes.
         legend: Geometry representing the legend for colored meshes.
         wire_frame: A list of lines representing the outlines of the rooms.
         values: A list of values that align with the input _rooms noting the
             attribute assigned to each room.
+        colors: A list of colors that align with the input Rooms, noting the color
+            of each Room in the Rhino scene. This can be used in conjunction
+            with the native Grasshopper "Custom Preview" component and other
+            honeybee visualization components (like "HB Visulaize Quick") to
+            create custom visualizations in the Rhino scene.
 """
 
 ghenv.Component.Name = 'HB Color Room Attributes'
 ghenv.Component.NickName = 'ColorRoomAttr'
-ghenv.Component.Message = '0.1.2'
+ghenv.Component.Message = '0.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -50,6 +55,7 @@ try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3ds_to_colored_mesh, \
         from_polyface3d_to_wireframe
     from ladybug_rhino.fromobjects import legend_objects
+    from ladybug_rhino.color import color_to_color
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -74,3 +80,4 @@ if all_required_inputs(ghenv.Component):
         wire_frame.extend(from_polyface3d_to_wireframe(room.geometry))
     legend = legend_objects(graphic.legend)
     values = color_obj.attributes
+    colors = [color_to_color(col) for col in graphic.value_colors]
