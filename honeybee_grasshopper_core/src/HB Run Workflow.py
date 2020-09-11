@@ -36,7 +36,7 @@ Execute any Queenbee workflow on this machine using queenbee-luigi.
 
 ghenv.Component.Name = 'HB Run Workflow'
 ghenv.Component.NickName = 'RunWorkflow'
-ghenv.Component.Message = '0.3.0'
+ghenv.Component.Message = '0.3.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '4 :: Simulate'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
