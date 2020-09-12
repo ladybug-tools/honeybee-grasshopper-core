@@ -36,7 +36,7 @@ Execute any Queenbee workflow on this machine using queenbee-luigi.
 
 ghenv.Component.Name = 'HB Run Workflow'
 ghenv.Component.NickName = 'RunWorkflow'
-ghenv.Component.Message = '0.3.1'
+ghenv.Component.Message = '0.3.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '4 :: Simulate'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -63,6 +63,22 @@ try:
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
+
+
+def sort_results_by_grid(results, grid_names):
+    """Sort result files according to the order that they appear in a list of grids."""
+    file_dict = {}  # dictionary relating grid name to file name
+    for res_file in results:
+        grid_name = '.'.join(os.path.basename(res_file).split('.')[:-1])
+        file_dict[grid_name] = res_file
+    grid_files = []
+    for g_name in grid_names:
+        try:
+            grid_files.append(file_dict[g_name])
+        except KeyError:  # grid that was not simulated
+            pass
+    other_files = [val for key, val in file_dict.items() if key not in grid_names]
+    return other_files + grid_files
 
 
 if all_required_inputs(ghenv.Component) and _run:
@@ -109,3 +125,6 @@ if all_required_inputs(ghenv.Component) and _run:
         res_folder = os.path.join(_folder_, _workflow.simulation_id, 'results')
         if os.path.isdir(res_folder):
             results = [os.path.join(res_folder, fn) for fn in os.listdir(res_folder)]
+            grid_studies = ('annual-daylight', 'daylight-factor')
+            if 'sensor-grids' in _workflow.inputs_dict and _workflow.name in grid_studies:
+                results = sort_results_by_grid(results, _workflow.inputs_dict['sensor-grids'])
