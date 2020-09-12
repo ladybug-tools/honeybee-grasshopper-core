@@ -21,6 +21,10 @@ Execute any Queenbee workflow on this machine using queenbee-luigi.
             of the workflow. This number should not exceed the number of CPUs on
             the machine running the simulation and should be lower if other tasks
             are running while the simulation is running.(Default: 2).
+        reload_old_: A boolean to indicate whether existing results for a given
+            model and recipe should be reloaded if they are found instead of
+            re-running the entire workflow from the beginning. If False or
+            None, any existing results will be overwritten by the new simulation.
         report_out_: A boolean to indicate whether the workflow progress should be
             displayed in the cmd window (False) or output form the "report" of
             this component (True). Outputting from the component can be useful
@@ -36,7 +40,7 @@ Execute any Queenbee workflow on this machine using queenbee-luigi.
 
 ghenv.Component.Name = 'HB Run Workflow'
 ghenv.Component.NickName = 'RunWorkflow'
-ghenv.Component.Message = '0.3.2'
+ghenv.Component.Message = '0.4.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '4 :: Simulate'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -45,7 +49,7 @@ import os
 import subprocess
 
 try:
-    from ladybug.futil import nukedir, preparedir
+    from ladybug.futil import preparedir, nukedir
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug:\n\t{}'.format(e))
 
@@ -92,10 +96,14 @@ if all_required_inputs(ghenv.Component) and _run:
         else:  # no default simulation path
             _folder_ = os.path.join(
                 hb_folders.default_simulation_folder, 'unnamed_workflow')
-    if os.path.isdir(_folder_):
-        nukedir(_folder_, rmdir=True)  # delete the folder if it already exists
-    else:
+    if not os.path.isdir(_folder_):
         preparedir(_folder_)  # create the directory if it's not there
+
+    # delete any existing result files unless reload_old_ is True
+    if not reload_old_ and _workflow.simulation_id is not None:
+        wf_folder = os.path.join(_folder_, _workflow.simulation_id)
+        if os.path.isdir(wf_folder):
+            nukedir(wf_folder, rmdir=True)
 
     # write the inputs JSON for the workflow
     inputs_json = _workflow.write_inputs_json(_folder_)
