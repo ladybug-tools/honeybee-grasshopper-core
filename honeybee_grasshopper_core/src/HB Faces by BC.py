@@ -14,7 +14,8 @@ boundary condition.
 
     Args:
         _hb_objs: Honeybee Rooms, Faces, Apertures, Doors and/or Shades which will
-            be separated based on object and face type.
+            be separated based on boundary condition. This can also be an entire
+            honeybee Model.
     
     Returns:
         outdoors: The faces with an Outdoors boundary condition.
@@ -26,12 +27,13 @@ boundary condition.
 
 ghenv.Component.Name = 'HB Faces by BC'
 ghenv.Component.NickName = 'FacesByBC'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
 
 try:  # import the core honeybee dependencies
+    from honeybee.model import Model
     from honeybee.room import Room
     from honeybee.face import Face
     from honeybee.aperture import Aperture
@@ -96,7 +98,17 @@ if all_required_inputs(ghenv.Component):
 
     # loop through all objects and add them
     for obj in _hb_objs:
-        if isinstance(obj, Room):
+        if isinstance(obj, Model):
+            for room in obj.rooms:
+                for face in room.faces:
+                    sort_face(face)
+            for face in obj.orphaned_faces:
+                sort_face(face)
+            for ap in obj.orphaned_apertures:
+                sort_subface(ap)
+            for dr in obj.orphaned_doors:
+                sort_subface(dr)
+        elif isinstance(obj, Room):
             for face in obj:
                 sort_face(face)
         elif isinstance(obj, Face):

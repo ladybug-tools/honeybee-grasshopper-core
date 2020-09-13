@@ -12,7 +12,8 @@ Separate and group honeybee rooms with the same average floor height.
 -
 
     Args:
-        _rooms: A list of honeybee rooms to be separated by floor height.
+        _rooms: A list of honeybee Rooms or honeybee Models to be separated by
+            floor height.
         min_diff_: An optional float value to denote the minimum difference
             in floor heights that is considered meaningful. This can be used
             to ensure rooms like those representing stair landings are grouped
@@ -29,13 +30,14 @@ Separate and group honeybee rooms with the same average floor height.
 
 ghenv.Component.Name = "HB Rooms by Floor Height"
 ghenv.Component.NickName = 'FloorHeight'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
 
 
 try:  # import the core honeybee dependencies
+    from honeybee.model import Model
     from honeybee.room import Room
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
@@ -48,8 +50,16 @@ except ImportError as e:
 
 
 if all_required_inputs(ghenv.Component):
+    # extract any rooms from input Models
+    in_rooms = []
+    for hb_obj in _rooms:
+        if isinstance(hb_obj, Model):
+            in_rooms.extend(hb_obj.rooms)
+        else:
+            in_rooms.append(hb_obj)
+
     # loop through each of the rooms and get the floor height
-    grouped_rooms, flr_hgts = Room.group_by_floor_height(_rooms, tolerance)
+    grouped_rooms, flr_hgts = Room.group_by_floor_height(in_rooms, tolerance)
 
     # convert matrix to data tree
     rooms = list_to_data_tree(grouped_rooms)

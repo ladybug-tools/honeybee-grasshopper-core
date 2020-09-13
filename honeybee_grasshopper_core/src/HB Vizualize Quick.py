@@ -26,10 +26,15 @@ assignment of child objects.
 
 ghenv.Component.Name = "HB Vizualize Quick"
 ghenv.Component.NickName = 'VizQuick'
-ghenv.Component.Message = '0.1.2'
+ghenv.Component.Message = '0.1.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
+
+try:  # import the core honeybee dependencies
+    from honeybee.face import Face
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the core ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3d, from_polyface3d
@@ -45,7 +50,10 @@ if all_required_inputs(ghenv.Component):
     # loop through all objects and add them
     for hb_obj in _hb_objs:
         try:  # Face, Shade, Aperture, or Door
-            geo.append(from_face3d(hb_obj.geometry))
+            if isinstance(hb_obj, Face):
+                geo.append(from_face3d(hb_obj.punched_geometry))
+            else:
+                geo.append(from_face3d(hb_obj.geometry))
         except AttributeError:  # probably a Room
             try:
                 geo.append(from_polyface3d(hb_obj.geometry))
@@ -53,7 +61,7 @@ if all_required_inputs(ghenv.Component):
                 for room in hb_obj.rooms:
                     geo.append(from_polyface3d(room.geometry))
                 for face in hb_obj.orphaned_faces:
-                    geo.append(from_face3d(face.geometry))
+                    geo.append(from_face3d(face.punched_geometry))
                 for ap in hb_obj.orphaned_apertures:
                     geo.append(from_face3d(ap.geometry))
                 for dr in hb_obj.orphaned_doors:

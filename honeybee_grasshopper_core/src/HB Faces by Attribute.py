@@ -32,12 +32,13 @@ This can be used to group faces by construction, modifier, etc.
 
 ghenv.Component.Name = "HB Faces by Attribute"
 ghenv.Component.NickName = 'FacesByAttr'
-ghenv.Component.Message = '0.1.0'
+ghenv.Component.Message = '0.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
 
 try:  # import the core honeybee dependencies
+    from honeybee.model import Model
     from honeybee.room import Room
     from honeybee.colorobj import ColorFace
 except ImportError as e:
@@ -54,7 +55,15 @@ if all_required_inputs(ghenv.Component):
     # extract any faces from input Rooms or Models
     faces = []
     for hb_obj in _hb_objs:
-        if isinstance(hb_obj, Room):
+        if isinstance(hb_obj, Model):
+            for room in hb_obj.rooms:
+                faces.extend(room.faces)
+                faces.extend(room.shades)
+            faces.extend(hb_obj.orphaned_faces)
+            faces.extend(hb_obj.orphaned_apertures)
+            faces.extend(hb_obj.orphaned_doors)
+            faces.extend(hb_obj.orphaned_shades)
+        elif isinstance(hb_obj, Room):
             faces.extend(hb_obj.faces)
             faces.extend(hb_obj.shades)
         else:
