@@ -13,7 +13,8 @@ with an Outdoors boundary condition.
 -
 
     Args:
-        _rooms: A list of honeybee rooms to be separated by orientation.
+        _rooms: A list of honeybee honeybee Rooms or honeybee Models to be
+            separated by orientation.
         n_groups_: An optional positive integer to set the number of orientation
             groups to use. For example, setting this to 4 will result in rooms
             being grouped by four orientations (North, East, South, West). If None,
@@ -33,7 +34,7 @@ with an Outdoors boundary condition.
 
 ghenv.Component.Name = "HB Rooms by Orientation"
 ghenv.Component.NickName = 'Orientation'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -44,6 +45,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
 
 try:  # import the core honeybee dependencies
+    from honeybee.model import Model
     from honeybee.room import Room
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
@@ -58,6 +60,14 @@ import math
 
 
 if all_required_inputs(ghenv.Component):
+    # extract any rooms from input Models
+    in_rooms = []
+    for hb_obj in _rooms:
+        if isinstance(hb_obj, Model):
+            in_rooms.extend(hb_obj.rooms)
+        else:
+            in_rooms.append(hb_obj)
+
     # process the north_ input
     if north_ is not None:
         try:
@@ -69,7 +79,7 @@ if all_required_inputs(ghenv.Component):
 
     # group the rooms by orientation
     perim_rooms, core_rooms, orientations, = \
-        Room.group_by_orientation(_rooms, n_groups_, north_vec)
+        Room.group_by_orientation(in_rooms, n_groups_, north_vec)
 
     # convert list of lists to data tree
     perim_rooms = list_to_data_tree(perim_rooms)
