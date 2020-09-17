@@ -10,7 +10,7 @@
 """
 Check the local configuration of the engines and data sets used by the honeybee
 plugin. This is useful for verifying that everything has been installed correctly
-and that the versions of the engines are as expected.
+and that the engines are configured as expected.
 -
 
     Returns:
@@ -36,7 +36,7 @@ and that the versions of the engines are as expected.
 
 ghenv.Component.Name = 'HB Config'
 ghenv.Component.NickName = 'Config'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '0.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
