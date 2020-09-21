@@ -8,39 +8,38 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Execute any Queenbee workflow on this machine using queenbee-luigi.
+Execute any Queenbee Recipe on this machine using queenbee-luigi.
 
 -
     Args:
-        _workflow: A Queenbee workflow object generated from any Queenbee
-            recipe component.
-        _folder_: An optional folder out of which the workflow will be executed.
+        _recipe: A Queenbee recipe object generated from any Queenbee recipe component.
+        _folder_: An optional folder out of which the recipe will be executed.
             NOTE THAT DIRECTORIES INPUT HERE SHOULD NOT HAVE ANY SPACES OR
             UNDERSCORES IN THE FILE PATH.
         _cpu_count_: An integer to set the number of CPUs used in the execution
-            of the workflow. This number should not exceed the number of CPUs on
+            of the recipe. This number should not exceed the number of CPUs on
             the machine running the simulation and should be lower if other tasks
             are running while the simulation is running.(Default: 2).
         reload_old_: A boolean to indicate whether existing results for a given
             model and recipe should be reloaded if they are found instead of
-            re-running the entire workflow from the beginning. If False or
+            re-running the entire recipe from the beginning. If False or
             None, any existing results will be overwritten by the new simulation.
-        report_out_: A boolean to indicate whether the workflow progress should be
+        report_out_: A boolean to indicate whether the recipe progress should be
             displayed in the cmd window (False) or output form the "report" of
             this component (True). Outputting from the component can be useful
             for debugging and capturing what's happening in the process but
-            workflow reports can often be very long and so it can slow
+            recipe reports can often be very long and so it can slow
             Grasshopper slightly. (Default: False).
-        _run: Set to "True" to run the workflow.
+        _run: Set to "True" to run the recipe.
     
     Returns:
         report: Reports, errors, warnings, etc.
-        results: A list of results output from the workflow.
+        results: A list of results output from the recipe.
 """
 
-ghenv.Component.Name = 'HB Run Workflow'
-ghenv.Component.NickName = 'RunWorkflow'
-ghenv.Component.Message = '0.4.0'
+ghenv.Component.Name = 'HB Run Recipe'
+ghenv.Component.NickName = 'RunRecipe'
+ghenv.Component.Message = '0.5.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '4 :: Simulate'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -89,29 +88,29 @@ if all_required_inputs(ghenv.Component) and _run:
     # set default number of CPUs
     _cpu_count_ = '2' if not _cpu_count_ else str(_cpu_count_)
 
-    # get the folder out of which the workflow will be executed
+    # get the folder out of which the recipe will be executed
     if _folder_ is None:
-        if _workflow.default_simulation_path is not None:
-            _folder_ = _workflow.default_simulation_path
+        if _recipe.default_simulation_path is not None:
+            _folder_ = _recipe.default_simulation_path
         else:  # no default simulation path
             _folder_ = os.path.join(
-                hb_folders.default_simulation_folder, 'unnamed_workflow')
+                hb_folders.default_simulation_folder, 'unnamed_recipe')
     if not os.path.isdir(_folder_):
         preparedir(_folder_)  # create the directory if it's not there
 
     # delete any existing result files unless reload_old_ is True
-    if not reload_old_ and _workflow.simulation_id is not None:
-        wf_folder = os.path.join(_folder_, _workflow.simulation_id)
+    if not reload_old_ and _recipe.simulation_id is not None:
+        wf_folder = os.path.join(_folder_, _recipe.simulation_id)
         if os.path.isdir(wf_folder):
             nukedir(wf_folder, rmdir=True)
 
-    # write the inputs JSON for the workflow
-    inputs_json = _workflow.write_inputs_json(_folder_)
+    # write the inputs JSON for the recipe
+    inputs_json = _recipe.write_inputs_json(_folder_)
 
     # execute the queenbee luigi CLI to obtain the results via CPython
     queenbee_exe = os.path.join(hb_folders.python_scripts_path, 'queenbee.exe') \
         if os.name == 'nt' else os.path.join(hb_folders.python_scripts_path, 'queenbee')
-    cmds = [queenbee_exe, 'luigi', 'translate', _workflow.path, _folder_,
+    cmds = [queenbee_exe, 'luigi', 'translate', _recipe.path, _folder_,
             '-i', inputs_json, '--workers', _cpu_count_]
     if rad_folders.radlib_path:  # set the RAYPATH environment variable
         cmds.extend(['--env', 'RAYPATH={}'.format(rad_folders.radlib_path)])
@@ -129,10 +128,10 @@ if all_required_inputs(ghenv.Component) and _run:
         result = process.communicate()
 
     # try to parse the results
-    if _workflow.simulation_id:
-        res_folder = os.path.join(_folder_, _workflow.simulation_id, 'results')
+    if _recipe.simulation_id:
+        res_folder = os.path.join(_folder_, _recipe.simulation_id, 'results')
         if os.path.isdir(res_folder):
             results = [os.path.join(res_folder, fn) for fn in os.listdir(res_folder)]
             grid_studies = ('annual-daylight', 'daylight-factor')
-            if 'sensor-grids' in _workflow.inputs_dict and _workflow.name in grid_studies:
-                results = sort_results_by_grid(results, _workflow.inputs_dict['sensor-grids'])
+            if 'sensor-grids' in _recipe.inputs_dict and _recipe.name in grid_studies:
+                results = sort_results_by_grid(results, _recipe.inputs_dict['sensor-grids'])
