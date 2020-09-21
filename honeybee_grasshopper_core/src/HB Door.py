@@ -37,7 +37,7 @@ Create Honeybee Door
 
 ghenv.Component.Name = "HB Door"
 ghenv.Component.NickName = 'Door'
-ghenv.Component.Message = '0.2.0'
+ghenv.Component.Message = '0.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -57,8 +57,8 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
-    from honeybee_energy.lib.constructions import opaque_construction_by_name, \
-        window_construction_by_name
+    from honeybee_energy.lib.constructions import opaque_construction_by_identifier, \
+        window_construction_by_identifier
 except ImportError as e:
     if ep_constr_ is not None:
         raise ValueError('ep_constr_ has been specified but honeybee-energy '
@@ -89,8 +89,8 @@ if all_required_inputs(ghenv.Component):
             # try to assign the energyplus construction
             if ep_constr_ is not None:
                 if isinstance(ep_constr_, str):
-                    ep_constr_ = opaque_construction_by_name(ep_constr_) if not \
-                        hb_dr.is_glass else window_construction_by_name(ep_constr_)
+                    ep_constr_ = opaque_construction_by_identifier(ep_constr_) if not \
+                        hb_dr.is_glass else window_construction_by_identifier(ep_constr_)
                 hb_dr.properties.energy.construction = ep_constr_
 
             # try to assign the radiance modifier
