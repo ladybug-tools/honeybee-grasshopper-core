@@ -1,0 +1,78 @@
+{
+  "version": "0.2.0", 
+  "nickname": "AperturesByRatio", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_objs", 
+        "description": "The input Honeybee Face or Room with Apertures generated from\nthe input parameters.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "A list of honeybee Rooms or Faces to which Apertures will be\nadded based on the inputs.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_ratio", 
+      "description": "A number between 0 and 0.95 for the ratio between the area of\nthe apertures and the area of the parent face. If an array of values\nare input here, different ratios will be assigned based on\ncardinal direction, starting with north and moving clockwise.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_subdivide_", 
+      "description": "Boolean to note whether to generate a single window in the\ncenter of each Face (False) or to generate a series of rectangular\nwindows using the other inputs below (True). The latter is often more\nrealistic and is important to consider for detailed daylight and\nthermal comfort simulations but the former is likely better when the\nonly concern is building energy use since energy use doesn't change\nmuch while the glazing ratio remains constant. Default: True.", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_win_height_", 
+      "description": "A number for the target height of the output apertures.\nNote that, if the ratio is too large for the height, the ratio will\ntake precedence and the actual aperture height will be larger\nthan this value. If an array of values are input here, different\nheights will be assigned based on cardinal direction, starting with\nnorth and moving clockwise. Default: 2 meters.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_sill_height_", 
+      "description": "A number for the target height above the bottom edge of\nthe face to start the apertures. Note that, if the ratio is too large\nfor the height, the ratio will take precedence and the sill_height\nwill be smaller than this value. If an array of values are input here,\ndifferent heights will be assigned based on cardinal direction, starting\nwith north and moving clockwise. Default: 0.8 meters.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_horiz_separ_", 
+      "description": "A number for the horizontal separation between\nindividual aperture centerlines.  If this number is larger than\nthe parent face's length, only one aperture will be produced.\nIf an array of values are input here, different separation distances\nwill be assigned based on cardinal direction, starting with north\nand moving clockwise. Default: 3 meters.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "vert_separ_", 
+      "description": "An optional number to create a single vertical\nseparation between top and bottom apertures. If an array of values\nare input here, different separation distances will be assigned based\non cardinal direction, starting with north and moving clockwise.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "operable_", 
+      "description": "An optional boolean to note whether the generated Apertures\ncan be opened for ventilation. If an array of booleans are input\nhere, different operable properties will be assigned based on\ncardinal direction, starting with north and moving clockwise.", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.boundarycondition import Outdoors\n    from honeybee.facetype import Wall\n    from honeybee.room import Room\n    from honeybee.face import Face\n    from honeybee.orientation import check_matching_inputs, angles_from_num_orient, \\\n        face_orient_index, inputs_by_index\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance, conversion_to_meters\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef can_host_apeture(face):\n    \"\"\"Test if a face is intended to host apertures (according to this component).\"\"\"\n    return isinstance(face.boundary_condition, Outdoors) and \\\n        isinstance(face.type, Wall)\n\n\ndef assign_apertures(face, sub, rat, hgt, sil, hor, vert, op):\n    \"\"\"Assign apertures to a Face based on a set of inputs.\"\"\"\n    if sub:\n        face.apertures_by_ratio_rectangle(rat, hgt, sil, hor, vert, tolerance)\n    else:\n        face.apertures_by_ratio(rat, tolerance)\n    \n    # try to assign the operable property\n    if op:\n        for ap in face.apertures:\n            ap.is_operable = op\n\n\nif all_required_inputs(ghenv.Component):\n    # duplicate the initial objects\n    hb_objs = [obj.duplicate() for obj in _hb_objs]\n    \n    # set defaults for any blank inputs\n    conversion = conversion_to_meters()\n    _subdivide_ = _subdivide_ if len(_subdivide_) != 0 else [True]\n    _win_height_ = _win_height_ if len(_win_height_) != 0 else [2.0 / conversion]\n    _sill_height_ = _sill_height_ if len(_sill_height_) != 0 else [0.8 / conversion]\n    _horiz_separ_ = _horiz_separ_ if len(_horiz_separ_) != 0 else [3.0 / conversion]\n    vert_separ_ = vert_separ_ if len(vert_separ_) != 0 else [0.0]\n    operable_ = operable_ if len(operable_) != 0 else [False]\n    \n    # gather all of the inputs together\n    all_inputs = [_subdivide_, _ratio, _win_height_, _sill_height_, _horiz_separ_,\n                  vert_separ_, operable_]\n    \n    # ensure matching list lengths across all values\n    all_inputs, num_orient = check_matching_inputs(all_inputs)\n    \n    # get a list of angles used to categorize the faces\n    angles = angles_from_num_orient(num_orient)\n    \n    # loop through the input objects and add apertures\n    for obj in hb_objs:\n        if isinstance(obj, Room):\n            for face in obj.faces:\n                if can_host_apeture(face):\n                    orient_i = face_orient_index(face, angles)\n                    sub, rat, hgt, sil, hor, vert, op = inputs_by_index(orient_i, all_inputs)\n                    assign_apertures(face, sub, rat, hgt, sil, hor, vert, op)\n        elif isinstance(obj, Face):\n            if can_host_apeture(obj):\n                orient_i = face_orient_index(obj, angles)\n                sub, rat, hgt, sil, hor, vert, op = inputs_by_index(orient_i, all_inputs)\n                assign_apertures(obj, sub, rat, hgt, sil, hor, vert, op)\n        else:\n            raise TypeError(\n                'Input _hb_objs must be a Room or Face. Not {}.'.format(type(obj)))", 
+  "category": "Honeybee", 
+  "name": "HB Apertures by Ratio", 
+  "description": "Add apertures to a Honeybee Face or Room given a ratio of aperture area to face area.\n_\nNote that this component will only add Apertures to Faces that are Walls and have\nan Outdoors boundary condition.\n-"
+}

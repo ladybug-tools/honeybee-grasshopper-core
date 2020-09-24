@@ -1,0 +1,43 @@
+{
+  "version": "0.1.3", 
+  "nickname": "Mirror", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_objs", 
+        "description": "The input _hb_objs that has been mirrored across the input plane.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "Any Honeybee geometry object (eg. Room, Face, Aperture, Door or\nShade) to be mirrored across a plane. This can also be a Honeybee\nModel object to be mirrored.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_plane", 
+      "description": "A Plane across which the object will be mirrored.", 
+      "type": "Plane", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "prefix_", 
+      "description": "Optional text string that will be inserted at the start of the\nidentifiers and display names of all transformed objects, their child\nobjects, and their adjacent Surface boundary condition objects. This\nis particularly useful in workflows where you duplicate and edit a\nstarting object and then want to combine it with the original object\ninto one Model (like making a model of repeated rooms) since all\nobjects within a Model must have unique identifiers. It is recommended\nthat this prefix be short to avoid maxing out the 100 allowable\ncharacters for honeybee identifiers. If None, no prefix will be\nadded to the input objects and all identifiers and display names\nwill remain the same. Default: None.", 
+      "type": "string", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.togeometry import to_plane\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nif all_required_inputs(ghenv.Component):\n    hb_objs = [obj.duplicate() for obj in _hb_objs]  # duplicate the initial objects\n    plane = to_plane(_plane)  # translate the plane to ladybug_geometry\n    \n    # mirror all of the objects\n    for obj in hb_objs:\n        obj.reflect(plane)\n    \n    # add the prefix if specified\n    if prefix_ is not None:\n        for obj in hb_objs:\n            obj.add_prefix(prefix_)", 
+  "category": "Honeybee", 
+  "name": "HB Mirror", 
+  "description": "Mirror any Honeybee geometry object or a Model across a plane.\n-"
+}

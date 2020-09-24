@@ -1,0 +1,36 @@
+{
+  "version": "0.1.0", 
+  "nickname": "Planarize", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "pl_brep", 
+        "description": "A planar version of the input _brep.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_brep", 
+      "description": "A list of closed Rhino polysurfaces (aka. breps) to be planarized.", 
+      "type": "Brep", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_mesh_par_", 
+      "description": "Optional Rhino Meshing Parameters to describe how curved\nfaces should be convereted into planar elements. These can be\nobtained from the native Grasshopper mesh Settings components.\nIf None, Rhino's Default Meshing Parameters will be used, which\ntend to be very coarse and simple.", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance\n    from ladybug_{{cad}}.planarize import curved_solid_faces\n    from ladybug_{{cad}}.fromgeometry import from_face3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nimport {{Cad}}.Geometry as rg\n\n\nif all_required_inputs(ghenv.Component):\n    # set default meshing parameters\n    mesh_par = _mesh_par_ or rg.MeshingParameters.Default\n\n    # planarize each of the breps\n    pl_brep = []\n    for brep in _brep:\n        lb_faces = curved_solid_faces(brep, mesh_par)\n        pl_brep.extend(\n            rg.Brep.JoinBreps([from_face3d(face) for face in lb_faces], tolerance))\n", 
+  "category": "Honeybee", 
+  "name": "HB Planarize Brep", 
+  "description": "Planarize Rhino breps in a manner that allows control over the meshing process.\n_\nThe resulting planar breps will be solid if the input brep is solid and any\nplanar faces of the brep will remain unchanged except for the polygonization\nof curved edges.\n-"
+}

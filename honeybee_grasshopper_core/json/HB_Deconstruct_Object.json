@@ -1,0 +1,50 @@
+{
+  "version": "0.2.1", 
+  "nickname": "DecnstrObj", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "faces", 
+        "description": "All of the Face objects that make up the input _hb_obj. This includes\nFaces that make up input Rooms as well as any input orphaned Faces.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "apertures", 
+        "description": "All of the Aperture objects that make up the input _hb_obj.\nThis includes any Apertures assigned to input Rooms or Faces as well\nas any input orphaned Apertures.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "doors", 
+        "description": "All of the Door objects that make up the input _hb_obj. This includes\nany Doors assigned to input Rooms or Faces as well as any input\norphaned Doors.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "shades", 
+        "description": "All of the Shade objects that make up the input _hb_obj. This includes\nany Shades assigned to input Rooms, Faces or Apertures as well as any\ninput orphaned Shades.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_hb_obj", 
+      "description": "A Honeybee Room, Face, Aperture, Door or Shade to be deconstructed\ninto its constituent objects. Note that, Doors and Shades do not have\nsub-objects assigned to them and the original object will be output.", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.room import Room\n    from honeybee.face import Face\n    from honeybee.aperture import Aperture\n    from honeybee.door import Door\n    from honeybee.shade import Shade\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\ndef deconstruct_door(door, doors, shades):\n    \"\"\"Deconstruct Door object.\"\"\"\n    doors.append(door)\n    for shd in door.shades:\n        shades.append(shd)\n\ndef deconstruct_aperture(aperture, apertures, shades):\n    \"\"\"Deconstruct Aperture object.\"\"\"\n    apertures.append(aperture)\n    for shd in aperture.shades:\n        shades.append(shd)\n\ndef deconstruct_face(face, faces, apertures, doors, shades):\n    \"\"\"Deconstruct Face object.\"\"\"\n    faces.append(face)\n    for ap in face.apertures:\n        deconstruct_aperture(ap, apertures, shades)\n    for dr in face.doors:\n        deconstruct_door(dr, doors, shades)\n    for shd in face.shades:\n        shades.append(shd)\n\ndef deconstruct_room(room, faces, apertures, doors, shades):\n    \"\"\"Deconstruct Room object.\"\"\"\n    for face in room.faces:\n        deconstruct_face(face, faces, apertures, doors, shades)\n    for shd in room.shades:\n        shades.append(shd)\n\n\nif all_required_inputs(ghenv.Component):\n    # lists of to be filled with component objects\n    faces = []\n    apertures = []\n    doors = []\n    shades = []\n    \n    # deconstruct objects\n    if isinstance(_hb_obj, Room):\n        deconstruct_room(_hb_obj, faces, apertures, doors, shades)\n    elif isinstance(_hb_obj, Face):\n        deconstruct_face(_hb_obj, faces, apertures, doors, shades)\n    elif isinstance(_hb_obj, Aperture):\n        deconstruct_aperture(_hb_obj, apertures, shades)\n    elif isinstance(_hb_obj, Door):\n        deconstruct_door(_hb_obj, doors, shades)\n    elif isinstance(_hb_obj, Shade):\n        shades.append(_hb_obj)\n    else:\n        raise TypeError(\n            'Unrecognized honeybee object type: {}'.format(type(_hb_obj)))", 
+  "category": "Honeybee", 
+  "name": "HB Deconstruct Object", 
+  "description": "Deconstruct any Honeybee geometry object into all of its constituent Honeybee objects.\n_\nThis is useful for editing auto-generated child objects separately from their parent.\nFor example, if you want to move all of the overhangs that were auto-generated for\na Room downward in order to turn them into light shelves, this component can give\nyou all of such shades. Then you can move the shades and assign them back to the\noriginal shade-less Room object.\n-"
+}

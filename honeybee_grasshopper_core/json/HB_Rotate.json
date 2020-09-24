@@ -1,0 +1,57 @@
+{
+  "version": "0.1.3", 
+  "nickname": "Rotate", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_objs", 
+        "description": "The input _hb_objs that has been rotated by the input angle.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "Any Honeybee geometry object (eg. Room, Face, Aperture, Door or\nShade) to be rotated by an angle. This can also be a Honeybee Model\nobject to be rotated.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_angle", 
+      "description": "An angle for rotation in degrees.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_origin_", 
+      "description": "A Point3D for the origin around which the object will be rotated.\nIf None,  it will be rotated from each object's center point unless\nthe input object is a Model, in which case, it will be rotated from\nthe world origin (0, 0, 0).", 
+      "type": "Point3d", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_axis_", 
+      "description": "A Vector3D axis representing the axis of rotation. If None, the\naxis will be a Z-vector (0, 0, 1) and the object will be rotated\nwithin the XY plane.", 
+      "type": "Vector3d", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "prefix_", 
+      "description": "Optional text string that will be inserted at the start of the\nidentifiers and display names of all transformed objects, their child\nobjects, and their adjacent Surface boundary condition objects. This\nis particularly useful in workflows where you duplicate and edit a\nstarting object and then want to combine it with the original object\ninto one Model (like making a model of repeated rooms) since all\nobjects within a Model must have unique identifiers. It is recommended\nthat this prefix be short to avoid maxing out the 100 allowable\ncharacters for honeybee identifiers. If None, no prefix will be\nadded to the input objects and all identifiers and display names\nwill remain the same. Default: None.", 
+      "type": "string", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the ladybug_geometry dependencies\n    from ladybug_geometry.geometry3d.pointvector import Point3D\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_geometry:\\n\\t{}'.format(e))\n\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.togeometry import to_point3d, to_vector3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    hb_objs = [obj.duplicate() for obj in _hb_objs]  # duplicate the initial objects\n    \n    # set the default origin\n    if _origin_ is not None:\n        pt = to_point3d(_origin_)\n    else:\n        pt = []\n        for obj in hb_objs:\n            origin = obj.center if not isinstance(obj, Model) else Point3D(0, 0, 0)\n            pt.append(origin)\n    \n    # rotate all of the objects\n    if _origin_ is None and _axis_ is None:\n        for i, obj in enumerate(hb_objs):\n            obj.rotate_xy(_angle, pt[i])\n    elif _origin_ is not None and _axis_ is None:\n        for obj in hb_objs:\n            obj.rotate_xy(_angle, pt)\n    elif _origin_ is not None and _axis_ is not None:\n        _axis_ = to_vector3d(_axis_)\n        for obj in hb_objs:\n            obj.rotate(_angle, pt, _axis_)\n    else:\n        _axis_ = to_vector3d(_axis_)\n        for i, obj in enumerate(hb_objs):\n            obj.rotate(_angle, pt[i], _axis_)\n    \n    # add the prefix if specified\n    if prefix_ is not None:\n        for obj in hb_objs:\n            obj.add_prefix(prefix_)", 
+  "category": "Honeybee", 
+  "name": "HB Rotate", 
+  "description": "Rotate any Honeybee geometry object or a Model by an angle.\n-"
+}

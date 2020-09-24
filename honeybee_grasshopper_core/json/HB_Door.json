@@ -1,0 +1,57 @@
+{
+  "version": "0.2.1", 
+  "nickname": "Door", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "doors", 
+        "description": "Honeybee doors. These can be used directly in radiance\nsimulations or can be added to a Honeybee face for energy simulation.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_geo", 
+      "description": "Rhino Brep geometry.", 
+      "type": "GeometryBase", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_name_", 
+      "description": "A name for the Door. If the name is not provided a random\nname will be assigned.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "glass_", 
+      "description": "Boolean to note whether the Door is transparent. Default: False.", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "ep_constr_", 
+      "description": "Optional text for the Door's energy construction to be looked\nup in the construction library. This can also be a custom construction\nobject. If no energy construction is input here, a default will be\nassigned based on the properties of the parent face that the Door\nis assigned to (ie. whether the Face is a RoofCeiling, whether it has\na Surface boundary condition, etc.)", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "rad_mod_", 
+      "description": "Optional text for the Door's radiance modifier to be looked\nup in the modifier library. This can also be a custom modifier object.\nIf no radiance modifier is input here, a default will be assigned\nbased on the properties of the parent face that the Door is\nassigned to (ie. whether the Face is a RoofCeiling, whether it has a\nSurface boundary condition, etc.)", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\nimport uuid\n\ntry:  # import the core honeybee dependencies\n    from honeybee.door import Door\n    from honeybee.typing import clean_and_id_string\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.togeometry import to_face3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee-energy extension\n    from honeybee_energy.lib.constructions import opaque_construction_by_identifier, \\\n        window_construction_by_identifier\nexcept ImportError as e:\n    if ep_constr_ is not None:\n        raise ValueError('ep_constr_ has been specified but honeybee-energy '\n                         'has failed to import.\\n{}'.format(e))\n\ntry:  # import the honeybee-radiance extension\n    from honeybee_radiance.lib.modifiers import modifier_by_identifier\nexcept ImportError as e:\n    if rad_mod_ is not None:\n        raise ValueError('rad_mod_ has been specified but honeybee-radiance '\n                         'has failed to import.\\n{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    doors = []  # list of doors that will be returned\n\n    # set default name\n    name = clean_and_id_string(_name_) if _name_ is not None else str(uuid.uuid4())\n\n    # create the Doors\n    i = 0  # iterator to ensure each door gets a unique name\n    for geo in _geo:\n        for lb_face in to_face3d(geo):\n            hb_dr = Door('{}_{}'.format(name, i), lb_face, is_glass=glass_)\n            if _name_ is not None:\n                hb_dr.display_name = '{}_{}'.format(_name_, i)\n\n            # try to assign the energyplus construction\n            if ep_constr_ is not None:\n                if isinstance(ep_constr_, str):\n                    ep_constr_ = opaque_construction_by_identifier(ep_constr_) if not \\\n                        hb_dr.is_glass else window_construction_by_identifier(ep_constr_)\n                hb_dr.properties.energy.construction = ep_constr_\n\n            # try to assign the radiance modifier\n            if rad_mod_ is not None:\n                if isinstance(rad_mod_, str):\n                    rad_mod_ = modifier_by_identifier(rad_mod_)\n                hb_dr.properties.radiance.modifier = rad_mod_\n\n            doors.append(hb_dr)  # collect the final Doors\n            i += 1  # advance the iterator", 
+  "category": "Honeybee", 
+  "name": "HB Door", 
+  "description": "Create Honeybee Door\n-"
+}

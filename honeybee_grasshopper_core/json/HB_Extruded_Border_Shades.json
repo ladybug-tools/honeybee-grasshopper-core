@@ -1,0 +1,57 @@
+{
+  "version": "0.2.0", 
+  "nickname": "BorderShades", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_objs", 
+        "description": "The input Honeybee Face or Room or Aperture with extruded border\nshades added to it.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "A list of honeybee Rooms, Faces, or Apertures to which extruded\nborder shades will be added.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_depth", 
+      "description": "A number for the extrusion depth.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "indoor_", 
+      "description": "Boolean for whether the extrusion should be generated facing the\nopposite direction of the aperture normal and added to the Aperture's\nindoor_shades instead of outdoor_shades. Note that, by default, indoor\nshades are not used in energy simulations but they are used in all\nsimulations involving Radiance. Default: False.", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "ep_constr_", 
+      "description": "Optional text for an energy construction to be used for all\ngenerated shades. This text will be used to look up a construction\nin the shade construction library. This can also be a custom\nShadeConstruction object.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "rad_mod_", 
+      "description": "Optional text for a radiance modifier to be used for all\ngenerated shades. This text will be used to look up a modifier\nin the modifier library. This can also be a custom modifier object.", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.boundarycondition import Outdoors\n    from honeybee.room import Room\n    from honeybee.face import Face\n    from honeybee.face import Aperture\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee-energy extension\n    from honeybee_energy.lib.constructions import shade_construction_by_identifier\nexcept ImportError as e:\n    if ep_constr_ is not None:\n        raise ValueError('ep_constr_ has been specified but honeybee-energy '\n                         'has failed to import.\\n{}'.format(e))\n\ntry:  # import the honeybee-radiance extension\n    from honeybee_radiance.lib.modifiers import modifier_by_identifier\nexcept ImportError as e:\n    if rad_mod_ is not None:\n        raise ValueError('rad_mod_ has been specified but honeybee-radiance '\n                         'has failed to import.\\n{}'.format(e))\n\n\ndef assign_shades(aperture, depth, indoor, ep, rad):\n    \"\"\"Assign shades to an Aperture based on a set of inputs.\"\"\"\n    if isinstance(aperture.boundary_condition, Outdoors):\n        new_shades = aperture.extruded_border(depth, indoor)\n        \n        # try to assign the energyplus construction\n        if ep is not None:\n            for shd in new_shades:\n                shd.properties.energy.construction = ep\n        # try to assign the radiance modifier\n        if rad is not None:\n            for shd in new_shades:\n                shd.properties.radiance.modifier = rad\n\n\nif all_required_inputs(ghenv.Component):\n    # duplicate the initial objects\n    hb_objs = [obj.duplicate() for obj in _hb_objs]\n\n    # assign default indoor_ property\n    indoor_ = indoor_ if indoor_ is not None else False\n\n    # get energyplus constructions if they are requested\n    if ep_constr_ is not None:\n        if isinstance(ep_constr_, str):\n            ep_constr_ = shade_construction_by_identifier(ep_constr_)\n\n    # get radiance modifiers if they are requested\n    if rad_mod_ is not None:\n        if isinstance(rad_mod_, str):\n            rad_mod_ = modifier_by_identifier(rad_mod_)\n\n    # loop through the input objects and add shades\n    for obj in hb_objs:\n        if isinstance(obj, Room):\n            for face in obj.faces:\n                for ap in face.apertures:\n                    assign_shades(ap, _depth, indoor_, ep_constr_, rad_mod_)\n        elif isinstance(obj, Face):\n            for ap in obj.apertures:\n                assign_shades(ap, _depth, indoor_, ep_constr_, rad_mod_)\n        elif isinstance(obj, Aperture):\n            assign_shades(obj, _depth, indoor_, ep_constr_, rad_mod_)\n        else:\n            raise TypeError('Input _hb_objs must be a Room, Face or Aperture. '\n                            'Not {}.'.format(type(obj)))", 
+  "category": "Honeybee", 
+  "name": "HB Extruded Border Shades", 
+  "description": "Add extruded border Shades to all the outdoor Apertures of an input Room, Face\nor Aperture.\n_\nThis is particularly useful for accounting for the depths of walls/roofs in Radiance\nsimulations or in the solar distribution calculation of EnergyPlus.\n-"
+}

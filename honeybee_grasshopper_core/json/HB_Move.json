@@ -1,0 +1,43 @@
+{
+  "version": "0.1.3", 
+  "nickname": "Move", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_objs", 
+        "description": "The input _hb_objs that has been moved along the input vector.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "Any Honeybee geometry object (eg. Room, Face, Aperture, Door or\nShade) to be moved along the input vector. This can also be a Honeybee\nModel object to be moved.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_vector", 
+      "description": "A Vector3D with the direction and distance to move the _hb_objs.", 
+      "type": "Vector3d", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "prefix_", 
+      "description": "Optional text string that will be inserted at the start of the\nidentifiers and display names of all transformed objects, their child\nobjects, and their adjacent Surface boundary condition objects. This\nis particularly useful in workflows where you duplicate and edit a\nstarting object and then want to combine it with the original object\ninto one Model (like making a model of repeated rooms) since all\nobjects within a Model must have unique identifiers. It is recommended\nthat this prefix be short to avoid maxing out the 100 allowable\ncharacters for honeybee identifiers. If None, no prefix will be\nadded to the input objects and all identifiers and display names\nwill remain the same. Default: None.", 
+      "type": "string", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.togeometry import to_vector3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nif all_required_inputs(ghenv.Component):\n    hb_objs = [obj.duplicate() for obj in _hb_objs]  # duplicate the initial objects\n    vec = to_vector3d(_vector)  # translate the vector to ladybug_geometry\n    \n    # move all of the objects\n    for obj in hb_objs:\n        obj.move(vec)\n    \n    # add the prefix if specified\n    if prefix_ is not None:\n        for obj in hb_objs:\n            obj.add_prefix(prefix_)", 
+  "category": "Honeybee", 
+  "name": "HB Move", 
+  "description": "Move any Honeybee geometry object or a Model object along a vector.\n-"
+}

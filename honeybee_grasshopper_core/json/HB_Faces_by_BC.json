@@ -1,0 +1,57 @@
+{
+  "version": "0.1.2", 
+  "nickname": "FacesByBC", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "outdoors", 
+        "description": "The faces with an Outdoors boundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "surface", 
+        "description": "The faces with a Surface (interior) boundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "ground", 
+        "description": "The faces with a Ground boundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "adiabatic", 
+        "description": "The faces with an adiabatic (no heat flow) boundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "other", 
+        "description": "All faces with a boundary condition other than the four above.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "Honeybee Rooms, Faces, Apertures, Doors and/or Shades which will\nbe separated based on boundary condition. This can also be an entire\nhoneybee Model.", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "2 :: Organize", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.room import Room\n    from honeybee.face import Face\n    from honeybee.aperture import Aperture\n    from honeybee.door import Door\n    from honeybee.boundarycondition import Outdoors, Surface, Ground\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee-energy dependencies\n    from honeybee.boundarycondition import Adiabatic\nexcept ImportError:  # honeybee-energy is not installed\n    Adiabatic = None  # don't worry about the Adiabatic bc\n\n\ndef add_face(face, geo_list):\n    geo_list.append(face)\n    for ap in face.apertures:\n        geo_list.append(ap)\n    for dr in face.doors:\n        geo_list.append(dr)\n\n\n\nif all_required_inputs(ghenv.Component):\n    # lists of {{cad}} geometry to be filled with content\n    outdoors = []\n    surface = []\n    ground = []\n    adiabatic = []\n    other = []\n\n    def sort_face(face):\n        bc = face.boundary_condition\n        if isinstance(bc, Outdoors):\n            add_face(face, outdoors)\n        elif isinstance(bc, Surface):\n            add_face(face, surface)\n        elif isinstance(bc, Ground):\n            add_face(face, ground)\n        elif isinstance(bc, Adiabatic):\n            add_face(face, adiabatic)\n        else:\n            add_face(face, other)\n\n    def sort_subface(face):\n        bc = face.boundary_condition\n        if isinstance(bc, Outdoors):\n            outdoors.append(face)\n        elif isinstance(bc, Surface):\n            surface.append(face)\n        elif isinstance(bc, Ground):\n            ground.append(face)\n        elif isinstance(bc, Adiabatic):\n            adiabatic.append(face)\n        else:\n            other.append(face)\n\n    # loop through all objects and add them\n    for obj in _hb_objs:\n        if isinstance(obj, Model):\n            for room in obj.rooms:\n                for face in room.faces:\n                    sort_face(face)\n            for face in obj.orphaned_faces:\n                sort_face(face)\n            for ap in obj.orphaned_apertures:\n                sort_subface(ap)\n            for dr in obj.orphaned_doors:\n                sort_subface(dr)\n        elif isinstance(obj, Room):\n            for face in obj:\n                sort_face(face)\n        elif isinstance(obj, Face):\n            sort_face(obj)\n        elif isinstance(obj, Aperture):\n            sort_subface(obj)\n        elif isinstance(obj, Door):\n            sort_subface(obj)\n", 
+  "category": "Honeybee", 
+  "name": "HB Faces by BC", 
+  "description": "Separate the faces/sub-faces of honeybee Rooms, Faces, Apertures or Doors by\nboundary condition.\n-"
+}

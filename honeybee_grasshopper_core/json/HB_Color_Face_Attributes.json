@@ -1,0 +1,71 @@
+{
+  "version": "0.2.0", 
+  "nickname": "ColorFaceAttr", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "mesh", 
+        "description": "Meshes of the faces and sub-faces colored according to their attributes.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "legend", 
+        "description": "Geometry representing the legend for colored meshes.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "wire_frame", 
+        "description": "A list of lines representing the outlines of the _hb_objs.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "values", 
+        "description": "A list of values noting the attribute assigned to each face/sub-face.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "colors", 
+        "description": "A list of colors noting the color of each face/sub-face in the\nRhino scene. This can be used in conjunction with the native\nGrasshopper \"Custom Preview\" component to create custom\nvisualizations in the Rhino scene.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "An array of honeybee Rooms, Faces, Apertures, Doors or Shades\nto be colored with their attributes in the Rhino scene. This can\nalso be an entire Model to be colored.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_attribute", 
+      "description": "Text for the name of the attribute with which the faces or\nsub-faces should be labeled. The Honeybee \"Face Attributes\" component\nlists all of the core attributes of the room. Also, each Honeybee\nextension (ie. Radiance, Energy) includes its own component that lists\nthe face and sub-face attributes of that extension.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "legend_par_", 
+      "description": "An optional LegendParameter object to change the display\nof the colored faces and sub-faces (Default: None).", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "1 :: Visualize", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.room import Room\n    from honeybee.colorobj import ColorFace\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.fromgeometry import from_face3ds_to_colored_mesh, \\\n        from_face3d_to_wireframe\n    from ladybug_{{cad}}.fromobjects import legend_objects\n    from ladybug_{{cad}}.color import color_to_color\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # extract any faces from input Rooms or Models\n    faces = []\n    for hb_obj in _hb_objs:\n        if isinstance(hb_obj, Model):\n            for room in hb_obj.rooms:\n                faces.extend(room.faces)\n                faces.extend(room.shades)\n            faces.extend(hb_obj.orphaned_faces)\n            faces.extend(hb_obj.orphaned_apertures)\n            faces.extend(hb_obj.orphaned_doors)\n            faces.extend(hb_obj.orphaned_shades)\n        elif isinstance(hb_obj, Room):\n            faces.extend(hb_obj.faces)\n            faces.extend(hb_obj.shades)\n        else:\n            faces.append(hb_obj)\n\n    # create the ColorFace visualization object and output geometry\n    color_obj = ColorFace(faces, _attribute, legend_par_)\n    graphic = color_obj.graphic_container\n    mesh = [from_face3ds_to_colored_mesh([fc], col) for fc, col in\n            zip(color_obj.flat_geometry, graphic.value_colors)]\n    wire_frame = []\n    for face in color_obj.flat_faces:\n        wire_frame.append(from_face3d_to_wireframe(face.geometry))\n    legend = legend_objects(graphic.legend)\n    values = color_obj.attributes\n    colors = [color_to_color(col) for col in graphic.value_colors]", 
+  "category": "Honeybee", 
+  "name": "HB Color Face Attributes", 
+  "description": "Color Honeybee Faces, Apertures, Doors and Shades in the Rhino scene using\ntheir attributes.\n_\nThis can be used as a means to check that correct properties are assigned to\ndifferent faces.\n-"
+}

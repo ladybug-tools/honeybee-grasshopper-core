@@ -1,0 +1,43 @@
+{
+  "version": "0.1.2", 
+  "nickname": "FloorHeight", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "flr_hgts", 
+        "description": "A list of floor heights with one floor height for each branch\nof the output rooms.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "rooms", 
+        "description": "A data tree of honeybee rooms with each branch of the tree\nrepresenting a different floor height.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_rooms", 
+      "description": "A list of honeybee Rooms or honeybee Models to be separated by\nfloor height.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "min_diff_", 
+      "description": "An optional float value to denote the minimum difference\nin floor heights that is considered meaningful. This can be used\nto ensure rooms like those representing stair landings are grouped\nwith floors. If None, any difference in floor heights greater than\nthe Rhino model tolerance will be considered meaningful.", 
+      "type": "double", 
+      "default": null
+    }
+  ], 
+  "subcategory": "2 :: Organize", 
+  "code": "\n\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_geometry:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, list_to_data_tree\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # extract any rooms from input Models\n    in_rooms = []\n    for hb_obj in _rooms:\n        if isinstance(hb_obj, Model):\n            in_rooms.extend(hb_obj.rooms)\n        else:\n            in_rooms.append(hb_obj)\n\n    # loop through each of the rooms and get the floor height\n    grouped_rooms, flr_hgts = Room.group_by_floor_height(in_rooms, tolerance)\n\n    # convert matrix to data tree\n    rooms = list_to_data_tree(grouped_rooms)\n", 
+  "category": "Honeybee", 
+  "name": "HB Rooms by Floor Height", 
+  "description": "Separate and group honeybee rooms with the same average floor height.\n-"
+}

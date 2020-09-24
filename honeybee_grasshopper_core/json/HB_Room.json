@@ -1,0 +1,64 @@
+{
+  "version": "0.2.0", 
+  "nickname": "Room", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "room", 
+        "description": "Honeybee room. These can be used directly in energy and radiance\nsimulations.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_faces", 
+      "description": "A list of honeybee Faces to be joined together into a Room.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_name_", 
+      "description": "Text to set the name for the Room and to be incorporated into\nunique Room identifier. If the name is not provided, a random name\nwill be assigned.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_mod_set_", 
+      "description": "Text for the modifier set of the Room, which is used\nto assign all default radiance modifiers needed to create a radiance\nmodel. Text should refer to a ModifierSet within the library) such\nas that output from the \"HB List Modifier Sets\" component. This\ncan also be a custom ModifierSet object. If nothing is input here,\nthe Room will have a generic construction set that is not sensitive to\nthe Room's climate or building energy code.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_constr_set_", 
+      "description": "Text for the construction set of the Room, which is used\nto assign all default energy constructions needed to create an energy\nmodel. Text should refer to a ConstructionSet within the library) such\nas that output from the \"HB List Construction Sets\" component. This\ncan also be a custom ConstructionSet object. If nothing is input here,\nthe Room will have a generic construction set that is not sensitive to\nthe Room's climate or building energy code.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_program_", 
+      "description": "Text for the program of the Room (to be looked up in the ProgramType\nlibrary) such as that output from the \"HB List Programs\" component.\nThis can also be a custom ProgramType object. If no program is input\nhere, the Room will have a generic office program. Note that ProgramTypes\neffectively map to OpenStudio space types upon export to OpenStudio.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "conditioned_", 
+      "description": "Boolean to note whether the Room has a heating and cooling\nsystem.", 
+      "type": "bool", 
+      "default": "true"
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\n# document-wide counter for the number of room names generated\nimport scriptcontext\ntry:\n    counter = scriptcontext.sticky[\"room_count\"]\nexcept KeyError:  # first time that the component is running\n    scriptcontext.sticky[\"room_count\"] = 1\n\ntry:  # import the core honeybee dependencies\n    from honeybee.room import Room\n    from honeybee.typing import clean_and_id_string\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance, angle_tolerance\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, give_warning\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee-energy extension\n    from honeybee_energy.lib.programtypes import program_type_by_identifier, office_program\n    from honeybee_energy.lib.constructionsets import construction_set_by_identifier\nexcept ImportError as e:\n    if _program_ is not None:\n        raise ValueError('_program_ has been specified but honeybee-energy '\n                         'has failed to import.\\n{}'.format(e))\n    elif _constr_set_ is not None:\n        raise ValueError('_constr_set_ has been specified but honeybee-energy '\n                         'has failed to import.\\n{}'.format(e))\n    elif conditioned_ is not None:\n        raise ValueError('conditioned_ has been specified but honeybee-energy '\n                         'has failed to import.\\n{}'.format(e))\n\ntry:  # import the honeybee-radiance extension\n    from honeybee_radiance.lib.modifiersets import modifier_set_by_identifier\nexcept ImportError as e:\n    if _mod_set_ is not None:\n        raise ValueError('_mod_set_ has been specified but honeybee-radiance '\n                         'has failed to import.\\n{}'.format(e))\n\nimport uuid\n\n\nif all_required_inputs(ghenv.Component):\n    # duplicate the input objects to avoid editing them\n    faces = (face.duplicate() for face in _faces)\n\n    # generate a default name\n    if _name_ is None:  # create a default Room name\n        name = \"Room_{}_{}\".format(scriptcontext.sticky[\"room_count\"], str(uuid.uuid4())[:8])\n        scriptcontext.sticky[\"room_count\"] += 1\n    else:  # clean the input name so that it's unique and acceptable for E+\n        name = clean_and_id_string(_name_)\n\n    # create the Room\n    room = Room(name, faces, tolerance, angle_tolerance)\n    if _name_ is not None:\n        room.display_name = _name_\n\n    # check that the Room geometry is closed.\n    if not room.check_solid(tolerance, angle_tolerance, False):\n        give_warning(ghenv.Component, 'Input _faces do not form a closed volume.\\n'\n                     'Room volume must be closed to access most honeybee features.\\n'\n                     'Preview the output Room to see the holes in your model.')\n\n    # try to assign the modifier set\n    if _mod_set_ is not None:\n        if isinstance(_mod_set_, str):\n            _mod_set_ = modifier_set_by_identifier(_mod_set_)\n        room.properties.radiance.modifier_set = _mod_set_\n\n    # try to assign the construction set\n    if _constr_set_ is not None:\n        if isinstance(_constr_set_, str):\n            _constr_set_ = construction_set_by_identifier(_constr_set_)\n        room.properties.energy.construction_set = _constr_set_\n\n    # try to assign the program\n    if _program_ is not None:\n        if isinstance(_program_, str):\n            _program_ = program_type_by_identifier(_program_)\n        room.properties.energy.program_type = _program_\n    else:  # generic office program by default\n        try:\n            room.properties.energy.program_type = office_program\n        except (NameError, AttributeError):\n            pass  # honeybee-energy is not installed\n\n    # try to assign an ideal air system\n    if conditioned_ or conditioned_ is None:  # conditioned by default\n        try:\n            room.properties.energy.add_default_ideal_air()\n        except (NameError, AttributeError):\n            pass  # honeybee-energy is not installed", 
+  "category": "Honeybee", 
+  "name": "HB Room", 
+  "description": "Create Honeybee Room from Honeybee Faces.\n_\nNote that each Room is mapped to a single zone in EnergyPlus/OpenStudio and\nshould always be a closed volume to ensure correct volumetric calculations and\navoid light leaks in Radiance simulations.\n-"
+}

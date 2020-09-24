@@ -1,0 +1,36 @@
+{
+  "version": "0.1.1", 
+  "nickname": "Prefix", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_objs", 
+        "description": "The input Honeybee objects with a prefix added to their display\nnames and identifiers.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "A Honeybee Room, Face, Shade, Aperture, or Door to which a\nprefix should be added to its name.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_prefix", 
+      "description": "Text that will be inserted at the start of this object's\n(and child objects') identifier and display_name. This will also be\nadded to any Surface boundary conditions of Faces, Apertures, or\nDoors. It is recommended that this prefix be short to avoid maxing\nout the 100 allowable characters for honeybee identifiers. This can\nalso be a list of prefixes that correspond to the input _hb_objs", 
+      "type": "string", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, longest_list\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    hb_objs = []\n    for i, obj in enumerate(_hb_objs):\n        obj_dup = obj.duplicate()\n        prefix = longest_list(_prefix, i)\n        obj_dup.add_prefix(prefix)\n        hb_objs.append(obj_dup)", 
+  "category": "Honeybee", 
+  "name": "HB Add Prefix", 
+  "description": "Change the display name and identifier of this object and all child objects by\ninserting a prefix.\n_\nThis is particularly useful in workflows where you duplicate and edit\na starting object and then want to combine it with the original object\ninto one Model (like making a model of repeated rooms) since all objects\nwithin a Model must have unique identifiers.\n-"
+}

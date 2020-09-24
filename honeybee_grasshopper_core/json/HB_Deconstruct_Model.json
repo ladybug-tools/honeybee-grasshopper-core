@@ -1,0 +1,57 @@
+{
+  "version": "0.1.1", 
+  "nickname": "DeconstructModel", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "rooms", 
+        "description": "All of the Room objects contained within the input Model.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "faces", 
+        "description": "All of the orphaned Face objects within the input Model.\nThis only oncludes parent-less Faces and does not include any Faces\nthat belong to a Room.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "apertures", 
+        "description": "All of the orphaned Aperture objects within the input Model.\nThis only oncludes parent-less Apertures and does not include any\nApertures that belong to a Face.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "doors", 
+        "description": "All of the orphaned Door objects within the input Model.\nThis only oncludes parent-less Doors and does not include any Doors\nthat belong to a Face.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "shades", 
+        "description": "All of the orphaned Shade objects within the input Model.\nThis only oncludes parent-less Shades and does not include any Shades\nthat belong to an Aperture, Face, or Room.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_model", 
+      "description": "A Honeybee Model to be deconstructed into into its constituent\nobjects (Rooms, Faces, Apertures, Doors Shades).", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the honeybee dependencies\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    assert isinstance(_model, Model), \\\n        'Input _model must be a Model. Got {}'.format(type(_model))\n\n    rooms = _model.rooms\n    faces = _model.orphaned_faces\n    apertures = _model.orphaned_apertures\n    doors = _model.orphaned_doors\n    shades = _model.orphaned_shades\n", 
+  "category": "Honeybee", 
+  "name": "HB Deconstruct Model", 
+  "description": "Deconstruct a Honeybee Model object into all of its constituent Honeybee objects.\n-"
+}
