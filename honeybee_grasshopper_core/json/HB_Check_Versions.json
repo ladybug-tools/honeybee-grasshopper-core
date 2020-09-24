@@ -1,0 +1,42 @@
+{
+  "version": "0.1.0", 
+  "nickname": "Versions", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "python", 
+        "description": "The version of Python used for Ladybug Tools CLI calls.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "radiance", 
+        "description": "The version of Radiance if it is installed.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "openstudio", 
+        "description": "The version of OpenStudio if it is installed.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "energyplus", 
+        "description": "The version of EnergyPlus if it is installed.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [], 
+  "subcategory": "1 :: Visualize", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.config import folders as hb_folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:\n    from honeybee_radiance.config import folders as radiance_folders\n    radiance_loaded = True\nexcept ImportError as e:\n    radiance_loaded = False\n\ntry:\n    from honeybee_energy.config import folders as energy_folders\n    energy_loaded = True\nexcept ImportError:\n    energy_loaded = False\n\n\n# output the versions\npython = hb_folders.python_version_str\nif radiance_loaded:\n    radiance = radiance_folders.radiance_version_str\nif energy_loaded:\n    openstudio = energy_folders.openstudio_version_str\n    energyplus = energy_folders.energyplus_version_str\n", 
+  "category": "Honeybee", 
+  "name": "HB Check Versions", 
+  "description": "Check the versions of the engines that are being used by the honeybee plugin.\nThis is useful for verifying that everything has been installed correctly\nand that the versions of the engines are as expected.\n-"
+}

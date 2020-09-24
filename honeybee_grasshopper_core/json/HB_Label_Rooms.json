@@ -1,0 +1,71 @@
+{
+  "version": "0.1.3", 
+  "nickname": "LabelRooms", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "label_text", 
+        "description": "The text with which each of the rooms are labeled.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "base_pts", 
+        "description": "The base planes for each of the text labels.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "labels", 
+        "description": "The text objects that are displaying within the Rhino scene.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "wire_frame", 
+        "description": "A list of curves representing the outlines of the rooms.\nThis is useful for understanding which geometry elements each\nlabel corresponds to.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_rooms_model", 
+      "description": "An array of honeybee Rooms or honeybee Models to be labeled\nwith their attributes in the Rhinoscene.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_attribute_", 
+      "description": "Text for the name of the Room attribute with which the\nRooms should be labeled. The Honeybee \"Room Attributes\" component\nlists all of the core attributes of the room. Also, each Honeybee\nextension (ie. Radiance, Energy) includes its own component that\nlists the Room attributes of that extension. Default: \"name\".", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_txt_height_", 
+      "description": "An optional number for the height of the text in the Rhino\nscene.  The default is auto-calculated based on the dimensions of the\ninput geometry.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_font_", 
+      "description": "An optional name of a font in which the labels will display. This\nmust be a font that is installed on this machine in order to work\ncorrectly. Default: \"Arial\".", 
+      "type": "string", 
+      "default": null
+    }
+  ], 
+  "subcategory": "1 :: Visualize", 
+  "code": "\ntry:  # import the ladybug_geometry dependencies\n    from ladybug_geometry.geometry3d.pointvector import Vector3D\n    from ladybug_geometry.geometry3d.plane import Plane\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_geometry:\\n\\t{}'.format(e))\n\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.search import get_attr_nested\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.fromgeometry import from_polyface3d_to_wireframe, from_plane\n    from ladybug_{{cad}}.text import text_objects\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n# hide the base_pts output from the scene\nghenv.Component.Params.Output[1].Hidden = True\n\n\nif all_required_inputs(ghenv.Component):\n    # lists of {{cad}} geometry to be filled with content\n    label_text = []\n    base_pts = []\n    labels = []\n    wire_frame = []\n\n    # set the default attribute and font\n    if _attribute_ is None:\n        _attribute_ = 'display_name'\n    if _font_ is None:\n        _font_ = 'Arial'\n\n    # extract any rooms from input Models\n    rooms = []\n    for hb_obj in _rooms_model:\n        if isinstance(hb_obj, Model):\n            rooms.extend(hb_obj.rooms)\n        else:\n            rooms.append(hb_obj)\n\n    for room in rooms:\n        room_prop = get_attr_nested(room, _attribute_)\n\n        # create the text label\n        cent_pt = room.geometry.center  # base point for the text\n        base_plane = Plane(Vector3D(0, 0, 1), cent_pt)\n        if _txt_height_ is None:  # auto-calculate default text height\n            txt_len = len(room_prop) if len(room_prop) > 10 else 10\n            txt_h = (room.geometry.max.x - room.geometry.min.x) / txt_len\n        else:\n            txt_h = _txt_height_\n        label = text_objects(room_prop, base_plane, txt_h, font=_font_,\n                             horizontal_alignment=1, vertical_alignment=3)\n\n        # append everything to the lists\n        label_text.append(room_prop)\n        base_pts.append(from_plane(base_plane))\n        labels.append(label)\n        wire_frame.extend(from_polyface3d_to_wireframe(room.geometry))", 
+  "category": "Honeybee", 
+  "name": "HB Label Rooms", 
+  "description": "Lablel Honeybee rooms with their attributes in the Rhino scene.\n_\nThis can be used as a means to check that correct properties are assigned to\ndifferent Rooms.\n-"
+}

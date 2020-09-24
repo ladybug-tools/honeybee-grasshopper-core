@@ -1,0 +1,50 @@
+{
+  "version": "0.2.0", 
+  "nickname": "FacParam", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "fac_par", 
+        "description": "A list of properties for different cardinal directions to be\nplugged into the \"HB Apertures by Ratio\" component or the \"HB Louver\nShades\" component.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_north_", 
+      "description": "Glazing parameter (boolean, float) for the north.", 
+      "type": "System.Object", 
+      "default": 0
+    }, 
+    {
+      "access": "item", 
+      "name": "_east_", 
+      "description": "Glazing parameter (boolean, float) for the east.", 
+      "type": "System.Object", 
+      "default": 0
+    }, 
+    {
+      "access": "item", 
+      "name": "_south_", 
+      "description": "Glazing parameter (boolean, float) for the south.", 
+      "type": "System.Object", 
+      "default": 0
+    }, 
+    {
+      "access": "item", 
+      "name": "_west_", 
+      "description": "Glazing parameter (boolean, float) for the west.", 
+      "type": "System.Object", 
+      "default": 0
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\n\ndef check_param(parameter):\n    if isinstance(parameter, bool):\n        return parameter\n    try:\n        return float(parameter)\n    except (TypeError, AttributeError):\n        return parameter\n\n\nfac_par = [check_param(par) for par in (_north_, _east_, _south_, _west_)]\n", 
+  "category": "Honeybee", 
+  "name": "HB Facade Parameters", 
+  "description": "Generate lists of facadce properties ordanized by the four primary cardinal\ndirections.\n_\nSuch properties can be glazing ratios, glazing heigths, sill heights, horizontal/\nvertical glazing splits for the \"HB Apertures by Ratio\" component. Or they could\nbe shade depths, angles, etc. for the \"HB Louver Shades\" component.\n-"
+}

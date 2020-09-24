@@ -1,0 +1,57 @@
+{
+  "version": "0.1.0", 
+  "nickname": "SkylightsByRatio", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_objs", 
+        "description": "The input Honeybee Face or Room with skylight Apertures generated\nfrom the input parameters.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "A list of honeybee Rooms or Faces to which skylight Apertures\nwill be added based on the inputs.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_ratio", 
+      "description": "A number between 0 and 1 for the ratio between the area of\nthe apertures and the area of the parent face.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_x_dim_", 
+      "description": "The x dimension of the grid cells as a number. (Default: 3 meters)", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_y_dim_", 
+      "description": "The y dimension of the grid cells as a number. Default is None,\nwhich will assume the same cell dimension for y as is set for x.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "operable_", 
+      "description": "An optional boolean to note whether the generated Apertures\ncan be opened for ventilation. Default: False.", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.boundarycondition import Outdoors\n    from honeybee.facetype import RoofCeiling\n    from honeybee.room import Room\n    from honeybee.face import Face\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import conversion_to_meters\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef can_host_apeture(face):\n    \"\"\"Test if a face is intended to host apertures (according to this component).\"\"\"\n    return isinstance(face.boundary_condition, Outdoors) and \\\n        isinstance(face.type, RoofCeiling)\n\n\ndef assign_apertures(face, rat, xd, yd, op):\n    \"\"\"Assign apertures to a Face based on a set of inputs.\"\"\"\n    face.apertures_by_ratio_gridded(rat, xd, yd)\n\n    # try to assign the operable property\n    if op:\n        for ap in face.apertures:\n            ap.is_operable = op\n\n\nif all_required_inputs(ghenv.Component):\n    # duplicate the initial objects\n    hb_objs = [obj.duplicate() for obj in _hb_objs]\n\n    # set defaults for any blank inputs\n    if _x_dim_ is None and _x_dim_ is None:\n        conversion = conversion_to_meters()\n        _x_dim_ = _x_dim_ if _x_dim_ is None else 3.0 / conversion\n    elif _x_dim_ is None:\n        _x_dim_ == _y_dim_\n\n    # loop through the input objects and add apertures\n    for obj in hb_objs:\n        if isinstance(obj, Room):\n            for face in obj.faces:\n                if can_host_apeture(face):\n                    assign_apertures(face, _ratio, _x_dim_, _y_dim_, operable_)\n        elif isinstance(obj, Face):\n            if can_host_apeture(obj):\n                assign_apertures(obj, _ratio, _x_dim_, _y_dim_, operable_)\n        else:\n            raise TypeError(\n                'Input _hb_objs must be a Room or Face. Not {}.'.format(type(obj)))\n", 
+  "category": "Honeybee", 
+  "name": "HB Skylights by Ratio", 
+  "description": "Add skylight apertures to a Honeybee Face or Room given a ratio of aperture area\nto face area.\n_\nNote that this component will only add Apertures to Faces that are Roofs and have\nan Outdoors boundary condition.\n-"
+}

@@ -1,0 +1,120 @@
+{
+  "version": "0.3.1", 
+  "nickname": "VizByType", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "walls", 
+        "description": "Rhino geometry for the Walls with an Outdoors or Ground boundary\ncondition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "interior_walls", 
+        "description": "Rhino geometry for the Walls with a Surface or Adiabatic\nboundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "roofs", 
+        "description": "Rhino geometry for the RoofCeilings with an Outdoors or Ground\nboundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "ceilings", 
+        "description": "Rhino geometry for the RoofCeilings with a Surface or Adiabatic\nboundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "exterior_floors", 
+        "description": "Rhino geometry for the Floors with an Outdoors or Ground\nboundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "interior_floors", 
+        "description": "Rhino geometry for the Floors with a Surface or Adiabatic\nboundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "air_walls", 
+        "description": "Rhino geometry for the AirWalls.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "apertures", 
+        "description": "Rhino geometry for the Apertures with an Outdoors or Ground\nboundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "interior_apertures", 
+        "description": "Rhino geometry for the Apertures with an Surface or\nAdiabatic boundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "doors", 
+        "description": "Rhino geometry for the Doors with an Outdoors or Ground boundary\ncondition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "interior_doors", 
+        "description": "Rhino geometry for the Doors with an Surface or Adiabatic\nboundary condition.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "outdoor_shades", 
+        "description": "Rhino geometry for the Shades assigned to the outdoors\nof their parent objects.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "indoor_shades", 
+        "description": "Rhino geometry for the Shades assigned to the indoors\nof their parent objects.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "wire_frame", 
+        "description": "A list of lines representing the outlines of the rooms.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_rooms", 
+      "description": "Honeybee Rooms for which you would like to preview geometry\nin the Rhino scene based on type. This can also be an entire\nhoneybee Model.", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "1 :: Visualize", 
+  "code": "\ntry:  # import the ladybug dependencies\n    from ladybug.color import Colorset\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug:\\n\\t{}'.format(e))\n\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.boundarycondition import Surface\n    from honeybee.facetype import Wall, RoofCeiling, Floor, AirBoundary\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.fromgeometry import from_face3ds_to_colored_mesh, \\\n        from_face3d_to_wireframe\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee-energy extension\n    from honeybee.boundarycondition import Adiabatic\nexcept ImportError:  # honeybee-energy not installed\n    Adiabatic = None  # don't worry about Aidabatic; Surface is the only interior bc\n\n\nif all_required_inputs(ghenv.Component):\n    # lists of {{cad}} geometry to be filled with content\n    _walls = []\n    _interior_walls = []\n    _roofs = []\n    _ceilings = []\n    _exterior_floors = []\n    _interior_floors = []\n    _air_walls = []\n    _apertures = []\n    _interior_apertures = []\n    _doors = []\n    _interior_doors = []\n    _outdoor_shades = []\n    _indoor_shades = []\n\n    # method to add shades\n    def add_shade(hb_obj):\n        _outdoor_shades.extend([shd.geometry for shd in hb_obj.outdoor_shades])\n        _indoor_shades.extend([shd.geometry for shd in hb_obj.indoor_shades])\n\n    # extract any rooms from input Models\n    rooms = []\n    for hb_obj in _rooms:\n        if isinstance(hb_obj, Model):\n            rooms.extend(hb_obj.rooms)\n            _outdoor_shades.extend([shd.geometry for shd in hb_obj.orphaned_shades])\n        else:\n            rooms.append(hb_obj)\n\n    # loop through all objects and add them\n    for room in rooms:\n        add_shade(room)\n        for face in room:\n            add_shade(face)\n            bc = face.boundary_condition\n            type = face.type\n            if isinstance(type, Wall):\n                if isinstance(bc, (Surface, Adiabatic)):\n                    _interior_walls.append(face.punched_geometry)\n                else:\n                    _walls.append(face.punched_geometry)\n            elif isinstance(type, RoofCeiling):\n                if isinstance(bc, (Surface, Adiabatic)):\n                    _ceilings.append(face.punched_geometry)\n                else:\n                    _roofs.append(face.punched_geometry)\n            elif isinstance(type, Floor):\n                if isinstance(bc, (Surface, Adiabatic)):\n                    _interior_floors.append(face.punched_geometry)\n                else:\n                    _exterior_floors.append(face.punched_geometry)\n            elif isinstance(type, AirBoundary):\n                _air_walls.append(face.punched_geometry)\n\n            # add the apertures, doors, and shades\n            for ap in face.apertures:\n                add_shade(ap)\n                if isinstance(bc, Surface):\n                    _interior_apertures.append(ap.geometry)\n                else:\n                    _apertures.append(ap.geometry)\n            for dr in face.doors:\n                add_shade(dr)\n                if isinstance(bc, Surface):\n                    _interior_doors.append(dr.geometry)\n                else:\n                    _doors.append(dr.geometry)\n\n    # color all of the geometry with its respective surface type\n    palette = Colorset.openstudio_palette()\n    walls = from_face3ds_to_colored_mesh(_walls, palette[0]) \\\n        if len(_walls) != 0 else None\n    interior_walls = from_face3ds_to_colored_mesh(_interior_walls, palette[1]) \\\n        if len(_interior_walls) != 0 else None\n    roofs = from_face3ds_to_colored_mesh(_roofs, palette[3]) \\\n        if len(_roofs) != 0 else None\n    ceilings = from_face3ds_to_colored_mesh(_ceilings, palette[4]) \\\n        if len(_ceilings) != 0 else None\n    exterior_floors = from_face3ds_to_colored_mesh(_exterior_floors, palette[6]) \\\n        if len(_exterior_floors) != 0 else None\n    interior_floors = from_face3ds_to_colored_mesh(_interior_floors, palette[7]) \\\n        if len(_interior_floors) != 0 else None\n    air_walls = from_face3ds_to_colored_mesh(_air_walls, palette[12]) \\\n        if len(_air_walls) != 0 else None\n    apertures = from_face3ds_to_colored_mesh(_apertures, palette[9]) \\\n        if len(_apertures) != 0 else None\n    interior_apertures = from_face3ds_to_colored_mesh(_interior_apertures, palette[9]) \\\n        if len(_interior_apertures) != 0 else None\n    doors = from_face3ds_to_colored_mesh(_doors, palette[10]) \\\n        if len(_doors) != 0 else None\n    interior_doors = from_face3ds_to_colored_mesh(_interior_doors, palette[10]) \\\n        if len(_interior_doors) != 0 else None\n    outdoor_shades = from_face3ds_to_colored_mesh(_outdoor_shades, palette[11]) \\\n        if len(_outdoor_shades) != 0 else None\n    indoor_shades = from_face3ds_to_colored_mesh(_indoor_shades, palette[11]) \\\n        if len(_indoor_shades) != 0 else None\n\n    # create the wire frame\n    all_geo = _walls + _interior_walls + _roofs + _ceilings + _exterior_floors + \\\n        _interior_floors + _air_walls + _apertures + _interior_apertures + _doors + \\\n        _interior_doors + _outdoor_shades + _indoor_shades\n    wire_frame = [from_face3d_to_wireframe(face) for face in all_geo]", 
+  "category": "Honeybee", 
+  "name": "HB Visualize by Type", 
+  "description": "Visualize room geometry in the Rhino scene organized by object and face type.\n-"
+}

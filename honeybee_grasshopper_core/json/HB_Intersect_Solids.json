@@ -1,0 +1,43 @@
+{
+  "version": "0.2.2", 
+  "nickname": "IntSolid", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "int_solids", 
+        "description": "The same input closed breps that have had their component\nfaces split by adjacent polysurfaces to have matching surfaces between\nadjacent breps.  It is recommended that you bake this output and check\nit in Rhino before turning the breps into honeybee Rooms.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_solids", 
+      "description": "A list of closed Rhino breps (polysurfaces) that you intend to turn\ninto Rooms that do not have perfectly matching surfaces between\nadjacent Faces (this matching is needed to contruct a correct\nmulti-room energy model).", 
+      "type": "Brep", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "parallel_", 
+      "description": "Set to \"True\" to run the intersection calculation in parallel,\nwhich can greatly increase the speed of calculation but may not be\ndesired when other simulations are running on your machine. If False,\nthe calculation will be run on a single core. Default: False.", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_run", 
+      "description": "Set to True to run the component.", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.intersect import intersect_solids, intersect_solids_parallel\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\n\nif all_required_inputs(ghenv.Component) and _run:\n    # generate bounding boxes for all inputs\n    b_boxes = [brep.GetBoundingBox(False) for brep in _solids]\n    \n    # intersect all of the solid geometries\n    if parallel_:\n        int_solids = intersect_solids_parallel(_solids, b_boxes)\n    else:\n        int_solids = intersect_solids(_solids, b_boxes)\n", 
+  "category": "Honeybee", 
+  "name": "HB Intersect Solids", 
+  "description": "Take a list of closed breps (polysurfaces) that you intend to turn into Rooms and\nsplit their Faces to ensure that there are matching faces between each of the\nadjacent rooms.\n_\nMatching faces and face areas betweem adjacent rooms are necessary to ensure\nthat the conductive heat flow calculation occurs correctly across the face in\nan energy simulation.\n-"
+}

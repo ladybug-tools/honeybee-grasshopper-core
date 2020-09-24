@@ -1,0 +1,77 @@
+{
+  "version": "0.1.2", 
+  "nickname": "Config", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "python_exe", 
+        "description": "The path to the Python executable to be used for Ladybug\nTools CLI calls.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "py_lib_install", 
+        "description": "The path to where the Ladybug Tools Python packages\nare installed.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "rad_install", 
+        "description": "The path to Radiance installation folder if it exists.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "os_install", 
+        "description": "The path to OpenStudio installation folder if it exists.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "ep_install", 
+        "description": "The path to EnergyPlus installation folder if it exists.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "hb_os_gem", 
+        "description": "The path to the honeybee_openstudio_gem if it exists. This gem\ncontains libraries and measures for translating between Honeybee\nJSON schema and OpenStudio Model schema (OSM).", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "standards", 
+        "description": "The path to the library of standards if it exists. This library\ncontains the default Modifiers, ModifierSets, Constructions,\nConstructionSets, Schedules, and ProgramTypes. It can be extended\nby dropping IDF or Honeybee JOSN files into the appropriate sub-folder.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "asset_report", 
+        "description": "A report of all the assets that have been loaded from the\nstandards library.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "default_sim", 
+        "description": "The path to the default simulation folder (where simulation\nfiles are written if not specified by the user.).", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [], 
+  "subcategory": "1 :: Visualize", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.config import folders as hb_folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:\n    from honeybee_radiance.config import folders as radiance_folders\n    from honeybee_radiance.lib.modifiers import MODIFIERS\n    from honeybee_radiance.lib.modifiersets import MODIFIER_SETS\n    radiance_loaded = True\nexcept ImportError as e:\n    radiance_loaded = False\n\ntry:\n    from honeybee_energy.config import folders as energy_folders\n    from honeybee_energy.lib.materials import OPAQUE_MATERIALS\n    from honeybee_energy.lib.materials import WINDOW_MATERIALS\n    from honeybee_energy.lib.constructions import OPAQUE_CONSTRUCTIONS\n    from honeybee_energy.lib.constructions import WINDOW_CONSTRUCTIONS\n    from honeybee_energy.lib.constructions import SHADE_CONSTRUCTIONS\n    from honeybee_energy.lib.constructionsets import CONSTRUCTION_SETS\n    from honeybee_energy.lib.scheduletypelimits import SCHEDULE_TYPE_LIMITS\n    from honeybee_energy.lib.schedules import SCHEDULES\n    from honeybee_energy.lib.programtypes import PROGRAM_TYPES\n    energy_loaded = True\nexcept ImportError:\n    energy_loaded = False\n\n\n# output the paths to the honeybee core folders\nreport_strs = []\npython_exe = hb_folders.python_exe_path\npy_lib_install = hb_folders.python_package_path\ndefault_sim = hb_folders.default_simulation_folder\n\n\nif radiance_loaded:  # output all of the paths to radiance_folders\n    rad_install = radiance_folders.radiance_path\n    standards = radiance_folders.standards_data_folder\n\n    # generate a report of all the resources loaded from the library\n    report_strs.append('{} modifiers loaded'.format(len(MODIFIERS)))\n    report_strs.append('{} modifier sets loaded'.format(len(MODIFIER_SETS)))\n\n\nif energy_loaded:  # output all of the paths to energy_folders\n    os_install = energy_folders.openstudio_path\n    ep_install = energy_folders.energyplus_path\n    hb_os_gem = energy_folders.honeybee_openstudio_gem_path\n    standards = energy_folders.standards_data_folder\n\n    # generate a report of all the resources loaded from the library\n    report_strs.append('{} opaque materials loaded'.format(len(OPAQUE_MATERIALS)))\n    report_strs.append('{} window materials loaded'.format(len(WINDOW_MATERIALS)))\n    report_strs.append('{} opaque counstructions loaded'.format(len(OPAQUE_CONSTRUCTIONS)))\n    report_strs.append('{} window counstructions loaded'.format(len(WINDOW_CONSTRUCTIONS)))\n    report_strs.append('{} shade counstructions loaded'.format(len(SHADE_CONSTRUCTIONS)))\n    report_strs.append('{} construction sets loaded'.format(len(CONSTRUCTION_SETS)))\n    report_strs.append('{} schedule types loaded'.format(len(SCHEDULE_TYPE_LIMITS)))\n    report_strs.append('{} schedules loaded'.format(len(SCHEDULES)))\n    report_strs.append('{} program types loaded'.format(len(PROGRAM_TYPES)))\n\nasset_report = '\\n'.join(report_strs)\n", 
+  "category": "Honeybee", 
+  "name": "HB Config", 
+  "description": "Check the local configuration of the engines and data sets used by the honeybee\nplugin. This is useful for verifying that everything has been installed correctly\nand that the engines are configured as expected.\n-"
+}

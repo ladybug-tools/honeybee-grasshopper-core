@@ -1,0 +1,43 @@
+{
+  "version": "0.2.1", 
+  "nickname": "AddShade", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_obj", 
+        "description": "The input Honeybee Aperture, Face or a Room with the input shades\nadded to it.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_hb_obj", 
+      "description": "A Honeybee Aperture, Door, Face or a Room to which the shades should\nbe added.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "out_shades_", 
+      "description": "A list of Honeybee Shade objects to be added to the outside\nof the input _hb_objs.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "in_shades_", 
+      "description": "A list of Honeybee Shade objects to be added to the inside\nof the input _hb_objs. Note that, by default, indoor shades are not\nused in energy simulations but they are used in all simulations\ninvolving Radiance.", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    hb_obj = _hb_obj.duplicate()  # duplicate the initial object\n\n    if out_shades_ is not None:\n        hb_obj.add_outdoor_shades((shd.duplicate() for shd in out_shades_))\n    if in_shades_ is not None:\n        hb_obj.add_indoor_shades((shd.duplicate() for shd in in_shades_))\n", 
+  "category": "Honeybee", 
+  "name": "HB Add Shade", 
+  "description": "Add a Honeybee Shades to an Aperture, Door, Face or Room.\n-"
+}

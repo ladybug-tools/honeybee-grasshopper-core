@@ -1,0 +1,36 @@
+{
+  "version": "0.1.1", 
+  "nickname": "Multiplier", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "rooms", 
+        "description": "The input Rooms with their multipliers edited.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_rooms", 
+      "description": "Honeybee Rooms to which the input _multipier should be assigned.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_multiplier", 
+      "description": "An integer noting how many times the Rooms are repeated.\nThis can also be an array of integers, which align with the input\n_rooms and will be matched to them accordingly", 
+      "type": "int", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\n\ntry:  # import the honeybee-energy extension\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, longest_list\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    rooms = []\n    for i, room in enumerate(_rooms):\n        assert isinstance(room, Room), \\\n            'Expected honeybee room. Got {}.'.format(type(room))\n        room_dup = room.duplicate()\n        room_dup.multiplier = longest_list(_multiplier, i)\n        rooms.append(room_dup)\n", 
+  "category": "Honeybee", 
+  "name": "HB Set Multiplier", 
+  "description": "Change the multiplier of a honeybee Room.\n_\nMultipliers are used to speed up the calculation when similar Rooms are\nrepeated more than once. Essentially, a given simulation with the\nRoom is run once and then the result is mutliplied by the multiplier.\nThis means that the \"repetition\" isn't in a particualr direction (it's\nessentially in the exact same location) and this comes with some\ninaccuracy. However, this error might not be too large if the Rooms\nare similar enough and it can often be worth it since it can greatly\nspeed up the calculation.\n-"
+}

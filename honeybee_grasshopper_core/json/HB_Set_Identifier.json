@@ -1,0 +1,36 @@
+{
+  "version": "0.1.0", 
+  "nickname": "ID", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_obj", 
+        "description": "The input Honeybee objects with a prefix added to their display\nnames and identifiers.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_hb_obj", 
+      "description": "Any honeybee-core object (eg. Room, Face, Shade, Aperture) or\nany honeybee extension object (eg. energy construction, radiance\nmodifier) for which the identifier should be changed.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_id", 
+      "description": "Text for the identifier of the object. Note that, if this identifier\ndoes not conform to acceptable values of the object type (eg. no\nspaces for a radiance modifier id), then an exception will be thrown.", 
+      "type": "string", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    hb_obj = _hb_obj.duplicate()\n    hb_obj.identifier = _id\n", 
+  "category": "Honeybee", 
+  "name": "HB Set Identifier", 
+  "description": "THIS COMPONENT IS INTENDED FOR ADVANCED USERS WHO UNDERSTAND THAT IDENTIFERS\nMUST BE UNIQUE AND THAT, TO SET THEM OTHERWISE CAN HAVE UNINTENDED CONSEQUENCES.\n_\nChange the identifier of an object.\n_\nNote that this component only changes the identifer of the input _hb_obj and\nnone of the identifiers of the child objects.\n-"
+}

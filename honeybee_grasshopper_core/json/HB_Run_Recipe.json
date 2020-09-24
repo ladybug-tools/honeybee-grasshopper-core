@@ -1,0 +1,64 @@
+{
+  "version": "0.5.0", 
+  "nickname": "RunRecipe", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "results", 
+        "description": "A list of results output from the recipe.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_recipe", 
+      "description": "A Queenbee recipe object generated from any Queenbee recipe component.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_folder_", 
+      "description": "An optional folder out of which the recipe will be executed.\nNOTE THAT DIRECTORIES INPUT HERE SHOULD NOT HAVE ANY SPACES OR\nUNDERSCORES IN THE FILE PATH.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_cpu_count_", 
+      "description": "An integer to set the number of CPUs used in the execution\nof the recipe. This number should not exceed the number of CPUs on\nthe machine running the simulation and should be lower if other tasks\nare running while the simulation is running.(Default: 2).", 
+      "type": "int", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "reload_old_", 
+      "description": "A boolean to indicate whether existing results for a given\nmodel and recipe should be reloaded if they are found instead of\nre-running the entire recipe from the beginning. If False or\nNone, any existing results will be overwritten by the new simulation.", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "report_out_", 
+      "description": "A boolean to indicate whether the recipe progress should be\ndisplayed in the cmd window (False) or output form the \"report\" of\nthis component (True). Outputting from the component can be useful\nfor debugging and capturing what's happening in the process but\nrecipe reports can often be very long and so it can slow\nGrasshopper slightly. (Default: False).", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_run", 
+      "description": "Set to \"True\" to run the recipe.", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "4 :: Simulate", 
+  "code": "\nimport os\nimport subprocess\n\ntry:\n    from ladybug.futil import preparedir, nukedir\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug:\\n\\t{}'.format(e))\n\ntry:\n    from honeybee.config import folders as hb_folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:\n    from honeybee_radiance.config import folders as rad_folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef sort_results_by_grid(results, grid_names):\n    \"\"\"Sort result files according to the order that they appear in a list of grids.\"\"\"\n    file_dict = {}  # dictionary relating grid name to file name\n    for res_file in results:\n        grid_name = '.'.join(os.path.basename(res_file).split('.')[:-1])\n        file_dict[grid_name] = res_file\n    grid_files = []\n    for g_name in grid_names:\n        try:\n            grid_files.append(file_dict[g_name])\n        except KeyError:  # grid that was not simulated\n            pass\n    other_files = [val for key, val in file_dict.items() if key not in grid_names]\n    return other_files + grid_files\n\n\nif all_required_inputs(ghenv.Component) and _run:\n    # set default number of CPUs\n    _cpu_count_ = '2' if not _cpu_count_ else str(_cpu_count_)\n\n    # get the folder out of which the recipe will be executed\n    if _folder_ is None:\n        if _recipe.default_simulation_path is not None:\n            _folder_ = _recipe.default_simulation_path\n        else:  # no default simulation path\n            _folder_ = os.path.join(\n                hb_folders.default_simulation_folder, 'unnamed_recipe')\n    if not os.path.isdir(_folder_):\n        preparedir(_folder_)  # create the directory if it's not there\n\n    # delete any existing result files unless reload_old_ is True\n    if not reload_old_ and _recipe.simulation_id is not None:\n        wf_folder = os.path.join(_folder_, _recipe.simulation_id)\n        if os.path.isdir(wf_folder):\n            nukedir(wf_folder, rmdir=True)\n\n    # write the inputs JSON for the recipe\n    inputs_json = _recipe.write_inputs_json(_folder_)\n\n    # execute the queenbee luigi CLI to obtain the results via CPython\n    queenbee_exe = os.path.join(hb_folders.python_scripts_path, 'queenbee.exe') \\\n        if os.name == 'nt' else os.path.join(hb_folders.python_scripts_path, 'queenbee')\n    cmds = [queenbee_exe, 'luigi', 'translate', _recipe.path, _folder_,\n            '-i', inputs_json, '--workers', _cpu_count_]\n    if rad_folders.radlib_path:  # set the RAYPATH environment variable\n        cmds.extend(['--env', 'RAYPATH={}'.format(rad_folders.radlib_path)])\n    if rad_folders.radbin_path:  # set the PATH environment variable\n        cmds.extend(['--env', 'PATH={}'.format(rad_folders.radbin_path)])\n    cmds.append('--run')\n\n    if report_out_:\n        process = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)\n        result = process.communicate()\n        print result[0]\n        print result[1]\n    else:\n        process = subprocess.Popen(cmds)\n        result = process.communicate()\n\n    # try to parse the results\n    if _recipe.simulation_id:\n        res_folder = os.path.join(_folder_, _recipe.simulation_id, 'results')\n        if os.path.isdir(res_folder):\n            results = [os.path.join(res_folder, fn) for fn in os.listdir(res_folder)]\n            grid_studies = ('annual-daylight', 'daylight-factor')\n            if 'sensor-grids' in _recipe.inputs_dict and _recipe.name in grid_studies:\n                results = sort_results_by_grid(results, _recipe.inputs_dict['sensor-grids'])\n", 
+  "category": "Honeybee", 
+  "name": "HB Run Recipe", 
+  "description": "Execute any Queenbee Recipe on this machine using queenbee-luigi.\n-"
+}

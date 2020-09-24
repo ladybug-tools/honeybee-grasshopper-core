@@ -1,0 +1,29 @@
+{
+  "version": "0.1.0", 
+  "nickname": "ObjToStr", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_str", 
+        "description": "A text string that completely describes the honeybee object.\nThis can be serialized back into a honeybee object using the \"HB\nString to Object\" coponent.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_hb_obj", 
+      "description": "A Honeybee object to be serialized to a string.", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "3 :: Serialize", 
+  "code": "\ntry:  # import the core ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nimport json\n\n\nif all_required_inputs(ghenv.Component):\n    hb_str = json.dumps(_hb_obj.to_dict(), indent=4)\n", 
+  "category": "Honeybee", 
+  "name": "HB Object to String", 
+  "description": "Serialize any honeybee object to a JSON text string. You can use \"HB String to Object\"\ncomponent to load the objects from the file back.\n-\nHoneybee objects include any Model, Room, Face, Aperture, Door, Shade, or\nboundary condition object.\n-\nIt also includes any honeybee energy Material, Construction, ConstructionSet,\nSchedule, Load, ProgramType, or Simulation object.\n-"
+}
