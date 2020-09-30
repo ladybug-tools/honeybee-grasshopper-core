@@ -16,6 +16,12 @@ Create Honeybee Shade
         _name_: Text to set the name for the Shade and to be incorporated into
             unique Shade identifier. If the name is not provided, a random name
             will be assigned.
+        attached_: Boolean to note whether the Shade is attached to other geometry.
+            This is automatically set to True if the Shade is assigned to
+            a parent Room, Face, Aperture or Door but will otherwise defalt
+            to False. If the Shade is not easily assignable to a parent
+            object but is attached to the building (eg. a parapet or large
+            roof overhang), then this should be set to True. (Default: False).
         ep_constr_: Optional text for the Shade's energy construction to be looked
             up in the construction library. This can also be a custom construction
             object. If no energy construction is input here, a default will be
@@ -36,7 +42,7 @@ Create Honeybee Shade
 
 ghenv.Component.Name = "HB Shade"
 ghenv.Component.NickName = 'Shade'
-ghenv.Component.Message = '0.2.0'
+ghenv.Component.Message = '0.3.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -76,6 +82,7 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     shades = []  # list of shades that will be returned
+    is_detached = not attached_
 
     # set default name
     name = clean_and_id_string(_name_) if _name_ is not None else str(uuid.uuid4())
@@ -84,7 +91,7 @@ if all_required_inputs(ghenv.Component):
     i = 0  # iterator to ensure each shade gets a unique name
     for geo in _geo:
         for lb_face in to_face3d(geo):
-            hb_shd = Shade('{}_{}'.format(name, i), lb_face)
+            hb_shd = Shade('{}_{}'.format(name, i), lb_face, is_detached)
             if _name_ is not None:
                 hb_shd.display_name = '{}_{}'.format(_name_, i)
 
