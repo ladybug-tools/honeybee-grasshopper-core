@@ -1,7 +1,7 @@
 # Honeybee: A Plugin for Environmental Analysis (GPL)
 # This file is part of Honeybee.
 #
-# Copyright (c) 2019, Ladybug Tools.
+# Copyright (c) 2020, Ladybug Tools.
 # You should have received a copy of the GNU General Public License
 # along with Honeybee; If not, see <http://www.gnu.org/licenses/>.
 # 
@@ -31,7 +31,7 @@ This can be used to group rooms by program, whether rooms are conditioned, etc.
 
 ghenv.Component.Name = "HB Rooms by Attribute"
 ghenv.Component.NickName = 'RoomsByAttr'
-ghenv.Component.Message = '0.1.1'
+ghenv.Component.Message = '1.0.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
