@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0", 
+  "version": "1.0.1", 
   "nickname": "FacParam", 
   "outputs": [
     [
@@ -43,7 +43,7 @@
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\n\ndef check_param(parameter):\n    if isinstance(parameter, bool):\n        return parameter\n    try:\n        return float(parameter)\n    except (TypeError, AttributeError):\n        return parameter\n\n\nfac_par = [check_param(par) for par in (_north_, _east_, _south_, _west_)]\n", 
+  "code": "\n\ndef check_param(parameter):\n    if isinstance(parameter, bool):\n        return parameter\n    try:\n        return float(parameter)\n    except (TypeError, AttributeError, ValueError):\n        return parameter\n\n\nfac_par = [check_param(par) for par in (_north_, _east_, _south_, _west_)]\n", 
   "category": "Honeybee", 
   "name": "HB Facade Parameters", 
   "description": "Generate lists of facadce properties ordanized by the four primary cardinal\ndirections.\n_\nSuch properties can be glazing ratios, glazing heigths, sill heights, horizontal/\nvertical glazing splits for the \"HB Apertures by Ratio\" component. Or they could\nbe shade depths, angles, etc. for the \"HB Louver Shades\" component.\n-"
