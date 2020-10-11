@@ -52,7 +52,7 @@ Create Honeybee Face
 
 ghenv.Component.Name = "HB Face"
 ghenv.Component.NickName = 'Face'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "3"
@@ -69,7 +69,7 @@ except ImportError as e:
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.togeometry import to_face3d
-    from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.grasshopper import all_required_inputs, longest_list
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -90,33 +90,35 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     faces = []  # list of faces that will be returned
-
-    # set default name, type, and boundary condition
-    name = clean_and_id_string(_name_) if _name_ is not None else str(uuid.uuid4())
-    if _type_ is not None and _type_ not in face_types:
-        _type_ = face_types.by_name(_type_)
-    if _bc_ is not None and _bc_ not in boundary_conditions:
-        _bc_ = boundary_conditions.by_name(_bc_)
-
-    # create the Faces
+    base_name = str(uuid.uuid4())
     i = 0  # iterator to ensure each face gets a unique name
-    for geo in _geo:
+    for j, geo in enumerate(_geo):
+        name = longest_list(_name_, j) if len(_name_) != 0 else base_name
+        typ = longest_list(_type_, j) if len(_type_) != 0 else None
+        bc = longest_list(_bc_, j) if len(_bc_) != 0 else None
+        if typ is not None and typ not in face_types:
+            typ = face_types.by_name(typ)
+        if bc is not None and bc not in boundary_conditions:
+            bc = boundary_conditions.by_name(bc)
+
         for lb_face in to_face3d(geo):
-            hb_face = Face('{}_{}'.format(name, i), lb_face, _type_, _bc_)
-            if _name_ is not None:
-                hb_face.display_name = '{}_{}'.format(_name_, i)
+            hb_face = Face(clean_and_id_string('{}_{}'.format(name, i)),
+                           lb_face, typ, bc)
+            hb_face.display_name = '{}_{}'.format(name, i)
 
             # try to assign the energyplus construction
-            if ep_constr_ is not None:
-                if isinstance(ep_constr_, str):
-                    ep_constr_ = opaque_construction_by_identifier(ep_constr_)
-                hb_face.properties.energy.construction = ep_constr_
+            if len(ep_constr_) != 0:
+                ep_constr = longest_list(ep_constr_, j)
+                if isinstance(ep_constr, str):
+                    ep_constr = opaque_construction_by_identifier(ep_constr)
+                hb_face.properties.energy.construction = ep_constr
 
             # try to assign the radiance modifier
-            if rad_mod_ is not None:
-                if isinstance(rad_mod_, str):
-                    rad_mod_ = modifier_by_identifier(rad_mod_)
-                hb_face.properties.radiance.modifier = rad_mod_
+            if len(rad_mod_) != 0:
+                rad_mod = longest_list(rad_mod_, j)
+                if isinstance(rad_mod, str):
+                    rad_mod = modifier_by_identifier(rad_mod)
+                hb_face.properties.radiance.modifier = rad_mod
 
             faces.append(hb_face)  # collect the final Faces
             i += 1  # advance the iterator

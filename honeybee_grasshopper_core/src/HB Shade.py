@@ -33,7 +33,7 @@ Create Honeybee Shade
         rad_mod_: Optional text for the Shade's radiance modifier to be looked
             up in the modifier library. This can also be a custom modifier object.
             If no radiance modifier is input here, a default will be assigned.
-    
+
     Returns:
         report: Reports, errors, warnings, etc.
         shades: Honeybee shades. These can be used directly in radiance and
@@ -42,7 +42,7 @@ Create Honeybee Shade
 
 ghenv.Component.Name = "HB Shade"
 ghenv.Component.NickName = 'Shade'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -57,7 +57,7 @@ except ImportError as e:
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.togeometry import to_face3d
-    from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.grasshopper import all_required_inputs, longest_list
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -82,36 +82,36 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     shades = []  # list of shades that will be returned
-    is_detached = not attached_
-
-    # set default name
-    name = clean_and_id_string(_name_) if _name_ is not None else str(uuid.uuid4())
-
-    # create the Shades
+    base_name = str(uuid.uuid4())
     i = 0  # iterator to ensure each shade gets a unique name
-    for geo in _geo:
+    for j, geo in enumerate(_geo):
+        name = longest_list(_name_, j) if len(_name_) != 0 else base_name
+        is_detached = not longest_list(attached_, j) if len(attached_) != 0 else True
         for lb_face in to_face3d(geo):
-            hb_shd = Shade('{}_{}'.format(name, i), lb_face, is_detached)
-            if _name_ is not None:
-                hb_shd.display_name = '{}_{}'.format(_name_, i)
+            hb_shd = Shade(clean_and_id_string('{}_{}'.format(name, i)),
+                           lb_face, is_detached)
+            hb_shd.display_name = '{}_{}'.format(name, i)
 
             # try to assign the energyplus construction
-            if ep_constr_ is not None:
-                if isinstance(ep_constr_, str):
-                    ep_constr_ = shade_construction_by_identifier(ep_constr_)
-                hb_shd.properties.energy.construction = ep_constr_
+            if len(ep_constr_) != 0:
+                ep_constr = longest_list(ep_constr_, j)
+                if isinstance(ep_constr, str):
+                    ep_constr = shade_construction_by_identifier(ep_constr)
+                hb_shd.properties.energy.construction = ep_constr
 
             # try to assign the energyplus transmittance schedule
-            if ep_trans_sch_ is not None:
+            if len(ep_trans_sch_) != 0:
+                ep_trans_sch = longest_list(ep_trans_sch_, j)
                 if isinstance(ep_trans_sch_, str):
                     ep_trans_sch_ = schedule_by_identifier(ep_trans_sch_)
                 hb_shd.properties.energy.transmittance_schedule = ep_trans_sch_
 
             # try to assign the radiance modifier
-            if rad_mod_ is not None:
-                if isinstance(rad_mod_, str):
-                    rad_mod_ = modifier_by_identifier(rad_mod_)
-                hb_shd.properties.radiance.modifier = rad_mod_
+            if len(rad_mod_) != 0:
+                rad_mod = longest_list(rad_mod_, j)
+                if isinstance(rad_mod, str):
+                    rad_mod = modifier_by_identifier(rad_mod)
+                hb_shd.properties.radiance.modifier = rad_mod
 
             shades.append(hb_shd)  # collect the final Shades
             i += 1  # advance the iterator

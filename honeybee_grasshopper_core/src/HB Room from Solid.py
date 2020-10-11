@@ -53,17 +53,10 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
-
-# document-wide counter to generate new unique Room names
-import scriptcontext
-try:
-    scriptcontext.sticky["room_count"]
-except KeyError:  # first time that the component is running
-    scriptcontext.sticky["room_count"] = 1
 
 try:  # import the core honeybee dependencies
     from honeybee.room import Room
@@ -75,7 +68,8 @@ except ImportError as e:
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.config import tolerance, angle_tolerance
     from ladybug_rhino.togeometry import to_polyface3d
-    from ladybug_rhino.grasshopper import all_required_inputs, give_warning
+    from ladybug_rhino.grasshopper import all_required_inputs, give_warning, \
+        document_counter, longest_list
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -110,16 +104,15 @@ if all_required_inputs(ghenv.Component):
     rooms = []  # list of rooms that will be returned
     for i, geo in enumerate(_geo):
         # get the name for the Room
-        if _name_ is None:  # make a default Room name
-            name = "Room_{}_{}".format(scriptcontext.sticky["room_count"], str(uuid.uuid4())[:8])
-            scriptcontext.sticky["room_count"] += 1
+        if len(_name_) == 0:  # make a default Room name
+            name = "Room_{}_{}".format(document_counter('room_count'), str(uuid.uuid4())[:8])
         else:
-            display_name = '{}_{}'.format(_name_, i + 1)
+            display_name = '{}_{}'.format(longest_list(_name_, i), i + 1)
             name = clean_and_id_string(display_name)
 
         # create the Room
         room = Room.from_polyface3d(name, to_polyface3d(geo), roof_angle)
-        if _name_ is not None:
+        if len(_name_) != 0:
             room.display_name = display_name
 
         # check that the Room geometry is closed.
@@ -129,22 +122,25 @@ if all_required_inputs(ghenv.Component):
                          'Preview the output Room to see the holes in your model.')
 
         # try to assign the modifier set
-        if _mod_set_ is not None:
-            if isinstance(_mod_set_, str):
-                _mod_set_ = modifier_set_by_identifier(_mod_set_)
-            room.properties.radiance.modifier_set = _mod_set_
+        if len(_mod_set_) != 0:
+            mod_set = longest_list(_mod_set_, i)
+            if isinstance(mod_set, str):
+                mod_set = modifier_set_by_identifier(mod_set)
+            room.properties.radiance.modifier_set = mod_set
 
         # try to assign the construction set
-        if _constr_set_ is not None:
-            if isinstance(_constr_set_, str):
-                _constr_set_ = construction_set_by_identifier(_constr_set_)
-            room.properties.energy.construction_set = _constr_set_
+        if len(_constr_set_) != 0:
+            constr_set = longest_list(_constr_set_, i)
+            if isinstance(constr_set, str):
+                constr_set = construction_set_by_identifier(constr_set)
+            room.properties.energy.construction_set = constr_set
 
         # try to assign the program
-        if _program_ is not None:
-            if isinstance(_program_, str):
-                _program_ = program_type_by_identifier(_program_)
-            room.properties.energy.program_type = _program_
+        if len(_program_) != 0:
+            program = longest_list(_program_, i)
+            if isinstance(program, str):
+                program = program_type_by_identifier(program)
+            room.properties.energy.program_type = program
         else:  # generic office program by default
             try:
                 room.properties.energy.program_type = office_program
@@ -152,7 +148,7 @@ if all_required_inputs(ghenv.Component):
                 pass  # honeybee-energy is not installed
 
         # try to assign an ideal air system
-        if conditioned_ or conditioned_ is None:  # conditioned by default
+        if len(conditioned_) == 0 or longest_list(conditioned_, i):
             try:
                 room.properties.energy.add_default_ideal_air()
             except (NameError, AttributeError):

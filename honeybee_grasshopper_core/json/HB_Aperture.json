@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0", 
+  "version": "1.1.0", 
   "nickname": "Aperture", 
   "outputs": [
     [
@@ -21,28 +21,28 @@
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "_name_", 
       "description": "Text to set the name for the Aperture and to be incorporated into\nunique Aperture identifier. If the name is not provided, a random name\nwill be assigned.", 
       "type": "string", 
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "operable_", 
       "description": "Boolean to note whether the Aperture can be opened for ventilation.", 
       "type": "bool", 
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "ep_constr_", 
       "description": "Optional text for the Aperture's energy construction to be looked\nup in the construction library. This can also be a custom WindowConstruction\nobject. If no energy construction is input here, a default will be\nassigned based on the properties of the parent face that the Aperture\nis assigned to (ie. whether the Face is a RoofCeiling, whether it has\na Surface boundary condition, etc.)", 
       "type": "System.Object", 
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "rad_mod_", 
       "description": "Optional text for the Aperture's radiance modifier to be looked\nup in the modifier library. This can also be a custom modifier object.\nIf no radiance modifier is input here, a default will be assigned\nbased on the properties of the parent face that the Aperture is\nassigned to (ie. whether the Face is a RoofCeiling, whether it has a\nSurface boundary condition, etc.)", 
       "type": "System.Object", 
@@ -50,7 +50,7 @@
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\nimport uuid\n\ntry:  # import the core honeybee dependencies\n    from honeybee.aperture import Aperture\n    from honeybee.typing import clean_and_id_string\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.togeometry import to_face3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee-energy extension\n    from honeybee_energy.lib.constructions import window_construction_by_identifier\nexcept ImportError as e:\n    if ep_constr_ is not None:\n        raise ValueError('ep_constr_ has been specified but honeybee-energy '\n                         'has failed to import.\\n{}'.format(e))\n\ntry:  # import the honeybee-radiance extension\n    from honeybee_radiance.lib.modifiers import modifier_by_identifier\nexcept ImportError as e:\n    if rad_mod_ is not None:\n        raise ValueError('rad_mod_ has been specified but honeybee-radiance '\n                         'has failed to import.\\n{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    apertures = []  # list of apertures that will be returned\n\n    # set default name\n    name = clean_and_id_string(_name_) if _name_ is not None else str(uuid.uuid4())\n\n    # create the Apertures\n    i = 0  # iterator to ensure each aperture gets a unique name\n    for geo in _geo:\n        for lb_face in to_face3d(geo):\n            hb_ap = Aperture('{}_{}'.format(name, i), lb_face, is_operable=operable_)\n            if _name_ is not None:\n                hb_ap.display_name = '{}_{}'.format(_name_, i)\n\n            # try to assign the energyplus construction\n            if ep_constr_ is not None:\n                if isinstance(ep_constr_, str):\n                    ep_constr_ = window_construction_by_identifier(ep_constr_)\n                hb_ap.properties.energy.construction = ep_constr_\n\n            # try to assign the radiance modifier\n            if rad_mod_ is not None:\n                if isinstance(rad_mod_, str):\n                    rad_mod_ = modifier_by_identifier(rad_mod_)\n                hb_ap.properties.radiance.modifier = rad_mod_\n\n            apertures.append(hb_ap)  # collect the final Apertures\n            i += 1  # advance the iterator", 
+  "code": "\nimport uuid\n\ntry:  # import the core honeybee dependencies\n    from honeybee.aperture import Aperture\n    from honeybee.typing import clean_and_id_string\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.togeometry import to_face3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, longest_list\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee-energy extension\n    from honeybee_energy.lib.constructions import window_construction_by_identifier\nexcept ImportError as e:\n    if ep_constr_ is not None:\n        raise ValueError('ep_constr_ has been specified but honeybee-energy '\n                         'has failed to import.\\n{}'.format(e))\n\ntry:  # import the honeybee-radiance extension\n    from honeybee_radiance.lib.modifiers import modifier_by_identifier\nexcept ImportError as e:\n    if rad_mod_ is not None:\n        raise ValueError('rad_mod_ has been specified but honeybee-radiance '\n                         'has failed to import.\\n{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    apertures = []  # list of apertures that will be returned\n    base_name = str(uuid.uuid4())\n    i = 0  # iterator to ensure each aperture gets a unique name\n    for j, geo in enumerate(_geo):\n        name = longest_list(_name_, j) if len(_name_) != 0 else base_name\n        operable = longest_list(operable_, j) if len(operable_) != 0 else False\n        for lb_face in to_face3d(geo):\n            hb_ap = Aperture(clean_and_id_string('{}_{}'.format(name, i)),\n                             lb_face, is_operable=operable)\n            hb_ap.display_name = '{}_{}'.format(name, i)\n\n            # try to assign the energyplus construction\n            if len(ep_constr_) != 0:\n                ep_constr = longest_list(ep_constr_, j)\n                if isinstance(ep_constr, str):\n                    ep_constr = window_construction_by_identifier(ep_constr)\n                hb_ap.properties.energy.construction = ep_constr\n\n            # try to assign the radiance modifier\n            if len(rad_mod_) != 0:\n                rad_mod = longest_list(rad_mod_, j)\n                if isinstance(rad_mod, str):\n                    rad_mod = modifier_by_identifier(rad_mod)\n                hb_ap.properties.radiance.modifier = rad_mod\n\n            apertures.append(hb_ap)  # collect the final Apertures\n            i += 1  # advance the iterator", 
   "category": "Honeybee", 
   "name": "HB Aperture", 
   "description": "Create Honeybee Aperture\n-"
