@@ -50,17 +50,11 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room"
 ghenv.Component.NickName = 'Room'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.0.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
 
-# document-wide counter for the number of room names generated
-import scriptcontext
-try:
-    counter = scriptcontext.sticky["room_count"]
-except KeyError:  # first time that the component is running
-    scriptcontext.sticky["room_count"] = 1
 
 try:  # import the core honeybee dependencies
     from honeybee.room import Room
@@ -70,7 +64,8 @@ except ImportError as e:
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.config import tolerance, angle_tolerance
-    from ladybug_rhino.grasshopper import all_required_inputs, give_warning
+    from ladybug_rhino.grasshopper import all_required_inputs, give_warning, \
+        document_counter
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -104,8 +99,7 @@ if all_required_inputs(ghenv.Component):
 
     # generate a default name
     if _name_ is None:  # create a default Room name
-        name = "Room_{}_{}".format(scriptcontext.sticky["room_count"], str(uuid.uuid4())[:8])
-        scriptcontext.sticky["room_count"] += 1
+        name = "Room_{}_{}".format(document_counter('room_count'), str(uuid.uuid4())[:8])
     else:  # clean the input name so that it's unique and acceptable for E+
         name = clean_and_id_string(_name_)
 
