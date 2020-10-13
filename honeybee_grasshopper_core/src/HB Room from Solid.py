@@ -53,7 +53,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -77,20 +77,20 @@ try:  # import the honeybee-energy extension
     from honeybee_energy.lib.programtypes import program_type_by_identifier, office_program
     from honeybee_energy.lib.constructionsets import construction_set_by_identifier
 except ImportError as e:
-    if _program_ is not None:
+    if len(_program_) != 0:
         raise ValueError('_program_ has been specified but honeybee-energy '
                          'has failed to import.\n{}'.format(e))
-    elif _constr_set_ is not None:
+    elif len(_constr_set_) != 0:
         raise ValueError('_constr_set_ has been specified but honeybee-energy '
                          'has failed to import.\n{}'.format(e))
-    elif conditioned_ is not None:
+    elif len(conditioned_) != 0:
         raise ValueError('conditioned_ has been specified but honeybee-energy '
                          'has failed to import.\n{}'.format(e))
 
 try:  # import the honeybee-radiance extension
     from honeybee_radiance.lib.modifiersets import modifier_set_by_identifier
 except ImportError as e:
-    if _mod_set_ is not None:
+    if len(_mod_set_) != 0:
         raise ValueError('_mod_set_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
 

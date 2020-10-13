@@ -39,7 +39,7 @@ Create Honeybee Aperture
 
 ghenv.Component.Name = "HB Aperture"
 ghenv.Component.NickName = 'Aperture'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -61,14 +61,14 @@ except ImportError as e:
 try:  # import the honeybee-energy extension
     from honeybee_energy.lib.constructions import window_construction_by_identifier
 except ImportError as e:
-    if ep_constr_ is not None:
+    if len(ep_constr_) != 0:
         raise ValueError('ep_constr_ has been specified but honeybee-energy '
                          'has failed to import.\n{}'.format(e))
 
 try:  # import the honeybee-radiance extension
     from honeybee_radiance.lib.modifiers import modifier_by_identifier
 except ImportError as e:
-    if rad_mod_ is not None:
+    if len(rad_mod_) != 0:
         raise ValueError('rad_mod_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
 
