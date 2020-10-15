@@ -39,6 +39,9 @@ adjacent.
             by this component set to an AirBoundary face type. Note that AirBoundary
             face types are not allowed if interior windows are assigned to interior
             faces. Default: False.
+        overwrite_: Boolean to note whether existing Surface boundary conditions
+            should be overwritten. If False or None, only newly-assigned
+            adjacencies will be updated.
         _run: Set to True to run the component and solve adjacencies.
     
     Returns:
@@ -49,7 +52,7 @@ adjacent.
 
 ghenv.Component.Name = "HB Solve Adjacency"
 ghenv.Component.NickName = 'SolveAdj'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -188,7 +191,21 @@ if all_required_inputs(ghenv.Component) and _run:
     adj_rooms = [room.duplicate() for room in _rooms] # duplicate the initial objects
 
     # solve adjacnecy
-    adj_info = Room.solve_adjacency(adj_rooms, tolerance)
+    if overwrite_:  # find adjscencies and re-assign them
+        adj_aps = []
+        adj_doors = []
+        adj_faces = Room.find_adjacency(adj_rooms, tolerance)
+        for face_pair in adj_faces:
+            face_info = face_pair[0].set_adjacency(face_pair[1])
+            adj_aps.extend(face_info['adjacent_apertures'])
+            adj_doors.extend(face_info['adjacent_doors'])
+        adj_info = {
+            'adjacent_faces': adj_faces,
+            'adjacent_apertures': adj_aps,
+            'adjacent_doors': adj_doors
+        }
+    else:  # just solve for new adjacencies
+        adj_info = Room.solve_adjacency(adj_rooms, tolerance)
 
     # try to assign the energyplus constructions if specified
     if len(ep_int_constr_) != 0:
