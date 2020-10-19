@@ -66,7 +66,7 @@ that are Walls (not Floors or Roofs).
 
 ghenv.Component.Name = "HB Louver Shades"
 ghenv.Component.NickName = 'LouverShades'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.0.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -161,11 +161,11 @@ if all_required_inputs(ghenv.Component):
                         assign_louvers(ap, depth, count, dist, off, angle, vec,
                                        flip, indr)
         elif isinstance(obj, Face):
-            if can_host_apeture(obj):
+            if can_host_louvers(obj):
                 orient_i = face_orient_index(obj, angles)
                 depth, count, dist, off, angle, vec, flip, indr = \
                     inputs_by_index(orient_i, all_inputs)
-                for ap in face.apertures:
+                for ap in obj.apertures:
                     assign_louvers(ap, depth, count, dist, off, angle, vec,
                                    flip, indr)
         elif isinstance(obj, Aperture):
