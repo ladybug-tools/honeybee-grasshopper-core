@@ -30,7 +30,7 @@ of curved edges.
 
 ghenv.Component.Name = "HB Planarize Brep"
 ghenv.Component.NickName = 'Planarize'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.0.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -38,21 +38,15 @@ ghenv.Component.AdditionalHelpFromDocStrings = "2"
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.config import tolerance
     from ladybug_rhino.planarize import curved_solid_faces
-    from ladybug_rhino.fromgeometry import from_face3d
+    from ladybug_rhino.fromgeometry import from_face3ds_to_joined_brep
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
-import Rhino.Geometry as rg
-
 
 if all_required_inputs(ghenv.Component):
-    # set default meshing parameters
-    mesh_par = _mesh_par_ or rg.MeshingParameters.Default
-
     # planarize each of the breps
     pl_brep = []
     for brep in _brep:
-        lb_faces = curved_solid_faces(brep, mesh_par)
-        pl_brep.extend(
-            rg.Brep.JoinBreps([from_face3d(face) for face in lb_faces], tolerance))
+        lb_faces = curved_solid_faces(brep, _mesh_par_)
+        pl_brep.extend(from_face3ds_to_joined_brep(lb_faces))
