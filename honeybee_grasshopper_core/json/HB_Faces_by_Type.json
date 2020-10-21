@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0", 
+  "version": "1.0.1", 
   "nickname": "FacesByType", 
   "outputs": [
     [
@@ -55,28 +55,28 @@
       {
         "access": "None", 
         "name": "apertures", 
-        "description": "The Apertures with an Outdoors or Ground boundary condition.", 
+        "description": "The Apertures with an Outdoors boundary condition.", 
         "type": null, 
         "default": null
       }, 
       {
         "access": "None", 
         "name": "interior_apertures", 
-        "description": "The Apertures with an Surface or Adiabatic boundary\ncondition.", 
+        "description": "The Apertures with a Surface boundary condition.", 
         "type": null, 
         "default": null
       }, 
       {
         "access": "None", 
         "name": "doors", 
-        "description": "The Doors with an Outdoors or Ground boundary condition.", 
+        "description": "The Doors with an Outdoors boundary condition.", 
         "type": null, 
         "default": null
       }, 
       {
         "access": "None", 
         "name": "interior_doors", 
-        "description": "The Doors with an Surface or Adiabatic boundary condition.", 
+        "description": "The Doors with a Surface boundary condition.", 
         "type": null, 
         "default": null
       }, 

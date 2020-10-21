@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0", 
+  "version": "1.0.1", 
   "nickname": "VizByType", 
   "outputs": [
     [
@@ -55,28 +55,28 @@
       {
         "access": "None", 
         "name": "apertures", 
-        "description": "Rhino geometry for the Apertures with an Outdoors or Ground\nboundary condition.", 
+        "description": "Rhino geometry for the Apertures with an Outdoors boundary condition.", 
         "type": null, 
         "default": null
       }, 
       {
         "access": "None", 
         "name": "interior_apertures", 
-        "description": "Rhino geometry for the Apertures with an Surface or\nAdiabatic boundary condition.", 
+        "description": "Rhino geometry for the Apertures with a Surface\nboundary condition.", 
         "type": null, 
         "default": null
       }, 
       {
         "access": "None", 
         "name": "doors", 
-        "description": "Rhino geometry for the Doors with an Outdoors or Ground boundary\ncondition.", 
+        "description": "Rhino geometry for the Doors with an Outdoors boundary condition.", 
         "type": null, 
         "default": null
       }, 
       {
         "access": "None", 
         "name": "interior_doors", 
-        "description": "Rhino geometry for the Doors with an Surface or Adiabatic\nboundary condition.", 
+        "description": "Rhino geometry for the Doors with a Surface boundary condition.", 
         "type": null, 
         "default": null
       }, 

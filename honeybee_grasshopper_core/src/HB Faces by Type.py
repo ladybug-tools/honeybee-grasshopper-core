@@ -25,18 +25,17 @@ by object and face type.
         exterior_floors: The Floors with an Outdoors or Ground boundary condition.
         interior_floors: The Floors with a Surface or Adiabatic boundary condition.
         air_walls: The AirWalls.
-        apertures: The Apertures with an Outdoors or Ground boundary condition.
-        interior_apertures: The Apertures with an Surface or Adiabatic boundary
-            condition.
-        doors: The Doors with an Outdoors or Ground boundary condition.
-        interior_doors: The Doors with an Surface or Adiabatic boundary condition.
+        apertures: The Apertures with an Outdoors boundary condition.
+        interior_apertures: The Apertures with a Surface boundary condition.
+        doors: The Doors with an Outdoors boundary condition.
+        interior_doors: The Doors with a Surface boundary condition.
         outdoor_shades: The Shades assigned to the outdoors of their parent objects.
         indoor_shades: The Shades assigned to the indoors of their parent objects.
 """
 
 ghenv.Component.Name = 'HB Faces by Type'
 ghenv.Component.NickName = 'FacesByType'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.0.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'

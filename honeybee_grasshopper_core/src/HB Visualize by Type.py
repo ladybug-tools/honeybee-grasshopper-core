@@ -30,14 +30,11 @@ Visualize room geometry in the Rhino scene organized by object and face type.
         interior_floors: Rhino geometry for the Floors with a Surface or Adiabatic
             boundary condition.
         air_walls: Rhino geometry for the AirWalls.
-        apertures: Rhino geometry for the Apertures with an Outdoors or Ground
+        apertures: Rhino geometry for the Apertures with an Outdoors boundary condition.
+        interior_apertures: Rhino geometry for the Apertures with a Surface
             boundary condition.
-        interior_apertures: Rhino geometry for the Apertures with an Surface or
-            Adiabatic boundary condition.
-        doors: Rhino geometry for the Doors with an Outdoors or Ground boundary
-            condition.
-        interior_doors: Rhino geometry for the Doors with an Surface or Adiabatic
-            boundary condition.
+        doors: Rhino geometry for the Doors with an Outdoors boundary condition.
+        interior_doors: Rhino geometry for the Doors with a Surface boundary condition.
         outdoor_shades: Rhino geometry for the Shades assigned to the outdoors
             of their parent objects.
         indoor_shades: Rhino geometry for the Shades assigned to the indoors
@@ -47,7 +44,7 @@ Visualize room geometry in the Rhino scene organized by object and face type.
 
 ghenv.Component.Name = 'HB Visualize by Type'
 ghenv.Component.NickName = 'VizByType'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.0.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
