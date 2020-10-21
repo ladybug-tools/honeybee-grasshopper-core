@@ -53,7 +53,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '1.1.1'
+ghenv.Component.Message = '1.1.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -111,7 +111,7 @@ if all_required_inputs(ghenv.Component):
             name = clean_and_id_string(display_name)
 
         # create the Room
-        room = Room.from_polyface3d(name, to_polyface3d(geo), roof_angle)
+        room = Room.from_polyface3d(name, to_polyface3d(geo), roof_angle, ground_depth=tolerance)
         if len(_name_) != 0:
             room.display_name = display_name
 
