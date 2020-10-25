@@ -32,7 +32,7 @@ none of the identifiers of the child objects.
 
 ghenv.Component.Name = 'HB Set Identifier'
 ghenv.Component.NickName = 'ID'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.0.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -45,4 +45,7 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     hb_obj = _hb_obj.duplicate()
-    hb_obj.identifier = _id
+    try:
+        hb_obj.identifier = _id
+    except AttributeError:
+        hb_obj._identifier = _id
