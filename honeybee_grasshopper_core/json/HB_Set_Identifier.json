@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0", 
+  "version": "1.0.1", 
   "nickname": "ID", 
   "outputs": [
     [
@@ -29,7 +29,7 @@
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    hb_obj = _hb_obj.duplicate()\n    hb_obj.identifier = _id\n", 
+  "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    hb_obj = _hb_obj.duplicate()\n    try:\n        hb_obj.identifier = _id\n    except AttributeError:\n        hb_obj._identifier = _id\n", 
   "category": "Honeybee", 
   "name": "HB Set Identifier", 
   "description": "THIS COMPONENT IS INTENDED FOR ADVANCED USERS WHO UNDERSTAND THAT IDENTIFERS\nMUST BE UNIQUE AND THAT, TO SET THEM OTHERWISE CAN HAVE UNINTENDED CONSEQUENCES.\n_\nChange the identifier of an object.\n_\nNote that this component only changes the identifer of the input _hb_obj and\nnone of the identifiers of the child objects.\n-"
