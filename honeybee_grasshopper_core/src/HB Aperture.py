@@ -12,7 +12,7 @@ Create Honeybee Aperture
 -
 
     Args:
-        _geo: Rhino Brep geometry.
+        _geo: Rhino Brep or Mesh geometry.
         _name_: Text to set the name for the Aperture and to be incorporated into
             unique Aperture identifier. If the name is not provided, a random name
             will be assigned.
@@ -39,7 +39,7 @@ Create Honeybee Aperture
 
 ghenv.Component.Name = "HB Aperture"
 ghenv.Component.NickName = 'Aperture'
-ghenv.Component.Message = '1.1.1'
+ghenv.Component.Message = '1.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -54,7 +54,8 @@ except ImportError as e:
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.togeometry import to_face3d
-    from ladybug_rhino.grasshopper import all_required_inputs, longest_list
+    from ladybug_rhino.grasshopper import all_required_inputs, longest_list, \
+        wrap_output
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -101,3 +102,4 @@ if all_required_inputs(ghenv.Component):
 
             apertures.append(hb_ap)  # collect the final Apertures
             i += 1  # advance the iterator
+    apertures = wrap_output(apertures)

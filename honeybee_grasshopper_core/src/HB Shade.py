@@ -12,7 +12,7 @@ Create Honeybee Shade
 -
 
     Args:
-        _geo: Rhino Brep geometry.
+        _geo: Rhino Brep or Mesh geometry.
         _name_: Text to set the name for the Shade and to be incorporated into
             unique Shade identifier. If the name is not provided, a random name
             will be assigned.
@@ -42,7 +42,7 @@ Create Honeybee Shade
 
 ghenv.Component.Name = "HB Shade"
 ghenv.Component.NickName = 'Shade'
-ghenv.Component.Message = '1.1.1'
+ghenv.Component.Message = '1.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -57,7 +57,8 @@ except ImportError as e:
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.togeometry import to_face3d
-    from ladybug_rhino.grasshopper import all_required_inputs, longest_list
+    from ladybug_rhino.grasshopper import all_required_inputs, longest_list, \
+        wrap_output
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -115,3 +116,4 @@ if all_required_inputs(ghenv.Component):
 
             shades.append(hb_shd)  # collect the final Shades
             i += 1  # advance the iterator
+    shades = wrap_output(shades)
