@@ -42,7 +42,7 @@ Create Honeybee Shade
 
 ghenv.Component.Name = "HB Shade"
 ghenv.Component.NickName = 'Shade'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -103,9 +103,9 @@ if all_required_inputs(ghenv.Component):
             # try to assign the energyplus transmittance schedule
             if len(ep_trans_sch_) != 0:
                 ep_trans_sch = longest_list(ep_trans_sch_, j)
-                if isinstance(ep_trans_sch_, str):
-                    ep_trans_sch_ = schedule_by_identifier(ep_trans_sch_)
-                hb_shd.properties.energy.transmittance_schedule = ep_trans_sch_
+                if isinstance(ep_trans_sch, str):
+                    ep_trans_sch = schedule_by_identifier(ep_trans_sch)
+                hb_shd.properties.energy.transmittance_schedule = ep_trans_sch
 
             # try to assign the radiance modifier
             if len(rad_mod_) != 0:
