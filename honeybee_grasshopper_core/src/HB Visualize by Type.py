@@ -12,10 +12,9 @@ Visualize room geometry in the Rhino scene organized by object and face type.
 -
 
     Args:
-        _rooms: Honeybee Rooms for which you would like to preview geometry
-            in the Rhino scene based on type. This can also be an entire
-            honeybee Model.
-    
+        _hb_objs: A Honeybee Model, Room, Face, Aperture, Door or Shade to be
+            previewed in the Rhino scene based on type.
+
     Returns:
         walls: Rhino geometry for the Walls with an Outdoors or Ground boundary
             condition.
@@ -35,8 +34,9 @@ Visualize room geometry in the Rhino scene organized by object and face type.
             boundary condition.
         doors: Rhino geometry for the Doors with an Outdoors boundary condition.
         interior_doors: Rhino geometry for the Doors with a Surface boundary condition.
-        outdoor_shades: Rhino geometry for the Shades assigned to the outdoors
-            of their parent objects.
+        outdoor_shades: Rhino geometry for the Shades assigned to the outdoors of
+            their parent objects. This also includes all orphaned shades
+            of a model.
         indoor_shades: Rhino geometry for the Shades assigned to the indoors
             of their parent objects.
         wire_frame: A list of lines representing the outlines of the rooms.
@@ -44,7 +44,7 @@ Visualize room geometry in the Rhino scene organized by object and face type.
 
 ghenv.Component.Name = 'HB Visualize by Type'
 ghenv.Component.NickName = 'VizByType'
-ghenv.Component.Message = '1.0.1'
+ghenv.Component.Message = '1.0.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
@@ -56,6 +56,11 @@ except ImportError as e:
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
+    from honeybee.room import Room
+    from honeybee.face import Face
+    from honeybee.aperture import Aperture
+    from honeybee.door import Door
+    from honeybee.shade import Shade
     from honeybee.boundarycondition import Surface
     from honeybee.facetype import Wall, RoofCeiling, Floor, AirBoundary
 except ImportError as e:
@@ -74,6 +79,67 @@ except ImportError:  # honeybee-energy not installed
     Adiabatic = None  # don't worry about Aidabatic; Surface is the only interior bc
 
 
+def add_shade(hb_obj):
+    """Add assigned shade objects to the relevant lists."""
+    _outdoor_shades.extend([shd.geometry for shd in hb_obj.outdoor_shades])
+    _indoor_shades.extend([shd.geometry for shd in hb_obj.indoor_shades])
+
+
+def add_aperture(ap):
+    """Add an aperture to the relevant lists."""
+    add_shade(ap)
+    if isinstance(ap.boundary_condition, Surface):
+        _interior_apertures.append(ap.geometry)
+    else:
+        _apertures.append(ap.geometry)
+
+
+def add_door(dr):
+    """Add a door to the relevant lists."""
+    add_shade(dr)
+    if isinstance(dr.boundary_condition, Surface):
+        _interior_doors.append(dr.geometry)
+    else:
+        _doors.append(dr.geometry)
+
+
+def add_face(face):
+    """Add a Face to the relevant lists."""
+    add_shade(face)
+    bc = face.boundary_condition
+    type = face.type
+    if isinstance(type, Wall):
+        if isinstance(bc, (Surface, Adiabatic)):
+            _interior_walls.append(face.punched_geometry)
+        else:
+            _walls.append(face.punched_geometry)
+    elif isinstance(type, RoofCeiling):
+        if isinstance(bc, (Surface, Adiabatic)):
+            _ceilings.append(face.punched_geometry)
+        else:
+            _roofs.append(face.punched_geometry)
+    elif isinstance(type, Floor):
+        if isinstance(bc, (Surface, Adiabatic)):
+            _interior_floors.append(face.punched_geometry)
+        else:
+            _exterior_floors.append(face.punched_geometry)
+    elif isinstance(type, AirBoundary):
+        _air_walls.append(face.punched_geometry)
+
+    # add the apertures, doors, and shades
+    for ap in face.apertures:
+        add_aperture(ap)
+    for dr in face.doors:
+        add_door(dr)
+
+
+def add_room(room):
+    """Add a Room to the relevant lists."""
+    add_shade(room)
+    for face in room:
+        add_face(face)
+
+
 if all_required_inputs(ghenv.Component):
     # lists of rhino geometry to be filled with content
     _walls = []
@@ -90,58 +156,27 @@ if all_required_inputs(ghenv.Component):
     _outdoor_shades = []
     _indoor_shades = []
 
-    # method to add shades
-    def add_shade(hb_obj):
-        _outdoor_shades.extend([shd.geometry for shd in hb_obj.outdoor_shades])
-        _indoor_shades.extend([shd.geometry for shd in hb_obj.indoor_shades])
-
-    # extract any rooms from input Models
-    rooms = []
-    for hb_obj in _rooms:
+    # loop through the objects and group them by type
+    for hb_obj in _hb_objs:
         if isinstance(hb_obj, Model):
-            rooms.extend(hb_obj.rooms)
+            [add_room(room) for room in hb_obj.rooms]
+            [add_face(face) for face in hb_obj.orphaned_faces]
+            [add_aperture(ap) for ap in hb_obj.orphaned_apertures]
+            [add_door(dr) for dr in hb_obj.orphaned_doors]
             _outdoor_shades.extend([shd.geometry for shd in hb_obj.orphaned_shades])
-        else:
-            rooms.append(hb_obj)
-
-    # loop through all objects and add them
-    for room in rooms:
-        add_shade(room)
-        for face in room:
-            add_shade(face)
-            bc = face.boundary_condition
-            type = face.type
-            if isinstance(type, Wall):
-                if isinstance(bc, (Surface, Adiabatic)):
-                    _interior_walls.append(face.punched_geometry)
-                else:
-                    _walls.append(face.punched_geometry)
-            elif isinstance(type, RoofCeiling):
-                if isinstance(bc, (Surface, Adiabatic)):
-                    _ceilings.append(face.punched_geometry)
-                else:
-                    _roofs.append(face.punched_geometry)
-            elif isinstance(type, Floor):
-                if isinstance(bc, (Surface, Adiabatic)):
-                    _interior_floors.append(face.punched_geometry)
-                else:
-                    _exterior_floors.append(face.punched_geometry)
-            elif isinstance(type, AirBoundary):
-                _air_walls.append(face.punched_geometry)
-
-            # add the apertures, doors, and shades
-            for ap in face.apertures:
-                add_shade(ap)
-                if isinstance(bc, Surface):
-                    _interior_apertures.append(ap.geometry)
-                else:
-                    _apertures.append(ap.geometry)
-            for dr in face.doors:
-                add_shade(dr)
-                if isinstance(bc, Surface):
-                    _interior_doors.append(dr.geometry)
-                else:
-                    _doors.append(dr.geometry)
+        elif isinstance(hb_obj, Room):
+            add_room(hb_obj)
+        elif isinstance(hb_obj, Face):
+            add_face(hb_obj)
+        elif isinstance(hb_obj, Aperture):
+            add_aperture(hb_obj)
+        elif isinstance(hb_obj, Door):
+            add_door(hb_obj)
+        elif isinstance(hb_obj, Shade):
+            if hb_obj.is_indoor:
+                _indoor_shades.append(hb_obj.geometry)
+            else:
+                _outdoor_shades.append(hb_obj.geometry)
 
     # color all of the geometry with its respective surface type
     palette = Colorset.openstudio_palette()
