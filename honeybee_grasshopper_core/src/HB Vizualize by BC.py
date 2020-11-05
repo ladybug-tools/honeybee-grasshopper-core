@@ -12,25 +12,24 @@ Visualize room geometry in the Rhino scene organized by boundary condition.
 -
 
     Args:
-        _rooms: Honeybee Rooms for which you would like to preview geometry
-            in the Rhino scene based on boundary condition. This can also be an
-            entire honeybee Model.
-    
+        _hb_objs: A Honeybee Model, Room, Face, Aperture, Door or Shade to be
+            previewed in the Rhino scene based on boundary condition.
+
     Returns:
-        outdoors: Rhino geometry for the faces with an Outdoors boundary condition.
-        surface: Rhino geometry for the faces with a Surface (interior) boundary
+        outdoors: Rhino geometry for the objects with an Outdoors boundary condition.
+        surface: Rhino geometry for the objects with a Surface (interior) boundary
             condition.
-        ground: Rhino geometry for the faces with a Ground boundary condition.
-        adiabatic: Rhino geometry for the faces with an adiabatic (no heat flow)
+        ground: Rhino geometry for the objects with a Ground boundary condition.
+        adiabatic: Rhino geometry for the objects with an adiabatic (no heat flow)
             boundary condition.
-        other: Rhino geometry for all faces with a boundary condition other than
-            the four above.
+        other: Rhino geometry for all objects with a boundary condition other than
+            the four above. All shade geometry will also be added to this list.
         wire_frame: A list of lines representing the outlines of the rooms.
 """
 
 ghenv.Component.Name = "HB Vizualize by BC"
 ghenv.Component.NickName = 'VizByBC'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.0.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
@@ -42,6 +41,11 @@ except ImportError as e:
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
+    from honeybee.room import Room
+    from honeybee.face import Face
+    from honeybee.aperture import Aperture
+    from honeybee.door import Door
+    from honeybee.shade import Shade
     from honeybee.boundarycondition import Outdoors, Surface, Ground
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -59,12 +63,46 @@ except ImportError:  # honeybee-energy is not installed
     Adiabatic = None  # don't worry about the Adiabatic bc
 
 
-def add_face(face, geo_list):
+def add_shades(hb_obj):
+    """Add assigned shade objects to the relevant list."""
+    _other.extend([shd.geometry for shd in hb_obj.shades])
+
+
+def add_subface(ap, geo_list=None):
+    """Add an aperture or a door to the relevant lists."""
+    add_shades(ap)
+    if geo_list is None:
+        geo_list = _outdoors if isinstance(ap.boundary_condition, Outdoors) \
+            else _surface
+    geo_list.append(ap.geometry)
+
+
+def add_face(face):
+    """Add a Face to the relevant lists."""
+    add_shades(face)
+    bc = face.boundary_condition
+    if isinstance(bc, Outdoors):
+        geo_list = _outdoors
+    elif isinstance(bc, Surface):
+        geo_list = _surface
+    elif isinstance(bc, Ground):
+        geo_list = _ground
+    elif isinstance(bc, Adiabatic):
+        geo_list = _adiabatic
+    else:
+        geo_list = _other
     geo_list.append(face.punched_geometry)
     for ap in face.apertures:
-        geo_list.append(ap.geometry)
+        add_subface(ap, geo_list)
     for dr in face.doors:
-        geo_list.append(dr.geometry)
+        add_subface(dr, geo_list)
+
+
+def add_room(room):
+    """Add a Room to the relevant lists."""
+    add_shades(room)
+    for face in room:
+        add_face(face)
 
 
 if all_required_inputs(ghenv.Component):
@@ -75,28 +113,24 @@ if all_required_inputs(ghenv.Component):
     _adiabatic = []
     _other = []
 
-    # extract any rooms from input Models
-    rooms = []
-    for hb_obj in _rooms:
+    # loop through the objects and group them by boundary condition
+    for hb_obj in _hb_objs:
         if isinstance(hb_obj, Model):
-            rooms.extend(hb_obj.rooms)
-        else:
-            rooms.append(hb_obj)
-
-    # loop through all objects and add them
-    for room in rooms:
-        for face in room:
-            bc = face.boundary_condition
-            if isinstance(bc, Outdoors):
-                add_face(face, _outdoors)
-            elif isinstance(bc, Surface):
-                add_face(face, _surface)
-            elif isinstance(bc, Ground):
-                add_face(face, _ground)
-            elif isinstance(bc, Adiabatic):
-                add_face(face, _adiabatic)
-            else:
-                add_face(face, _other)
+            [add_room(room) for room in hb_obj.rooms]
+            [add_face(face) for face in hb_obj.orphaned_faces]
+            [add_subface(ap) for ap in hb_obj.orphaned_apertures]
+            [add_subface(dr) for dr in hb_obj.orphaned_doors]
+            _other.extend([shd.geometry for shd in hb_obj.orphaned_shades])
+        elif isinstance(hb_obj, Room):
+            add_room(hb_obj)
+        elif isinstance(hb_obj, Face):
+            add_face(hb_obj)
+        elif isinstance(hb_obj, Aperture):
+            add_subface(hb_obj)
+        elif isinstance(hb_obj, Door):
+            add_subface(hb_obj)
+        elif isinstance(hb_obj, Shade):
+            _other.append(hb_obj.geometry)
 
     # color all of the geometry with its respective surface type
     palette = Colorset.openstudio_palette()
@@ -108,7 +142,7 @@ if all_required_inputs(ghenv.Component):
         if len(_ground) != 0 else None
     adiabatic = from_face3ds_to_colored_mesh(_adiabatic, palette[4]) \
         if len(_adiabatic) != 0 else None
-    other = from_face3ds_to_colored_mesh(_other, palette[9]) \
+    other = from_face3ds_to_colored_mesh(_other, palette[12]) \
         if len(_other) != 0 else None
 
     # create the wire frame
