@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ladybug-tools/honeybee-grasshopper-core.svg?branch=master)](https://travis-ci.org/ladybug-tools/honeybee-grasshopper-core)
+[![Build Status](https://travis-ci.com/ladybug-tools/honeybee-grasshopper-core.svg?branch=master)](https://travis-ci.com/ladybug-tools/honeybee-grasshopper-core)
 
 [![IronPython](https://img.shields.io/badge/ironpython-2.7-red.svg)](https://github.com/IronLanguages/ironpython2/releases/tag/ipy-2.7.8/)
 
