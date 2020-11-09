@@ -33,7 +33,7 @@ speed up the calculation.
 
 ghenv.Component.Name = "HB Set Multiplier"
 ghenv.Component.NickName = 'Multiplier'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

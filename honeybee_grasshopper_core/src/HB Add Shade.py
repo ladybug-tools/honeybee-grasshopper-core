@@ -29,7 +29,7 @@ Add a Honeybee Shades to an Aperture, Door, Face or Room.
 
 ghenv.Component.Name = "HB Add Shade"
 ghenv.Component.NickName = 'AddShade'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"

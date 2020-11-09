@@ -30,7 +30,7 @@ Separate and group honeybee rooms with the same average floor height.
 
 ghenv.Component.Name = "HB Rooms by Floor Height"
 ghenv.Component.NickName = 'FloorHeight'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
