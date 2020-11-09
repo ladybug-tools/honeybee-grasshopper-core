@@ -40,7 +40,7 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Dump Objects'
 ghenv.Component.NickName = 'DumpObjects'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'

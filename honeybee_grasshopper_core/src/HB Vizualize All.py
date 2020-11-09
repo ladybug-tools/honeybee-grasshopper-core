@@ -23,7 +23,7 @@ sub-faces and assigned shades.
 
 ghenv.Component.Name = "HB Vizualize All"
 ghenv.Component.NickName = 'VizAll'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"

@@ -29,7 +29,7 @@ be shade depths, angles, etc. for the "HB Louver Shades" component.
 """
 ghenv.Component.Name = "HB Facade Parameters"
 ghenv.Component.NickName = 'FacParam'
-ghenv.Component.Message = '1.0.1'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"

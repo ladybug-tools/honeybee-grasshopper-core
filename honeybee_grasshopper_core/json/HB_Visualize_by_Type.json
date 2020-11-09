@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2", 
+  "version": "1.1.0", 
   "nickname": "VizByType", 
   "outputs": [
     [
@@ -106,7 +106,7 @@
   "inputs": [
     {
       "access": "list", 
-      "name": "_rooms", 
+      "name": "_hb_objs", 
       "description": "A Honeybee Model, Room, Face, Aperture, Door or Shade to be\npreviewed in the Rhino scene based on type.", 
       "type": "System.Object", 
       "default": null

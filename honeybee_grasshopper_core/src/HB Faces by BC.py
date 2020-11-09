@@ -28,7 +28,7 @@ by boundary condition.
 
 ghenv.Component.Name = 'HB Faces by BC'
 ghenv.Component.NickName = 'FacesByBC'
-ghenv.Component.Message = '1.0.1'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'

@@ -40,7 +40,7 @@ simulations or in the solar distribution calculation of EnergyPlus.
 
 ghenv.Component.Name = "HB Extruded Border Shades"
 ghenv.Component.NickName = 'BorderShades'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"

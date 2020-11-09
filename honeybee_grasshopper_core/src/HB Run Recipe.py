@@ -39,7 +39,7 @@ Execute any Queenbee Recipe on this machine using queenbee-luigi.
 
 ghenv.Component.Name = 'HB Run Recipe'
 ghenv.Component.NickName = 'RunRecipe'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '4 :: Simulate'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'

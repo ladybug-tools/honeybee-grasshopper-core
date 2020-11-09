@@ -31,7 +31,7 @@ This can be used to group rooms by program, whether rooms are conditioned, etc.
 
 ghenv.Component.Name = "HB Rooms by Attribute"
 ghenv.Component.NickName = 'RoomsByAttr'
-ghenv.Component.Message = '1.0.0'
+ghenv.Component.Message = '1.1.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
