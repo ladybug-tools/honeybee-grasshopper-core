@@ -44,7 +44,7 @@ Visualize room geometry in the Rhino scene organized by object and face type.
 
 ghenv.Component.Name = 'HB Visualize by Type'
 ghenv.Component.NickName = 'VizByType'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
@@ -211,4 +211,4 @@ if all_required_inputs(ghenv.Component):
     all_geo = _walls + _interior_walls + _roofs + _ceilings + _exterior_floors + \
         _interior_floors + _air_walls + _apertures + _interior_apertures + _doors + \
         _interior_doors + _outdoor_shades + _indoor_shades
-    wire_frame = [from_face3d_to_wireframe(face) for face in all_geo]
+    wire_frame = [curve for face in all_geo for curve in from_face3d_to_wireframe(face)]

@@ -29,7 +29,7 @@ Visualize room geometry in the Rhino scene organized by boundary condition.
 
 ghenv.Component.Name = "HB Vizualize by BC"
 ghenv.Component.NickName = 'VizByBC'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
@@ -147,4 +147,4 @@ if all_required_inputs(ghenv.Component):
 
     # create the wire frame
     all_geo = _outdoors + _surface + _ground + _adiabatic + _other
-    wire_frame = [from_face3d_to_wireframe(face) for face in all_geo]
+    wire_frame = [curve for face in all_geo for curve in from_face3d_to_wireframe(face)]
