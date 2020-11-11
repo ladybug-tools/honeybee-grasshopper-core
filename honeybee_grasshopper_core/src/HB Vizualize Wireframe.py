@@ -23,7 +23,7 @@ scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = 'HB Vizualize Wireframe'
 ghenv.Component.NickName = 'VizWireF'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -47,32 +47,32 @@ except ImportError as e:
 
 def add_door(door, geo):
     """Add Door geometry to a geo list."""
-    geo.append(from_face3d_to_wireframe(door.geometry))
+    geo.extend(from_face3d_to_wireframe(door.geometry))
     for shd in door.shades:
-        geo.append(from_face3d_to_wireframe(shd.geometry))
+        geo.extend(from_face3d_to_wireframe(shd.geometry))
 
 def add_aperture(aperture, geo):
     """Add Aperture geometry to a geo list."""
-    geo.append(from_face3d_to_wireframe(aperture.geometry))
+    geo.extend(from_face3d_to_wireframe(aperture.geometry))
     for shd in aperture.shades:
-        geo.append(from_face3d_to_wireframe(shd.geometry))
+        geo.extend(from_face3d_to_wireframe(shd.geometry))
 
 def add_face(face, geo):
     """Add Face geometry to a geo list."""
-    geo.append(from_face3d_to_wireframe(face.geometry))
+    geo.extend(from_face3d_to_wireframe(face.geometry))
     for ap in face.apertures:
         add_aperture(ap, geo)
     for dr in face.doors:
         add_door(dr, geo)
     for shd in face.shades:
-        geo.append(from_face3d_to_wireframe(shd.geometry))
+        geo.extend(from_face3d_to_wireframe(shd.geometry))
 
 def add_room(room, geo):
     """Add Room geometry to a geo list."""
     for face in room.faces:
         add_face(face, geo)
     for shd in room.shades:
-        geo.append(from_face3d_to_wireframe(shd.geometry))
+        geo.extend(from_face3d_to_wireframe(shd.geometry))
 
 def add_model(model, geo):
     """Add Model geometry to a geo list."""
@@ -85,7 +85,7 @@ def add_model(model, geo):
     for dr in model.orphaned_doors:
         add_door(dr, geo)
     for shd in model.orphaned_shades:
-        geo.append(from_face3d_to_wireframe(shd.geometry))
+        geo.extend(from_face3d_to_wireframe(shd.geometry))
 
 
 if all_required_inputs(ghenv.Component):
@@ -103,7 +103,7 @@ if all_required_inputs(ghenv.Component):
         elif isinstance(hb_obj, Door):
             add_door(hb_obj, geo)
         elif isinstance(hb_obj, Shade):
-            geo.append(from_face3d_to_wireframe(hb_obj.geometry))
+            geo.extend(from_face3d_to_wireframe(hb_obj.geometry))
         elif isinstance(hb_obj, Model):
             add_model(hb_obj, geo)
         else:
