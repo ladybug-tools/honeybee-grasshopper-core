@@ -40,7 +40,7 @@ different faces and sub-faces.
 
 ghenv.Component.Name = 'HB Label Faces'
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -106,7 +106,7 @@ def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_fra
     label_text.append(face_prop)
     base_pts.append(from_plane(base_plane))
     labels.append(label)
-    wire_frame.append(from_face3d_to_wireframe(face.geometry))
+    wire_frame.extend(from_face3d_to_wireframe(face.geometry))
 
 
 if all_required_inputs(ghenv.Component):
