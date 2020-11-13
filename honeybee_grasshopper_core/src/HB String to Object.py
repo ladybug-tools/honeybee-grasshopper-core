@@ -27,7 +27,7 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB String to Object'
 ghenv.Component.NickName = 'StrToObj'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -76,7 +76,7 @@ def model_units_tolerance_check(model):
         msg = 'Imported Model tolerance "{}" is significantly coarser than the ' \
             'current Rhino model tolerance "{}".\nIt is recommended that the ' \
             'Rhino document tolerance be changed to be coarser and this ' \
-            'component is re-run.'.format(new_tol, tolerance)
+            'component is re-run.'.format(model.tolerance, tolerance)
         print msg
         give_warning(ghenv.Component, msg)
 
