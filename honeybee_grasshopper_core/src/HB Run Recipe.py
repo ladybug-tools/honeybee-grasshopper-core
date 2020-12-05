@@ -39,7 +39,7 @@ Execute any Queenbee Recipe on this machine using queenbee-luigi.
 
 ghenv.Component.Name = 'HB Run Recipe'
 ghenv.Component.NickName = 'RunRecipe'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '4 :: Simulate'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -107,24 +107,27 @@ if all_required_inputs(ghenv.Component) and _run:
     # write the inputs JSON for the recipe
     inputs_json = _recipe.write_inputs_json(_folder_)
 
-    # execute the queenbee luigi CLI to obtain the results via CPython
-    queenbee_exe = os.path.join(hb_folders.python_scripts_path, 'queenbee.exe') \
-        if os.name == 'nt' else os.path.join(hb_folders.python_scripts_path, 'queenbee')
-    cmds = [queenbee_exe, 'luigi', 'translate', _recipe.path, _folder_,
-            '-i', inputs_json, '--workers', _cpu_count_]
-    if rad_folders.radlib_path:  # set the RAYPATH environment variable
-        cmds.extend(['--env', 'RAYPATH={}'.format(rad_folders.radlib_path)])
-    if rad_folders.radbin_path:  # set the PATH environment variable
-        cmds.extend(['--env', 'PATH={}'.format(rad_folders.radbin_path)])
-    cmds.append('--run')
+    genv = os.environ.copy()
+    genv['PATH'] = os.pathsep.join((rad_folders.radbin_path, genv['PATH']))
+    genv['RAYPATH'] = os.pathsep.join((rad_folders.radlib_path, genv['RAYPATH']))
+
+    # create command
+    command = '"{hb_recipe}" run {recipe_name} ' \
+        '"{project_folder}" -i "{user_inputs}" --workers {cpu_count} ' \
+        '--name {simulation_name}'.format(
+            hb_recipe=os.path.join(hb_folders.python_scripts_path, 'honeybee-recipe'),
+            recipe_name=_recipe.name, project_folder=_folder_,
+            user_inputs=inputs_json, cpu_count=_cpu_count_,
+            simulation_name=_recipe.simulation_id
+        )
 
     if report_out_:
-        process = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         result = process.communicate()
         print result[0]
         print result[1]
     else:
-        process = subprocess.Popen(cmds)
+        process = subprocess.Popen(command)
         result = process.communicate()
 
     # try to parse the results
