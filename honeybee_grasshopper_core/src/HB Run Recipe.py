@@ -107,17 +107,19 @@ if all_required_inputs(ghenv.Component) and _run:
     # write the inputs JSON for the recipe
     inputs_json = _recipe.write_inputs_json(_folder_)
 
-    genv = os.environ.copy()
-    genv['PATH'] = os.pathsep.join((rad_folders.radbin_path, genv['PATH']))
-    genv['RAYPATH'] = os.pathsep.join((rad_folders.radlib_path, genv['RAYPATH']))
+    genv = {}
+    genv['PATH'] = rad_folders.radbin_path
+    genv['RAYPATH'] = rad_folders.radlib_path
+    env_args = ['--env {}="{}"'.format(k, v) for k, v in genv.items()]
 
     # create command
     command = '"{hb_recipe}" run {recipe_name} ' \
         '"{project_folder}" -i "{user_inputs}" --workers {cpu_count} ' \
-        '--name {simulation_name}'.format(
+        '{environment} --name {simulation_name}'.format(
             hb_recipe=os.path.join(hb_folders.python_scripts_path, 'honeybee-recipe'),
             recipe_name=_recipe.name, project_folder=_folder_,
             user_inputs=inputs_json, cpu_count=_cpu_count_,
+            environment=' '.join(env_args),
             simulation_name=_recipe.simulation_id
         )
 
