@@ -9,7 +9,7 @@
 
 """
 THIS COMPONENT IS INTENDED FOR ADVANCED USERS WHO UNDERSTAND THAT IDENTIFERS
-MUST BE UNIQUE AND THAT, TO SET THEM OTHERWISE CAN HAVE UNINTENDED CONSEQUENCES.
+SHOULD BE UNIQUE AND THAT, TO SET THEM OTHERWISE CAN HAVE UNINTENDED CONSEQUENCES.
 _
 Change the identifier of an object.
 _
@@ -32,7 +32,7 @@ none of the identifiers of the child objects.
 
 ghenv.Component.Name = 'HB Set Identifier'
 ghenv.Component.NickName = 'ID'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -46,4 +46,3 @@ except ImportError as e:
 if all_required_inputs(ghenv.Component):
     hb_obj = _hb_obj.duplicate()
     hb_obj.identifier = _id
-    hb_obj.display_name = _id  # reset to be the same as ID
