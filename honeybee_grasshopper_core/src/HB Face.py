@@ -43,7 +43,7 @@ Create Honeybee Face
             up in the modifier library. This can also be a custom modifier object.
             If no radiance modifier is input here, the face type and boundary
             condition will be used to assign a default.
-    
+
     Returns:
         report: Reports, errors, warnings, etc.
         face: Honeybee faces. These can be used directly in radiance simulations
@@ -52,12 +52,10 @@ Create Honeybee Face
 
 ghenv.Component.Name = "HB Face"
 ghenv.Component.NickName = 'Face'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "3"
-
-import uuid
 
 try:  # import the core honeybee dependencies
     from honeybee.face import Face
@@ -90,10 +88,13 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     faces = []  # list of faces that will be returned
-    base_name = str(uuid.uuid4())
-    i = 0  # iterator to ensure each face gets a unique name
     for j, geo in enumerate(_geo):
-        name = longest_list(_name_, j) if len(_name_) != 0 else base_name
+        if len(_name_) == 0:  # make a default Face name
+            name = display_name = clean_and_id_string('Face')
+        else:
+            display_name = '{}_{}'.format(longest_list(_name_, j), j + 1) \
+                if len(_name_) != len(_geo) else longest_list(_name_, j)
+            name = clean_and_id_string(display_name)
         typ = longest_list(_type_, j) if len(_type_) != 0 else None
         bc = longest_list(_bc_, j) if len(_bc_) != 0 else None
         if typ is not None and typ not in face_types:
@@ -101,10 +102,11 @@ if all_required_inputs(ghenv.Component):
         if bc is not None and bc not in boundary_conditions:
             bc = boundary_conditions.by_name(bc)
 
-        for lb_face in to_face3d(geo):
-            hb_face = Face(clean_and_id_string('{}_{}'.format(name, i)),
-                           lb_face, typ, bc)
-            hb_face.display_name = '{}_{}'.format(name, i)
+        lb_faces = to_face3d(geo)
+        for i, lb_face in enumerate(lb_faces):
+            face_name = '{}_{}'.format(name, i) if len(lb_faces) > 1 else name
+            hb_face = Face(face_name, lb_face, typ, bc)
+            hb_face.display_name = display_name
 
             # try to assign the energyplus construction
             if len(ep_constr_) != 0:
@@ -121,5 +123,4 @@ if all_required_inputs(ghenv.Component):
                 hb_face.properties.radiance.modifier = rad_mod
 
             faces.append(hb_face)  # collect the final Faces
-            i += 1  # advance the iterator
     faces = wrap_output(faces)

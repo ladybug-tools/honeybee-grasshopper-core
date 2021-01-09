@@ -41,7 +41,7 @@ avoid light leaks in Radiance simulations.
             effectively map to OpenStudio space types upon export to OpenStudio.
         conditioned_: Boolean to note whether the Room has a heating and cooling
             system.
-    
+
     Returns:
         report: Reports, errors, warnings, etc.
         room: Honeybee room. These can be used directly in energy and radiance
@@ -50,7 +50,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room"
 ghenv.Component.NickName = 'Room'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -90,8 +90,6 @@ except ImportError as e:
         raise ValueError('_mod_set_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
 
-import uuid
-
 
 if all_required_inputs(ghenv.Component):
     # duplicate the input objects to avoid editing them
@@ -99,14 +97,14 @@ if all_required_inputs(ghenv.Component):
 
     # generate a default name
     if _name_ is None:  # create a default Room name
-        name = "Room_{}_{}".format(document_counter('room_count'), str(uuid.uuid4())[:8])
-    else:  # clean the input name so that it's unique and acceptable for E+
-        name = clean_and_id_string(_name_)
+        display_name = 'Room_{}'.format(document_counter('room_count'))
+    else:
+        display_name = _name_
+    name = clean_and_id_string(display_name)
 
     # create the Room
     room = Room(name, faces, tolerance, angle_tolerance)
-    if _name_ is not None:
-        room.display_name = _name_
+    room.display_name = display_name
 
     # check that the Room geometry is closed.
     if not room.check_solid(tolerance, angle_tolerance, False):

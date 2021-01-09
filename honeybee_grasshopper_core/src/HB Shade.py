@@ -42,12 +42,10 @@ Create Honeybee Shade
 
 ghenv.Component.Name = "HB Shade"
 ghenv.Component.NickName = 'Shade'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = "5"
-
-import uuid
+ghenv.Component.AdditionalHelpFromDocStrings = '5'
 
 try:  # import the core honeybee dependencies
     from honeybee.shade import Shade
@@ -83,15 +81,20 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     shades = []  # list of shades that will be returned
-    base_name = str(uuid.uuid4())
-    i = 0  # iterator to ensure each shade gets a unique name
     for j, geo in enumerate(_geo):
-        name = longest_list(_name_, j) if len(_name_) != 0 else base_name
+        if len(_name_) == 0:  # make a default Shade name
+            name = display_name = clean_and_id_string('Shade')
+        else:
+            display_name = '{}_{}'.format(longest_list(_name_, j), j + 1) \
+                if len(_name_) != len(_geo) else longest_list(_name_, j)
+            name = clean_and_id_string(display_name)
         is_detached = not longest_list(attached_, j) if len(attached_) != 0 else True
-        for lb_face in to_face3d(geo):
-            hb_shd = Shade(clean_and_id_string('{}_{}'.format(name, i)),
-                           lb_face, is_detached)
-            hb_shd.display_name = '{}_{}'.format(name, i)
+
+        lb_faces = to_face3d(geo)
+        for i, lb_face in enumerate(lb_faces):
+            shd_name = '{}_{}'.format(name, i) if len(lb_faces) > 1 else name
+            hb_shd = Shade(shd_name, lb_face, is_detached)
+            hb_shd.display_name = display_name
 
             # try to assign the energyplus construction
             if len(ep_constr_) != 0:

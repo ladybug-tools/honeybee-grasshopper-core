@@ -44,7 +44,7 @@ avoid light leaks in Radiance simulations.
         conditioned_: Boolean to note whether the Rooms have heating and cooling
             systems.
         _roof_angle_: Cutting angle for roof from Z axis in degrees. Default: 30.
-    
+
     Returns:
         report: Reports, errors, warnings, etc.
         rooms: Honeybee rooms. These can be used directly in energy and radiance
@@ -53,7 +53,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -94,8 +94,6 @@ except ImportError as e:
         raise ValueError('_mod_set_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
 
-import uuid
-
 
 if all_required_inputs(ghenv.Component):
     # set the default roof angle
@@ -105,15 +103,15 @@ if all_required_inputs(ghenv.Component):
     for i, geo in enumerate(_geo):
         # get the name for the Room
         if len(_name_) == 0:  # make a default Room name
-            name = "Room_{}_{}".format(document_counter('room_count'), str(uuid.uuid4())[:8])
+            display_name = 'Room_{}'.format(document_counter('room_count'))
         else:
-            display_name = '{}_{}'.format(longest_list(_name_, i), i + 1)
-            name = clean_and_id_string(display_name)
+            display_name = '{}_{}'.format(longest_list(_name_, i), i + 1) \
+                if len(_name_) != len(_geo) else longest_list(_name_, i)
+        name = clean_and_id_string(display_name)
 
         # create the Room
         room = Room.from_polyface3d(name, to_polyface3d(geo), roof_angle, ground_depth=tolerance)
-        if len(_name_) != 0:
-            room.display_name = display_name
+        room.display_name = display_name
 
         # check that the Room geometry is closed.
         if not room.check_solid(tolerance, angle_tolerance, False):

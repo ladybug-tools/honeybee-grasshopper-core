@@ -37,12 +37,10 @@ Create Honeybee Door
 
 ghenv.Component.Name = "HB Door"
 ghenv.Component.NickName = 'Door'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
-
-import uuid
 
 try:  # import the core honeybee dependencies
     from honeybee.door import Door
@@ -75,15 +73,20 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     doors = []  # list of doors that will be returned
-    base_name = str(uuid.uuid4())
-    i = 0  # iterator to ensure each door gets a unique name
     for j, geo in enumerate(_geo):
-        name = longest_list(_name_, j) if len(_name_) != 0 else base_name
+        if len(_name_) == 0:  # make a default Door name
+            name = display_name = clean_and_id_string('Door')
+        else:
+            display_name = '{}_{}'.format(longest_list(_name_, j), j + 1) \
+                if len(_name_) != len(_geo) else longest_list(_name_, j)
+            name = clean_and_id_string(display_name)
         glass = longest_list(glass_, j) if len(glass_) != 0 else False
-        for lb_face in to_face3d(geo):
-            hb_dr = Door(clean_and_id_string('{}_{}'.format(name, i)),
-                         lb_face, is_glass=glass)
-            hb_dr.display_name = '{}_{}'.format(name, i)
+
+        lb_faces = to_face3d(geo)
+        for i, lb_face in enumerate(lb_faces):
+            dr_name = '{}_{}'.format(name, i) if len(lb_faces) > 1 else name
+            hb_dr = Door(dr_name, lb_face, is_glass=glass)
+            hb_dr.display_name = display_name
 
             # try to assign the energyplus construction
             if len(ep_constr_) != 0:
