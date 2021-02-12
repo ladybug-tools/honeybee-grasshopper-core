@@ -1,12 +1,12 @@
 {
-  "version": "1.1.1", 
+  "version": "1.1.2", 
   "nickname": "RunRecipe", 
   "outputs": [
     [
       {
         "access": "None", 
         "name": "results", 
-        "description": "A list of results output from the recipe.", 
+        "description": "The results output from the recipe.", 
         "type": null, 
         "default": null
       }
@@ -16,21 +16,21 @@
     {
       "access": "item", 
       "name": "_recipe", 
-      "description": "A Queenbee recipe object generated from any Queenbee recipe component.", 
+      "description": "A recipe object generated from any recipe component.", 
       "type": "System.Object", 
       "default": null
     }, 
     {
       "access": "item", 
       "name": "_folder_", 
-      "description": "An optional folder out of which the recipe will be executed.\nNOTE THAT DIRECTORIES INPUT HERE SHOULD NOT HAVE ANY SPACES OR\nUNDERSCORES IN THE FILE PATH.", 
+      "description": "An optional folder out of which the recipe will be executed.", 
       "type": "string", 
       "default": null
     }, 
     {
       "access": "item", 
       "name": "_cpu_count_", 
-      "description": "An integer to set the number of CPUs used in the execution\nof the recipe. This number should not exceed the number of CPUs on\nthe machine running the simulation and should be lower if other tasks\nare running while the simulation is running.(Default: 2).", 
+      "description": "An integer to set the number of CPUs used in the execution\nof the recipe. This number should not exceed the number of CPUs on\nthe machine running the simulation and should be lower if other tasks\nare running while the simulation is running. (Default: 2).", 
       "type": "int", 
       "default": null
     }, 
@@ -39,7 +39,7 @@
       "name": "reload_old_", 
       "description": "A boolean to indicate whether existing results for a given\nmodel and recipe should be reloaded if they are found instead of\nre-running the entire recipe from the beginning. If False or\nNone, any existing results will be overwritten by the new simulation.", 
       "type": "bool", 
-      "default": null
+      "default": "false"
     }, 
     {
       "access": "item", 
@@ -57,8 +57,8 @@
     }
   ], 
   "subcategory": "4 :: Simulate", 
-  "code": "\nimport os\nimport subprocess\n\ntry:\n    from ladybug.futil import preparedir, nukedir\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug:\\n\\t{}'.format(e))\n\ntry:\n    from honeybee.config import folders as hb_folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:\n    from honeybee_radiance.config import folders as rad_folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef sort_results_by_grid(results, grid_names):\n    \"\"\"Sort result files according to the order that they appear in a list of grids.\"\"\"\n    file_dict = {}  # dictionary relating grid name to file name\n    for res_file in results:\n        grid_name = '.'.join(os.path.basename(res_file).split('.')[:-1])\n        file_dict[grid_name] = res_file\n    grid_files = []\n    for g_name in grid_names:\n        try:\n            grid_files.append(file_dict[g_name])\n        except KeyError:  # grid that was not simulated\n            pass\n    other_files = [val for key, val in file_dict.items() if key not in grid_names]\n    return other_files + grid_files\n\n\nif all_required_inputs(ghenv.Component) and _run:\n    # set default number of CPUs\n    _cpu_count_ = '2' if not _cpu_count_ else str(_cpu_count_)\n\n    # get the folder out of which the recipe will be executed\n    if _folder_ is None:\n        if _recipe.default_simulation_path is not None:\n            _folder_ = _recipe.default_simulation_path\n        else:  # no default simulation path\n            _folder_ = os.path.join(\n                hb_folders.default_simulation_folder, 'unnamed_recipe')\n    if not os.path.isdir(_folder_):\n        preparedir(_folder_)  # create the directory if it's not there\n\n    # delete any existing result files unless reload_old_ is True\n    if not reload_old_ and _recipe.simulation_id is not None:\n        wf_folder = os.path.join(_folder_, _recipe.simulation_id)\n        if os.path.isdir(wf_folder):\n            nukedir(wf_folder, rmdir=True)\n\n    # write the inputs JSON for the recipe\n    inputs_json = _recipe.write_inputs_json(_folder_)\n\n    genv = {}\n    genv['PATH'] = rad_folders.radbin_path\n    genv['RAYPATH'] = rad_folders.radlib_path\n    env_args = ['--env {}=\"{}\"'.format(k, v) for k, v in genv.items()]\n\n    # create command\n    command = '\"{hb_recipe}\" run {recipe_name} ' \\\n        '\"{project_folder}\" -i \"{user_inputs}\" --workers {cpu_count} ' \\\n        '{environment} --name {simulation_name}'.format(\n            hb_recipe=os.path.join(hb_folders.python_scripts_path, 'honeybee-recipe'),\n            recipe_name=_recipe.name, project_folder=_folder_,\n            user_inputs=inputs_json, cpu_count=_cpu_count_,\n            environment=' '.join(env_args),\n            simulation_name=_recipe.simulation_id\n        )\n\n    if report_out_:\n        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)\n        result = process.communicate()\n        print result[0]\n        print result[1]\n    else:\n        process = subprocess.Popen(command)\n        result = process.communicate()\n\n    # try to parse the results\n    if _recipe.simulation_id:\n        res_folder = os.path.join(_folder_, _recipe.simulation_id, 'results')\n        if os.path.isdir(res_folder):\n            results = [os.path.join(res_folder, fn) for fn in os.listdir(res_folder)]\n            grid_studies = ('annual-daylight', 'daylight-factor')\n            if 'sensor-grids' in _recipe.inputs_dict and _recipe.name in grid_studies:\n                results = sort_results_by_grid(results, _recipe.inputs_dict['sensor-grids'])\n", 
+  "code": "\nimport os\nimport subprocess\n\ntry:\n    from ladybug.futil import preparedir, nukedir\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug:\\n\\t{}'.format(e))\n\ntry:\n    from honeybee.config import folders as hb_folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:\n    from honeybee_radiance.config import folders as rad_folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee_radiance:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, give_warning, \\\n        list_to_data_tree\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n# check the installed Radiance and ensure it's from the right date\ncompatible_rad_date = (2020, 9, 3)\nhb_url = 'https://github.com/ladybug-tools/lbt-{{plugin}}/wiki/1.4-Compatibility-Matrix'\nrad_msg = 'Download and install the version of Radiance listed in the Ladybug ' \\\n    'Tools compatibility matrix\\n{}'.format(hb_url)\nassert rad_folders.radiance_path is not None, \\\n    'No Radiance installation was found on this machine.\\n{}'.format(rad_msg)\nassert rad_folders.radiance_version_date >= compatible_rad_date, \\\n    'The installed Radiance is not from {} or later.' \\\n    '\\n{}'.format('/'.join(str(v) for v in compatible_rad_date), rad_msg)\n\n\nif all_required_inputs(ghenv.Component) and _run:\n    # set default number of CPUs\n    _cpu_count_ = '2' if not _cpu_count_ else str(_cpu_count_)\n\n    # get the folder out of which the recipe will be executed\n    if _folder_ is None:\n        _folder_ = _recipe.default_project_folder\n    if not os.path.isdir(_folder_):\n        preparedir(_folder_)  # create the directory if it's not there\n\n    # delete any existing result files unless reload_old_ is True\n    if not reload_old_ and _recipe.simulation_id is not None:\n        wf_folder = os.path.join(_folder_, _recipe.simulation_id)\n        if os.path.isdir(wf_folder):\n            nukedir(wf_folder, rmdir=True)\n\n    # write the inputs JSON for the recipe and set up the envrionment variables\n    inputs_json = _recipe.write_inputs_json(_folder_)\n    genv = {}\n    genv['PATH'] = rad_folders.radbin_path\n    genv['RAYPATH'] = rad_folders.radlib_path\n    env_args = ['--env {}=\"{}\"'.format(k, v) for k, v in genv.items()]\n\n    # create command\n    command = '\"{qb_path}\" local run \"{recipe_folder}\" ' \\\n        '\"{project_folder}\" -i \"{user_inputs}\" --workers {cpu_count} ' \\\n        '{environment} --name {simulation_name}'.format(\n            qb_path=os.path.join(hb_folders.python_scripts_path, 'queenbee'),\n            recipe_folder=_recipe.path, project_folder=_folder_,\n            user_inputs=inputs_json, cpu_count=_cpu_count_,\n            environment=' '.join(env_args),\n            simulation_name=_recipe.simulation_id\n        )\n\n    # execute command\n    if report_out_:\n        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)\n        result = process.communicate()\n        print result[0]\n        print result[1]\n    else:\n        process = subprocess.Popen(command)\n        result = process.communicate()  # freeze the canvas while running\n\n    # try to parse the results\n    try:\n        results = _recipe.output_value_by_name('results', _folder_)\n        if isinstance(results, (list, tuple)):\n            results = list_to_data_tree(results)\n    except (AssertionError, ValueError) as e:\n        msg = 'Simulation did not succeed. Try setting reoprt_out_ to True to ' \\\n            'see the full traceback.\\n{}'.format(e)\n        give_warning(ghenv.Component, msg)\n", 
   "category": "Honeybee", 
   "name": "HB Run Recipe", 
-  "description": "Execute any Queenbee Recipe on this machine using queenbee-luigi.\n-"
+  "description": "Execute any Recipe on this machine using queenbee-luigi.\n-"
 }
