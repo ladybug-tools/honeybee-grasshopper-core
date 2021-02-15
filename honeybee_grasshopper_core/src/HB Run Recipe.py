@@ -37,7 +37,7 @@ Execute any Recipe on this machine using queenbee-luigi.
 
 ghenv.Component.Name = 'HB Run Recipe'
 ghenv.Component.NickName = 'RunRecipe'
-ghenv.Component.Message = '1.1.2'
+ghenv.Component.Message = '1.1.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '4 :: Simulate'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -113,13 +113,15 @@ if all_required_inputs(ghenv.Component) and _run:
         )
 
     # execute command
+    shell = False if os.name == 'nt' else True
     if report_out_:
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell)
         result = process.communicate()
         print result[0]
         print result[1]
     else:
-        process = subprocess.Popen(command)
+        process = subprocess.Popen(command, shell=shell)
         result = process.communicate()  # freeze the canvas while running
 
     # try to parse the results
