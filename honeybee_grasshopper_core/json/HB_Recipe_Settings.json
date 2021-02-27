@@ -1,0 +1,50 @@
+{
+  "version": "1.1.0", 
+  "nickname": "RecipeSettings", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "settings", 
+        "description": "Recipe settings that can be plugged into any recipe component to\nspecify how the simulation should be run.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_folder_", 
+      "description": "Path to a project folder in which the recipe will be executed.\nIf None, the default project folder for the Recipe will be used.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_workers_", 
+      "description": "An integer to set the number of CPUs used in the execution of the\nrecipe. This number should not exceed the number of CPUs on the\nmachine running the simulation and should be lower if other tasks\nare running while the simulation is running. (Default: 2).", 
+      "type": "int", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "reload_old_", 
+      "description": "A boolean to indicate whether existing results for a given\nmodel and recipe should be reloaded (if they are found) instead of\nre-running the entire recipe from the beginning. If False or\nNone, any existing results will be overwritten by the new simulation.", 
+      "type": "bool", 
+      "default": "false"
+    }, 
+    {
+      "access": "item", 
+      "name": "report_out_", 
+      "description": "A boolean to indicate whether the recipe progress should be\ndisplayed in the cmd window (False) or output form the \"report\" of\nthe recipe component (True). Outputting from the component can be\nuseful for debugging but recipe reports can often be very long\nand so it can slow Grasshopper slightly. (Default: False).", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\n\ntry:\n    from lbt_recipes.settings import RecipeSettings\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import lbt_recipes:\\n\\t{}'.format(e))\n\n\n# create the settings\n_workers_ = 2 if _workers_ is None else _workers_\nsettings = RecipeSettings(_folder_, _workers_, reload_old_, report_out_)\n", 
+  "category": "Honeybee", 
+  "name": "HB Recipe Settings", 
+  "description": "Specify settings for the run of a recipe, including the number of workers/CPUs,\nthe project folder, and other settings.\n-"
+}
