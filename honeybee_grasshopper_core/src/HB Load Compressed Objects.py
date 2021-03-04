@@ -30,7 +30,7 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Load Compressed Objects'
 ghenv.Component.NickName = 'LoadCompressed'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -111,7 +111,7 @@ def version_check(data):
 
 
 if all_required_inputs(ghenv.Component) and _load:
-    with open(_hb_file) as pkl_file:
+    with open(_hb_file, 'rb') as pkl_file:
         data = pickle.load(pkl_file)
 
     version_check(data)  # try to check the version
