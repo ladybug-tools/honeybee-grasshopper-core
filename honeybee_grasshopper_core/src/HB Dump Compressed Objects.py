@@ -35,7 +35,7 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Dump Compressed Objects'
 ghenv.Component.NickName = 'DumpCompressed'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.1.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -72,5 +72,5 @@ if all_required_inputs(ghenv.Component) and _dump:
             obj_dict[obj.identifier] = obj.to_dict()
 
     # write the dictionary into a file
-    with open(hb_file, 'w') as fp:
+    with open(hb_file, 'wb') as fp:
         pickle.dump(obj_dict, fp)
