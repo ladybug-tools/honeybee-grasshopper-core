@@ -1,7 +1,7 @@
 # Honeybee: A Plugin for Environmental Analysis (GPL)
 # This file is part of Honeybee.
 #
-# Copyright (c) 2020, Ladybug Tools.
+# Copyright (c) 2021, Ladybug Tools.
 # You should have received a copy of the GNU General Public License
 # along with Honeybee; If not, see <http://www.gnu.org/licenses/>.
 # 
@@ -41,7 +41,7 @@ Rotate any Honeybee geometry object or a Model by an angle.
 
 ghenv.Component.Name = "HB Rotate"
 ghenv.Component.NickName = 'Rotate'
-ghenv.Component.Message = '1.1.0'
+ghenv.Component.Message = '1.2.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
