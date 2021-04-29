@@ -22,16 +22,17 @@ Schedule, Load, ProgramType, or Simulation object.
         _hb_file: A file path to a honeybee JSON from which objects will be loaded
             back into Grasshopper. The objects in the file must be non-abridged
             in order to be loaded back correctly.
-        _load: Set to "True to load the objects from the _hb_file.
+        _load: Set to "True" to load the objects from the _hb_file.
     
     Returns:
+        report: Reports, errors, warnings, etc.
         hb_objs: A list of honeybee objects that have been re-serialized from
             the input file.
 """
 
 ghenv.Component.Name = 'HB Load Objects'
 ghenv.Component.NickName = 'LoadObjects'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'

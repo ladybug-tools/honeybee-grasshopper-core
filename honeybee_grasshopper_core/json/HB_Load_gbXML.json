@@ -1,0 +1,36 @@
+{
+  "version": "1.2.0", 
+  "nickname": "LoadGBXML", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "model", 
+        "description": "A honeybee Model objects that has been re-serialized from the input file.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_gbxml", 
+      "description": "A file path to a gbXML, OSM or IDF file from which a Honeybee Model\nwill be loaded", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_load", 
+      "description": "Set to \"True\" to load the Model from the input file.", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "3 :: Serialize", 
+  "code": "\ntry:  # import the ladybug_geometry dependencies\n    from ladybug_geometry.geometry3d.pointvector import Vector3D\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_geometry:\\n\\t{}'.format(e))\n\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.config import folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, give_warning\n    from ladybug_{{cad}}.config import conversion_to_meters, units_system, tolerance\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nimport os\nimport subprocess\nimport json\n\n\ndef model_units_tolerance_check(model):\n    \"\"\"Convert a model to the current {{Cad}} units and check the tolerance.\n\n    Args:\n        model: A honeybee Model, which will have its units checked.\n    \"\"\"\n    # check the model units\n    if model.units != units_system():\n        print('Imported model units \"{}\" do not match that of the current {{Cad}} '\n            'model units \"{}\"\\nThe model is being automatically converted '\n            'to the {{Cad}} doc units.'.format(model.units, units_system()))\n        model.convert_to_units(units_system())\n\n    # check that the model tolerance is not too far from the {{Cad}} tolerance\n    if model.tolerance / tolerance >= 100:\n        msg = 'Imported Model tolerance \"{}\" is significantly coarser than the ' \\\n            'current {{Cad}} model tolerance \"{}\".\\nIt is recommended that the ' \\\n            '{{Cad}} document tolerance be changed to be coarser and this ' \\\n            'component is re-run.'.format(model.tolerance, tolerance)\n        print msg\n        give_warning(ghenv.Component, msg)\n\n\nif all_required_inputs(ghenv.Component) and _load:\n    # sense the type of file we are loading\n    lower_fname = _gbxml.lower()\n    if lower_fname.endswith('.xml') or lower_fname.endswith('.gbxml'):\n        cmd_name = 'model-from-gbxml'\n    elif lower_fname.endswith('.osm'):\n        cmd_name = 'model-from-osm'\n    elif lower_fname.endswith('.idf'):\n        cmd_name = 'model-from-idf'\n    else:\n        raise ValueError('Failed to recongize the input _gbxml file type.\\n'\n                         'Make sure that it has an appropriate file extension.')\n\n    # Execute the honybee CLI to obtain the model JSON via CPython\n    shell = True if os.name == 'nt' else False\n    cmds = [folders.python_exe_path, '-m', 'honeybee_energy', 'translate',\n            cmd_name, _gbxml]\n    process = subprocess.Popen(cmds, stdout=subprocess.PIPE, shell=shell)\n    stdout = process.communicate()\n    model_dict = json.loads(stdout[0])\n\n    # load the model from the JSON dictionary and convert it to {{Cad}} model units\n    model = Model.from_dict(model_dict)\n    model_units_tolerance_check(model)\n\n    # given that most other software lets doors go to the edge, move them slightly for HB\n    move_vec = Vector3D(0, 0, 0.02 / conversion_to_meters())\n    for room in model.rooms:\n        for face in room.faces:\n            doors = face.doors\n            for door in doors:\n                door.move(move_vec)\n            if len(doors) != 0:\n                face._punched_geometry = None\n", 
+  "category": "Honeybee", 
+  "name": "HB Load gbXML", 
+  "description": "Load a gbXML, OSM, or IDF file as a Honeybee Model.\n_\nThe reverse translators within the OpenStudio SDK are used to import all geometry\nand boundary conditions (including adjacencies) to a Honeybee format.\n_\nNote that, while all geometry will be imported, it is possible that not all of the\nproperties assigned to this geometry will be imported, particularly if a certain\nproperty is not supported in the OpenStudio SDK. Honeybee will assign defaults\nfor missing properites and, the HBJSON format should be used whenever lossless\nfile transfer is needed.\n-"
+}

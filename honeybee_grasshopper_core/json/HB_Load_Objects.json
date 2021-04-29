@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0", 
+  "version": "1.2.1", 
   "nickname": "LoadObjects", 
   "outputs": [
     [
@@ -17,13 +17,13 @@
       "access": "item", 
       "name": "_hb_file", 
       "description": "A file path to a honeybee JSON from which objects will be loaded\nback into Grasshopper. The objects in the file must be non-abridged\nin order to be loaded back correctly.", 
-      "type": "System.Object", 
+      "type": "string", 
       "default": null
     }, 
     {
       "access": "item", 
       "name": "_load", 
-      "description": "Set to \"True to load the objects from the _hb_file.", 
+      "description": "Set to \"True\" to load the objects from the _hb_file.", 
       "type": "bool", 
       "default": null
     }
