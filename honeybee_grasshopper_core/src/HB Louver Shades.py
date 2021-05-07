@@ -66,7 +66,7 @@ that are Walls (not Floors or Roofs).
 
 ghenv.Component.Name = "HB Louver Shades"
 ghenv.Component.NickName = 'LouverShades'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -102,6 +102,8 @@ def can_host_louvers(face):
 
 def assign_louvers(ap, depth, count, dist, off, angle, vec, flip, indr):
     """Assign louvers to an Aperture based on a set of inputs."""
+    if depth == 0 or count == 0:
+        return None
     if count is not None:
         louvers = ap.louvers_by_count(count, depth, off, angle, vec, flip, indr,
                                       tolerance)
@@ -113,13 +115,13 @@ def assign_louvers(ap, depth, count, dist, off, angle, vec, flip, indr):
 if all_required_inputs(ghenv.Component):
     # duplicate the initial objects
     hb_objs = [obj.duplicate() for obj in _hb_objs]
-    
+
     # set defaults for any blank inputs
     _facade_offset_ = _facade_offset_ if len(_facade_offset_) != 0 else [0.0]
     _angle_ = _angle_ if len(_angle_) != 0 else [0.0]
     flip_start_ = flip_start_ if len(flip_start_) != 0 else [False]
     indoor_ = indoor_ if len(indoor_) != 0 else [False]
-    
+
     # process the defaults for _shade_count_ vs _dist_between
     if len(_shade_count_) != 0 and len(_dist_between_) != 0:
         raise ValueError('Inputs for _shade_count_ and _dist_between_ are both set.'
@@ -131,24 +133,24 @@ if all_required_inputs(ghenv.Component):
         _dist_between_ = [None]
     else:
         _shade_count_ = [None]
-    
+
     # process the vertical_ input into a direction vector
     if len(vertical_) != 0:
         vertical_ = [Vector2D(1, 0) if vert else Vector2D(0, 1)
                      for vert in vertical_]
     else:
         vertical_ = [Vector2D(0, 1)]
-    
+
     # gather all of the inputs together
     all_inputs = [_depth, _shade_count_, _dist_between_, _facade_offset_, _angle_,
                   vertical_, flip_start_, indoor_]
-    
+
     # ensure matching list lengths across all values
     all_inputs, num_orient = check_matching_inputs(all_inputs)
-    
+
     # get a list of angles used to categorize the faces
     angles = angles_from_num_orient(num_orient)
-    
+
     # loop through the input objects and add apertures
     for obj in hb_objs:
         if isinstance(obj, Room):
