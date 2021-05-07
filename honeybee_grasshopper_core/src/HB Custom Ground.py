@@ -12,9 +12,8 @@ Set the boundary conditions of Rooms to be Ground vs. Outdoors using a surface o
 polysurface that represents the ground.
 _
 Room faces that are coplanar with the ground surface or have a center below it
-will get a Ground boundary condition while those above will get an Outdoors
-boundary condition. Existing Faces with a Surface or Adiabatic condition will
-be unaffected.
+will get a Ground boundary condition. Existing Faces with a Surface/Adiabatic
+condition, AirBoundary type, or assigned Apertures/Doors will be unaffected.
 _
 Note that this component will not intersect the Faces with the ground surface and
 this is intersection should be done prior to the creation of the Honeybee Rooms.
@@ -31,7 +30,7 @@ this is intersection should be done prior to the creation of the Honeybee Rooms.
 
 ghenv.Component.Name = 'HB Custom Ground'
 ghenv.Component.NickName = 'CustomGround'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

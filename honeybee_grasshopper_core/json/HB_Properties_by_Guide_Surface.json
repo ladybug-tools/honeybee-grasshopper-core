@@ -1,0 +1,64 @@
+{
+  "version": "1.2.0", 
+  "nickname": "GuideSurface", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "rooms", 
+        "description": "The input Rooms with their Face properties changed.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_rooms", 
+      "description": "Honeybee Rooms which will have their Face boundary conditions set\nbased on the guide surface(s).", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_guide", 
+      "description": "Rhino Breps or Meshes that represent the guide surfaces.", 
+      "type": "GeometryBase", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "type_", 
+      "description": "Text for the face type. The face type will be used to set the\nmaterial and construction for the surface if they are not assigned\nthrough the inputs below.\nChoose from the following:\n- Wall\n- RoofCeiling\n- Floor\n- AirBoundary", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "bc_", 
+      "description": "Text for the boundary condition of the face. The boundary condition\nis also used to assign default materials and constructions as well as\nthe nature of heat excahnge across the face in energy simulation.\nChoose from the following:\n- Outdoors\n- Ground\n- Adiabatic", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "ep_constr_", 
+      "description": "Optional text for the Face's energy construction to be looked\nup in the construction library. This can also be a custom\nOpaqueConstruction object.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "rad_mod_", 
+      "description": "Optional text for the Face's radiance modifier to be looked\nup in the modifier library. This can also be a custom modifier\nobject.", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.facetype import face_types\n    from honeybee.boundarycondition import boundary_conditions\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance, angle_tolerance\n    from ladybug_{{cad}}.togeometry import to_face3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee-energy extension\n    from honeybee_energy.lib.constructions import opaque_construction_by_identifier\nexcept ImportError as e:\n    if ep_constr_ is None:\n        raise ValueError('ep_constr_ has been specified but honeybee-energy '\n                         'has failed to import.\\n{}'.format(e))\n\ntry:  # import the honeybee-radiance extension\n    from honeybee_radiance.lib.modifiers import modifier_by_identifier\nexcept ImportError as e:\n    if rad_mod_ is None:\n        raise ValueError('rad_mod_ has been specified but honeybee-radiance '\n                         'has failed to import.\\n{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # process the inputs\n    rooms = [room.duplicate() for room in _rooms]  # duplicate to avoid editing input\n    guide_faces = [g for geo in _guide for g in to_face3d(geo)]  # convert to lb geometry\n    if type_ is not None and type_ not in face_types:\n        type_ = face_types.by_name(type_)\n    if bc_ is not None and bc_ not in boundary_conditions:\n        bc_ = boundary_conditions.by_name(bc_)\n    if isinstance(ep_constr_, str):\n        ep_constr_ = opaque_construction_by_identifier(ep_constr_)\n    if isinstance(rad_mod_, str):\n        rad_mod_ = modifier_by_identifier(rad_mod_)\n\n    # loop through the rooms and set the face properties\n    for room in rooms:\n        select_faces = room.faces_by_guide_surface(\n            guide_faces, tolerance=tolerance, angle_tolerance=angle_tolerance)\n        for hb_face in select_faces:\n            if type_ is not None:\n                hb_face.type = type_\n            if bc_ is not None:\n                hb_face.boundary_condition = bc_\n            if ep_constr_ is not None:\n                hb_face.properties.energy.construction = ep_constr_\n            if rad_mod_ is not None:\n                hb_face.properties.radiance.modifier = rad_mod_\n", 
+  "category": "Honeybee", 
+  "name": "HB Properties by Guide Surface", 
+  "description": "Set the properties of room Faces using (a) guide surface(s) or polysurface(s).\n_\nFaces that are touching and coplanar with the guide surface will get their\nproperties changed to match the inputs.\n_\nThis is useful for colelctively setting the properties of spatially aligned Faces,\nlike setting Faces along a given stretch of a parti wall to be adiabatic.\n-"
+}

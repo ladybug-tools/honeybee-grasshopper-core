@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0", 
+  "version": "1.2.1", 
   "nickname": "CustomGround", 
   "outputs": [
     [
@@ -32,5 +32,5 @@
   "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance, angle_tolerance\n    from ladybug_{{cad}}.togeometry import to_face3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    rooms = [room.duplicate() for room in _rooms]  # duplicate to avoid editing input\n    ground_faces = [g for geo in _ground for g in to_face3d(geo)]  # convert to lb geometry\n\n    # loop through the rooms and set the ground boundary conditions\n    for room in rooms:\n        room.ground_by_custom_surface(ground_faces, tolerance, angle_tolerance)\n", 
   "category": "Honeybee", 
   "name": "HB Custom Ground", 
-  "description": "Set the boundary conditions of Rooms to be Ground vs. Outdoors using a surface or\npolysurface that represents the ground.\n_\nRoom faces that are coplanar with the ground surface or have a center below it\nwill get a Ground boundary condition while those above will get an Outdoors\nboundary condition. Existing Faces with a Surface or Adiabatic condition will\nbe unaffected.\n_\nNote that this component will not intersect the Faces with the ground surface and\nthis is intersection should be done prior to the creation of the Honeybee Rooms.\n-"
+  "description": "Set the boundary conditions of Rooms to be Ground vs. Outdoors using a surface or\npolysurface that represents the ground.\n_\nRoom faces that are coplanar with the ground surface or have a center below it\nwill get a Ground boundary condition. Existing Faces with a Surface/Adiabatic\ncondition, AirBoundary type, or assigned Apertures/Doors will be unaffected.\n_\nNote that this component will not intersect the Faces with the ground surface and\nthis is intersection should be done prior to the creation of the Honeybee Rooms.\n-"
 }
