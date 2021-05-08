@@ -76,7 +76,7 @@ that are Walls (not Floors or Roofs).
 
 ghenv.Component.Name = "HB Louver Shades"
 ghenv.Component.NickName = 'LouverShades'
-ghenv.Component.Message = '1.2.2'
+ghenv.Component.Message = '1.2.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -156,7 +156,9 @@ if all_required_inputs(ghenv.Component):
     indoor_ = indoor_ if len(indoor_) != 0 else [False]
 
     # process the defaults for _shade_count_ vs _dist_between
-    if len(_shade_count_) == 0 and len(_dist_between_) == 0:
+    if len(_shade_count_) != 0 and len(_dist_between_) != 0:
+        pass
+    elif len(_shade_count_) == 0 and len(_dist_between_) == 0:
         _shade_count_ = [1]
         _dist_between_ = [None]
     elif len(_shade_count_) != 0:
