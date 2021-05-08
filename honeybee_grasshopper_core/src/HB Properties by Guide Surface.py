@@ -49,10 +49,10 @@ like setting Faces along a given stretch of a parti wall to be adiabatic.
 
 ghenv.Component.Name = 'HB Properties by Guide Surface'
 ghenv.Component.NickName = 'GuideSurface'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = '0'
+ghenv.Component.AdditionalHelpFromDocStrings = '3'
 
 try:  # import the core honeybee dependencies
     from honeybee.facetype import face_types
