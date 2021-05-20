@@ -33,8 +33,8 @@ following repositories to be installed in order to work correctly:
 
 The honeybee-grasshopper plugin has the following extensions:
 
-* [honeybee-grasshopper-radiance]]((https://github.com/ladybug-tools/honeybee-grasshopper-radiance)
-* [honeybee-grasshopper-energy]((https://github.com/ladybug-tools/honeybee-grasshopper-energy)
+* [honeybee-grasshopper-radiance](https://github.com/ladybug-tools/honeybee-grasshopper-radiance)
+* [honeybee-grasshopper-energy](https://github.com/ladybug-tools/honeybee-grasshopper-energy)
 
 ## Installation
 
