@@ -20,10 +20,17 @@ model geometry and properties.
 
     Args:
         _model: A Honeybee Model object to be written to a gbXML file.
-        _name_: A name for the file to which the honeybee objects will be
-            written. (Default: 'unnamed').
+        _name_: A name for the file to which the honeybee objects will be written.
+            If unspecified, it will be derived from the model identifier.
         _folder_: An optional directory into which the honeybee objects will be
             written.  The default is set to the default simulation folder.
+        full_geo_: Boolean to note whether space boundaries and shell geometry should
+            be included in the exported gbXML vs. just the minimal required
+            non-manifold geometry. Setting to True to include the full geometry
+            will increase file size without adding much new infomration that
+            doesn't already exist in the file. However, some gbXML interfaces
+            need this geometry in order to properly represent and display
+            room volumes. (Default: False).
         _dump: Set to "True" to save the honeybee model to a gbXML file.
 
     Returns:
@@ -33,7 +40,7 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -45,7 +52,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the honeybee_energy dependencies
-    from honeybee_energy.run import to_gbxml_osw, run_osw
+    from honeybee_energy.run import to_gbxml_osw, run_osw, add_gbxml_space_boundaries
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee_energy:\n\t{}'.format(e))
 
@@ -61,7 +68,7 @@ if all_required_inputs(ghenv.Component) and _dump:
     # check the input and set the component defaults
     assert isinstance(_model, Model), \
         'Excpected Honeybee Model object. Got {}.'.format(type(_model))
-    name = _name_ if _name_ is not None else 'unnamed'
+    name = _name_ if _name_ is not None else _model.identifier
     gbxml_file = '{}.gbxml'.format(name)
     folder = _folder_ if _folder_ is not None else folders.default_simulation_folder
     gbxml = os.path.join(folder, gbxml_file)
@@ -77,3 +84,7 @@ if all_required_inputs(ghenv.Component) and _dump:
     osm, idf = run_osw(osw, silent=True)
     if idf is None:
         raise Exception('Running OpenStudio CLI failed.')
+
+    # add in the space boundary geometry if the user has requested it
+    if full_geo_:
+        add_gbxml_space_boundaries(gbxml, _model)
