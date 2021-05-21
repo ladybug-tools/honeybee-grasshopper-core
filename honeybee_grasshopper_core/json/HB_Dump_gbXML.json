@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0", 
+  "version": "1.2.1", 
   "nickname": "DumpGBXML", 
   "outputs": [
     [
@@ -23,7 +23,7 @@
     {
       "access": "item", 
       "name": "_name_", 
-      "description": "A name for the file to which the honeybee objects will be\nwritten. (Default: 'unnamed').", 
+      "description": "A name for the file to which the honeybee objects will be written.\nIf unspecified, it will be derived from the model identifier.", 
       "type": "string", 
       "default": null
     }, 
@@ -36,6 +36,13 @@
     }, 
     {
       "access": "item", 
+      "name": "full_geo_", 
+      "description": "Boolean to note whether space boundaries and shell geometry should\nbe included in the exported gbXML vs. just the minimal required\nnon-manifold geometry. Setting to True to include the full geometry\nwill increase file size without adding much new infomration that\ndoesn't already exist in the file. However, some gbXML interfaces\nneed this geometry in order to properly represent and display\nroom volumes. (Default: False).", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
       "name": "_dump", 
       "description": "Set to \"True\" to save the honeybee model to a gbXML file.", 
       "type": "bool", 
@@ -43,7 +50,7 @@
     }
   ], 
   "subcategory": "3 :: Serialize", 
-  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.config import folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee_energy dependencies\n    from honeybee_energy.run import to_gbxml_osw, run_osw\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee_energy:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nimport os\n\n\nif all_required_inputs(ghenv.Component) and _dump:\n    # check the input and set the component defaults\n    assert isinstance(_model, Model), \\\n        'Excpected Honeybee Model object. Got {}.'.format(type(_model))\n    name = _name_ if _name_ is not None else 'unnamed'\n    gbxml_file = '{}.gbxml'.format(name)\n    folder = _folder_ if _folder_ is not None else folders.default_simulation_folder\n    gbxml = os.path.join(folder, gbxml_file)\n\n    # write out the HBJSON and OpenStudio Workflow (OSW) that translates models to gbXML\n    out_directory = os.path.join(folders.default_simulation_folder, 'temp_translate')\n    if not os.path.isdir(out_directory):\n        os.makedirs(out_directory)\n    hb_file = _model.to_hbjson(name, out_directory, included_prop=['energy'])\n    osw = to_gbxml_osw(hb_file, gbxml, out_directory)\n\n    # run the measure to translate the model JSON to an openstudio measure\n    osm, idf = run_osw(osw, silent=True)\n    if idf is None:\n        raise Exception('Running OpenStudio CLI failed.')\n", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.config import folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee_energy dependencies\n    from honeybee_energy.run import to_gbxml_osw, run_osw, add_gbxml_space_boundaries\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee_energy:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nimport os\n\n\nif all_required_inputs(ghenv.Component) and _dump:\n    # check the input and set the component defaults\n    assert isinstance(_model, Model), \\\n        'Excpected Honeybee Model object. Got {}.'.format(type(_model))\n    name = _name_ if _name_ is not None else _model.identifier\n    gbxml_file = '{}.gbxml'.format(name)\n    folder = _folder_ if _folder_ is not None else folders.default_simulation_folder\n    gbxml = os.path.join(folder, gbxml_file)\n\n    # write out the HBJSON and OpenStudio Workflow (OSW) that translates models to gbXML\n    out_directory = os.path.join(folders.default_simulation_folder, 'temp_translate')\n    if not os.path.isdir(out_directory):\n        os.makedirs(out_directory)\n    hb_file = _model.to_hbjson(name, out_directory, included_prop=['energy'])\n    osw = to_gbxml_osw(hb_file, gbxml, out_directory)\n\n    # run the measure to translate the model JSON to an openstudio measure\n    osm, idf = run_osw(osw, silent=True)\n    if idf is None:\n        raise Exception('Running OpenStudio CLI failed.')\n\n    # add in the space boundary geometry if the user has requested it\n    if full_geo_:\n        add_gbxml_space_boundaries(gbxml, _model)\n", 
   "category": "Honeybee", 
   "name": "HB Dump gbXML", 
   "description": "Dump a Honyebee Model to a gbXML file.\n_\nThe gbXML format is a common open standard used to transfer energy model geometry\nand (some) energy simulation properties from one simulation environment to another.\n_\nThe forward translators within the OpenStudio SDK are used to export all Honeybee\nmodel geometry and properties.\n-"
