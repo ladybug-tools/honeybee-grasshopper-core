@@ -40,7 +40,7 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.2.1'
+ghenv.Component.Message = '1.2.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -69,7 +69,9 @@ if all_required_inputs(ghenv.Component) and _dump:
     assert isinstance(_model, Model), \
         'Excpected Honeybee Model object. Got {}.'.format(type(_model))
     name = _name_ if _name_ is not None else _model.identifier
-    gbxml_file = '{}.gbxml'.format(name)
+    lower_name = name.lower()
+    gbxml_file = name if lower_name.endswith('.xml') or lower_name.endswith('.gbxml') \
+        else '{}.xml'.format(name)
     folder = _folder_ if _folder_ is not None else folders.default_simulation_folder
     gbxml = os.path.join(folder, gbxml_file)
 
