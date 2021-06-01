@@ -1,0 +1,57 @@
+{
+  "version": "1.2.0", 
+  "nickname": "UpdateHBJSON", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hbjson", 
+        "description": "The file path to the updated HBJSON.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_hbjson", 
+      "description": "A file path to a Model HBJSON which will be upgraded to the currently\ninstalled version of the Honeybee Model schema (or a specific version\nspecified below).", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "version_", 
+      "description": "Text to indicate the version to which the Model HBJSON will be\nupdated (eg. 1.41.2). Versions must always consist of three integers\nseparated by periods. If None, the Model HBJSON will be updated to\nthe currently installed version of honeybee-schema.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_name_", 
+      "description": "A name for the file to which the honeybee objects will be written.\nBy default, it will have the same name as the input file but\nwith \"UPDATED\" appended to the file name.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_folder_", 
+      "description": "An optional directory into which the updated file will be\nwritten.  The default is set to the default simulation folder.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_update", 
+      "description": "Set to \"True\" to update the Model HBJSON to the currently installed\nversion.", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "3 :: Serialize", 
+  "code": "\nimport os\nimport subprocess\n\ntry:  # import the core honeybee dependencies\n    from honeybee.config import folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component) and _update:\n    # set default variables\n    version = version_ if version_ is not None else folders.honeybee_schema_version_str\n    name = _name_ if _name_ is not None else \\\n        os.path.basename(_hbjson).lower().replace('.hbjson', '_UPDATED').replace('.json', '_UPDATED')\n    if not (name.endswith('.hbjson') or name.endswith('.json')):\n        name = '{}.hbjson'.format(name)\n    folder = _folder_ if _folder_ is not None else os.path.dirname(_hbjson)\n    hbjson = os.path.join(folder, name)\n\n    # execute the update command and update the HBJSON\n    shell = True if os.name == 'nt' else False\n    cmds = [folders.python_exe_path, '-m', 'honeybee_schema', 'update-model',\n            _hbjson, '--version', version, '--output-file', hbjson]\n    process = subprocess.Popen(cmds, stderr=subprocess.PIPE, shell=shell)\n    stderr = process.communicate()\n    print(stderr[-1])\n", 
+  "category": "Honeybee", 
+  "name": "HB Update HBJSON", 
+  "description": "Upgrade a Model HBJSON file to the currently installed version of the schema.\n_\nThis component can also upgrade to a specific version of the schema but it\ncannot downgrade the schema version or change the version of any honeybee\nobject other than a Model.\n_\nA full list of honeybee-schema versions can be found on the honeybee-schema GitHub:\nhttps://github.com/ladybug-tools/honeybee-schema/releases\n-"
+}
