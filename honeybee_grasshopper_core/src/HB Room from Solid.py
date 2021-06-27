@@ -53,7 +53,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -114,7 +114,7 @@ if all_required_inputs(ghenv.Component):
         room.display_name = display_name
 
         # check that the Room geometry is closed.
-        if not room.check_solid(tolerance, angle_tolerance, False):
+        if room.check_solid(tolerance, angle_tolerance, False) != '':
             give_warning(ghenv.Component, 'Input _geo is not a closed volume.\n'
                          'Room volume must be closed to access most honeybee features.\n'
                          'Preview the output Room to see the holes in your model.')

@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0", 
+  "version": "1.2.1", 
   "nickname": "UpdateHBJSON", 
   "outputs": [
     [
@@ -43,6 +43,13 @@
     }, 
     {
       "access": "item", 
+      "name": "x", 
+      "description": "Boolean to note whether the Honeybee Model should be validated and\nchecked for errors after it has been updated. This includes basic\nproperties like adjacency and duplicate identifier checks as well\nas geometry checks for planarity, room solidity, etc.", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
       "name": "_update", 
       "description": "Set to \"True\" to update the Model HBJSON to the currently installed\nversion.", 
       "type": "bool", 
@@ -50,7 +57,7 @@
     }
   ], 
   "subcategory": "3 :: Serialize", 
-  "code": "\nimport os\nimport subprocess\n\ntry:  # import the core honeybee dependencies\n    from honeybee.config import folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component) and _update:\n    # set default variables\n    version = version_ if version_ is not None else folders.honeybee_schema_version_str\n    name = _name_ if _name_ is not None else \\\n        os.path.basename(_hbjson).lower().replace('.hbjson', '_UPDATED').replace('.json', '_UPDATED')\n    if not (name.endswith('.hbjson') or name.endswith('.json')):\n        name = '{}.hbjson'.format(name)\n    folder = _folder_ if _folder_ is not None else os.path.dirname(_hbjson)\n    hbjson = os.path.join(folder, name)\n\n    # execute the update command and update the HBJSON\n    shell = True if os.name == 'nt' else False\n    cmds = [folders.python_exe_path, '-m', 'honeybee_schema', 'update-model',\n            _hbjson, '--version', version, '--output-file', hbjson]\n    process = subprocess.Popen(cmds, stderr=subprocess.PIPE, shell=shell)\n    stderr = process.communicate()\n    print(stderr[-1])\n", 
+  "code": "\nimport os\nimport subprocess\n\ntry:  # import the core honeybee dependencies\n    from honeybee.config import folders\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, give_warning\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component) and _update:\n    # set default variables\n    version = version_ if version_ is not None else folders.honeybee_schema_version_str\n    name = _name_ if _name_ is not None else \\\n        os.path.basename(_hbjson).lower().replace('.hbjson', '_UPDATED').replace('.json', '_UPDATED')\n    if not (name.endswith('.hbjson') or name.endswith('.json')):\n        name = '{}.hbjson'.format(name)\n    folder = _folder_ if _folder_ is not None else os.path.dirname(_hbjson)\n    hbjson = os.path.join(folder, name)\n\n    # execute the update command and update the HBJSON\n    shell = True if os.name == 'nt' else False\n    cmds = [folders.python_exe_path, '-m', 'honeybee_schema', 'update-model',\n            _hbjson, '--version', version, '--output-file', hbjson]\n    process = subprocess.Popen(cmds, stderr=subprocess.PIPE, shell=shell)\n    stderr = process.communicate()\n    print(stderr[-1])\n\n    # validate the model if validation was requested\n    if validate_:\n        parsed_model = Model.from_hbjson(hbjson)\n        valid_report = parsed_model.check_all(raise_exception=False)\n        if valid_report != '':\n            print(valid_report)\n            give_warning(ghenv.Component, valid_report)\n", 
   "category": "Honeybee", 
   "name": "HB Update HBJSON", 
   "description": "Upgrade a Model HBJSON file to the currently installed version of the schema.\n_\nThis component can also upgrade to a specific version of the schema but it\ncannot downgrade the schema version or change the version of any honeybee\nobject other than a Model.\n_\nA full list of honeybee-schema versions can be found on the honeybee-schema GitHub:\nhttps://github.com/ladybug-tools/honeybee-schema/releases\n-"
