@@ -32,6 +32,10 @@ https://github.com/ladybug-tools/honeybee-schema/releases
             with "UPDATED" appended to the file name.
         _folder_: An optional directory into which the updated file will be
             written.  The default is set to the default simulation folder.
+        validate_: Boolean to note whether the Honeybee Model should be validated and
+            checked for errors after it has been updated. This includes basic
+            properties like adjacency and duplicate identifier checks as well
+            as geometry checks for planarity, room solidity, etc.
         _update: Set to "True" to update the Model HBJSON to the currently installed
             version.
 
@@ -42,7 +46,7 @@ https://github.com/ladybug-tools/honeybee-schema/releases
 
 ghenv.Component.Name = 'HB Update HBJSON'
 ghenv.Component.NickName = 'UpdateHBJSON'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -52,11 +56,12 @@ import subprocess
 
 try:  # import the core honeybee dependencies
     from honeybee.config import folders
+    from honeybee.model import Model
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the core ladybug_rhino dependencies
-    from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.grasshopper import all_required_inputs, give_warning
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -78,3 +83,11 @@ if all_required_inputs(ghenv.Component) and _update:
     process = subprocess.Popen(cmds, stderr=subprocess.PIPE, shell=shell)
     stderr = process.communicate()
     print(stderr[-1])
+
+    # validate the model if validation was requested
+    if validate_:
+        parsed_model = Model.from_hbjson(hbjson)
+        valid_report = parsed_model.check_all(raise_exception=False)
+        if valid_report != '':
+            print(valid_report)
+            give_warning(ghenv.Component, valid_report)
