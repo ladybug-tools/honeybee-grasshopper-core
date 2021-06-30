@@ -53,10 +53,10 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '1.2.1'
+ghenv.Component.Message = '1.2.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = "2"
+ghenv.Component.AdditionalHelpFromDocStrings = '2'
 
 try:  # import the core honeybee dependencies
     from honeybee.room import Room
@@ -74,7 +74,8 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
-    from honeybee_energy.lib.programtypes import program_type_by_identifier, office_program
+    from honeybee_energy.lib.programtypes import program_type_by_identifier, \
+        building_program_type_by_identifier, office_program
     from honeybee_energy.lib.constructionsets import construction_set_by_identifier
 except ImportError as e:
     if len(_program_) != 0:
@@ -137,7 +138,10 @@ if all_required_inputs(ghenv.Component):
         if len(_program_) != 0:
             program = longest_list(_program_, i)
             if isinstance(program, str):
-                program = program_type_by_identifier(program)
+                try:
+                    program = building_program_type_by_identifier(program)
+                except ValueError:
+                    program = program_type_by_identifier(program)
             room.properties.energy.program_type = program
         else:  # generic office program by default
             try:
