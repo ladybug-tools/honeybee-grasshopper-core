@@ -50,7 +50,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room"
 ghenv.Component.NickName = 'Room'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -70,7 +70,8 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
-    from honeybee_energy.lib.programtypes import program_type_by_identifier, office_program
+    from honeybee_energy.lib.programtypes import program_type_by_identifier, \
+        building_program_type_by_identifier, office_program
     from honeybee_energy.lib.constructionsets import construction_set_by_identifier
 except ImportError as e:
     if _program_ is not None:
@@ -107,7 +108,7 @@ if all_required_inputs(ghenv.Component):
     room.display_name = display_name
 
     # check that the Room geometry is closed.
-    if not room.check_solid(tolerance, angle_tolerance, False):
+    if room.check_solid(tolerance, angle_tolerance, False) != '':
         give_warning(ghenv.Component, 'Input _faces do not form a closed volume.\n'
                      'Room volume must be closed to access most honeybee features.\n'
                      'Preview the output Room to see the holes in your model.')
@@ -127,7 +128,10 @@ if all_required_inputs(ghenv.Component):
     # try to assign the program
     if _program_ is not None:
         if isinstance(_program_, str):
-            _program_ = program_type_by_identifier(_program_)
+            try:
+                _program_ = building_program_type_by_identifier(_program_)
+            except ValueError:
+                _program_ = program_type_by_identifier(_program_)
         room.properties.energy.program_type = _program_
     else:  # generic office program by default
         try:
