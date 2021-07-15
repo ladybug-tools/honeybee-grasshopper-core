@@ -1,0 +1,21 @@
+{
+  "version": "1.2.0", 
+  "nickname": "VizRecipe", 
+  "outputs": [
+    []
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_launch", 
+      "description": "Set to True to run the component and launch a browser window that\nvisualizes recipe execution steps.", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\nimport os\nimport subprocess\nimport webbrowser as wb\n\ntry:\n    from honeybee.config import folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component) and _launch:\n    # set up and run the command to launch the luigi deamon\n    ld_path = os.path.join(folders.python_scripts_path, 'luigid')\n    process = subprocess.Popen(ld_path, shell=True)\n\n    # open the localhost URL where the recipe will be reported\n    local_url = 'http://localhost:8082/'\n    try:\n        wb.open(local_url, 2, True)\n    except ValueError:  # we are using an old version of IronPython\n        os.system(\"open \\\"\\\" \" + url)\n    print('Recipe visualization avaolable at:\\n{}'.format(local_url))\n", 
+  "category": "Honeybee", 
+  "name": "HB Visualize Recipe Execution", 
+  "description": "Launch a browser window that can be used to visualize the execution and logs of\nany currently-running recipe.\n_\nNote that this component will only open the recipe visualizer in the default browser\nand the page must be refreshed after starting a recipe run in order for the latest\nrecipe execution status to be visible.\n_\nAlso note that the \"Let [RECIPE NAME] Fly\" task contains all of the information\nabout a given recipe run. Selecting \"View Graph\" for this task and then un-checking\n\"Hide Done\" will allow one to see the full progress of the recipe.\n-"
+}
