@@ -1,5 +1,5 @@
 {
-  "version": "1.2.2", 
+  "version": "1.2.3", 
   "nickname": "RoomSolid", 
   "outputs": [
     [
@@ -60,7 +60,7 @@
     {
       "access": "item", 
       "name": "_roof_angle_", 
-      "description": "Cutting angle for roof from Z axis in degrees. Default: 30.", 
+      "description": "A number between 0 and 90 to set the threshold below which faces\nwill be considered roofs instead of walls. 90 indicates that all\nvertical faces are roofs and 0 indicates that all horizotnal faces\nare walls. (Default: 30).", 
       "type": "double", 
       "default": null
     }
