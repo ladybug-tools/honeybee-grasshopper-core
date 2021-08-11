@@ -43,7 +43,10 @@ avoid light leaks in Radiance simulations.
             effectively map to OpenStudio space types upon export to OpenStudio.
         conditioned_: Boolean to note whether the Rooms have heating and cooling
             systems.
-        _roof_angle_: Cutting angle for roof from Z axis in degrees. Default: 30.
+        _roof_angle_: A number between 0 and 90 to set the threshold below which faces
+            will be considered roofs instead of walls. 90 indicates that all
+            vertical faces are roofs and 0 indicates that all horizotnal faces
+            are walls. (Default: 30).
 
     Returns:
         report: Reports, errors, warnings, etc.
@@ -53,7 +56,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '1.2.2'
+ghenv.Component.Message = '1.2.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
