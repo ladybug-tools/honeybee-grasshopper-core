@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0", 
+  "version": "1.2.1", 
   "nickname": "RecipeSettings", 
   "outputs": [
     [
@@ -23,7 +23,7 @@
     {
       "access": "item", 
       "name": "_workers_", 
-      "description": "An integer to set the number of CPUs used in the execution of the\nrecipe. This number should not exceed the number of CPUs on the\nmachine running the simulation and should be lower if other tasks\nare running while the simulation is running. (Default: 2).", 
+      "description": "An integer to set the number of CPUs used in the execution of the\nrecipe. This number should not exceed the number of CPUs on the\nmachine and should be lower if other tasks are running while the\nsimulation is running. If unspecified, it will automatically default\nto one less than the number of CPUs currently available on the\nmachine. (Default: None)", 
       "type": "int", 
       "default": null
     }, 
@@ -43,7 +43,7 @@
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\n\ntry:\n    from lbt_recipes.settings import RecipeSettings\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import lbt_recipes:\\n\\t{}'.format(e))\n\n\n# create the settings\n_workers_ = 2 if _workers_ is None else _workers_\nsettings = RecipeSettings(_folder_, _workers_, reload_old_, report_out_)\n", 
+  "code": "\n\ntry:\n    from lbt_recipes.settings import RecipeSettings\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import lbt_recipes:\\n\\t{}'.format(e))\n\n\n# create the settings\nsettings = RecipeSettings(_folder_, _workers_, reload_old_, report_out_)\n", 
   "category": "Honeybee", 
   "name": "HB Recipe Settings", 
   "description": "Specify settings for the run of a recipe, including the number of workers/CPUs,\nthe project folder, and other settings.\n-"
