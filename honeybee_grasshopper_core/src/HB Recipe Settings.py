@@ -17,8 +17,10 @@ the project folder, and other settings.
             If None, the default project folder for the Recipe will be used.
         _workers_: An integer to set the number of CPUs used in the execution of the
             recipe. This number should not exceed the number of CPUs on the
-            machine running the simulation and should be lower if other tasks
-            are running while the simulation is running. (Default: 2).
+            machine and should be lower if other tasks are running while the
+            simulation is running. If unspecified, it will automatically default
+            to one less than the number of CPUs currently available on the
+            machine. (Default: None)
         reload_old_: A boolean to indicate whether existing results for a given
             model and recipe should be reloaded (if they are found) instead of
             re-running the entire recipe from the beginning. If False or
@@ -36,7 +38,7 @@ the project folder, and other settings.
 
 ghenv.Component.Name = 'HB Recipe Settings'
 ghenv.Component.NickName = 'RecipeSettings'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '7'
@@ -49,5 +51,4 @@ except ImportError as e:
 
 
 # create the settings
-_workers_ = 2 if _workers_ is None else _workers_
 settings = RecipeSettings(_folder_, _workers_, reload_old_, report_out_)
