@@ -35,20 +35,40 @@ within a Model must have unique identifiers.
 
 ghenv.Component.Name = "HB Add Prefix"
 ghenv.Component.NickName = 'Prefix'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.grasshopper import all_required_inputs, longest_list
+    from honeybee.room import Room
+    from honeybee.boundarycondition import Surface
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:  # import the ladybug_rhino dependencies
+    from ladybug_rhino.grasshopper import all_required_inputs, longest_list, \
+        give_warning
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
+
+
+def check_adjacency(room):
+    """Check if a room has had adjacnecies solved on it and give a warning if so."""
+    for face in room.faces:
+        if isinstance(face.boundary_condition, Surface):
+            msg = 'Room "{}" has had adjacencies solved on it and this can ' \
+                'cause missing reference issues if the adjacent room is not given ' \
+                'the same prefix.\nThe recommended practice is to add prefixes ' \
+                'before solving adjacency'.format(room.display_name)
+            give_warning(ghenv.Component, msg)
 
 
 if all_required_inputs(ghenv.Component):
     hb_objs = []
     for i, obj in enumerate(_hb_objs):
+        if isinstance(obj, Room):
+            check_adjacency(obj)
         obj_dup = obj.duplicate()
         prefix = longest_list(_prefix, i)
         obj_dup.add_prefix(prefix)
