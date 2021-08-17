@@ -9,26 +9,23 @@
 
 
 """
-Take a list of closed breps (polysurfaces) that you intend to turn into Rooms and
-split their Faces to ensure that there are matching faces between each of the
-adjacent rooms.
+Take a list of closed breps (polysurfaces) and split their Faces to ensure that
+there are matching surfaces between them.
 _
-Matching faces and face areas betweem adjacent rooms are necessary to ensure
-that the conductive heat flow calculation occurs correctly across the face in
-an energy simulation.
+This matching between Room faces is required in order to contruct a correct
+multi-room energy model since conductive heat flow won't occur correctly across
+interior faces when their surface areas do not match.
 -
 
     Args:
-        _solids: A list of closed Rhino breps (polysurfaces) that you intend to turn
-            into Rooms that do not have perfectly matching surfaces between
-            adjacent Faces (this matching is needed to contruct a correct
-            multi-room energy model).
-        parallel_: Set to "True" to run the intersection calculation in parallel,
-            which can greatly increase the speed of calculation but may not be
-            desired when other simulations are running on your machine. If False,
-            the calculation will be run on a single core. Default: False.
+        _solids: A list of closed Rhino breps (polysurfaces) that do not have matching
+            surfaces between adjacent Faces.
+        _cpu_count_: An integer to set the number of CPUs used in the execution of the
+            intersection calculation. If unspecified, it will automatically default
+            to one less than the number of CPUs currently available on the
+            machine or 1 if only one processor is available.
         _run: Set to True to run the component.
-    
+
     Returns:
         int_solids: The same input closed breps that have had their component
             faces split by adjacent polysurfaces to have matching surfaces between
@@ -38,7 +35,7 @@ an energy simulation.
 
 ghenv.Component.Name = "HB Intersect Solids"
 ghenv.Component.NickName = 'IntSolid'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -46,7 +43,7 @@ ghenv.Component.AdditionalHelpFromDocStrings = "2"
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.intersect import intersect_solids, intersect_solids_parallel
-    from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.grasshopper import all_required_inputs, recommended_processor_count
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -57,7 +54,8 @@ if all_required_inputs(ghenv.Component) and _run:
     b_boxes = [brep.GetBoundingBox(False) for brep in _solids]
     
     # intersect all of the solid geometries
-    if parallel_:
-        int_solids = intersect_solids_parallel(_solids, b_boxes)
-    else:
+    workers = _cpu_count_ if _cpu_count_ is not None else recommended_processor_count()
+    if workers > 1:
+        int_solids = intersect_solids_parallel(_solids, b_boxes, workers)
+    else:  # just use the single-core process
         int_solids = intersect_solids(_solids, b_boxes)
