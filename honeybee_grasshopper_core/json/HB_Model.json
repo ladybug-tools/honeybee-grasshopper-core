@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0", 
+  "version": "1.2.1", 
   "nickname": "Model", 
   "outputs": [
     [
@@ -51,13 +51,13 @@
     {
       "access": "item", 
       "name": "_name_", 
-      "description": "Text to be used for the name and identifier of the Model. If no\nname is provided, it will be \"unnamed\".", 
+      "description": "Text to be used for the Model name and to be incorporated into a unique\nmodel identifier. If no name is provided, it will be \"unnamed\" and\na unique model identifier will be auto-generated.", 
       "type": "string", 
       "default": null
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.typing import clean_string\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\n    from ladybug_{{cad}}.config import units_system, tolerance, angle_tolerance\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef check_all_geo_none():\n    \"\"\"Check whether all of the geometry inputs to this component are None.\"\"\"\n    return all(obj_list == [] or obj_list == [None] for obj_list in\n               (rooms_, faces_, shades_, apertures_, doors_))\n\n\nif all_required_inputs(ghenv.Component) and not check_all_geo_none():\n    # set a default name and get the {{Cad}} Model units\n    name = clean_string(_name_) if _name_ is not None else 'unnamed'\n    units = units_system()\n\n    # create the model\n    model = Model(name, rooms_, faces_, shades_, apertures_, doors_,\n                  units=units, tolerance=tolerance, angle_tolerance=angle_tolerance)\n    if _name_ is not None:\n        model.display_name = _name_\n", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.typing import clean_string, clean_and_id_string\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\n    from ladybug_{{cad}}.config import units_system, tolerance, angle_tolerance\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef check_all_geo_none():\n    \"\"\"Check whether all of the geometry inputs to this component are None.\"\"\"\n    return all(obj_list == [] or obj_list == [None] for obj_list in\n               (rooms_, faces_, shades_, apertures_, doors_))\n\n\nif all_required_inputs(ghenv.Component) and not check_all_geo_none():\n    # set a default name and get the {{Cad}} Model units\n    name = clean_string(_name_) if _name_ is not None else clean_and_id_string('unnamed')\n    units = units_system()\n\n    # create the model\n    model = Model(name, rooms_, faces_, shades_, apertures_, doors_,\n                  units=units, tolerance=tolerance, angle_tolerance=angle_tolerance)\n    model.display_name = _name_ if _name_ is not None else 'unnamed'\n", 
   "category": "Honeybee", 
   "name": "HB Model", 
   "description": "Create a Honeybee Model, which can be sent for simulation.\n-"

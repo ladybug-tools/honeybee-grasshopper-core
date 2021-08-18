@@ -21,9 +21,10 @@ Create a Honeybee Model, which can be sent for simulation.
             that apertures without a parent Face are not allowed for energy models.
         doors_: A list of honeybee Doors to be added to the Model. Note
             that doors without a parent Face are not allowed for energy models.
-        _name_: Text to be used for the name and identifier of the Model. If no
-            name is provided, it will be "unnamed".
-    
+        _name_: Text to be used for the Model name and to be incorporated into a unique
+            model identifier. If no name is provided, it will be "unnamed" and
+            a unique model identifier will be auto-generated.
+
     Returns:
         report: Reports, errors, warnings, etc.
         model: A Honeybee Model object possessing all of the input geometry
@@ -32,14 +33,14 @@ Create a Honeybee Model, which can be sent for simulation.
 
 ghenv.Component.Name = "HB Model"
 ghenv.Component.NickName = 'Model'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
-    from honeybee.typing import clean_string
+    from honeybee.typing import clean_string, clean_and_id_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -58,11 +59,10 @@ def check_all_geo_none():
 
 if all_required_inputs(ghenv.Component) and not check_all_geo_none():
     # set a default name and get the Rhino Model units
-    name = clean_string(_name_) if _name_ is not None else 'unnamed'
+    name = clean_string(_name_) if _name_ is not None else clean_and_id_string('unnamed')
     units = units_system()
 
     # create the model
     model = Model(name, rooms_, faces_, shades_, apertures_, doors_,
                   units=units, tolerance=tolerance, angle_tolerance=angle_tolerance)
-    if _name_ is not None:
-        model.display_name = _name_
+    model.display_name = _name_ if _name_ is not None else 'unnamed'
