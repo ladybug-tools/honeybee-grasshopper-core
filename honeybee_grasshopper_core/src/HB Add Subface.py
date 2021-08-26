@@ -1,3 +1,4 @@
+
 # Honeybee: A Plugin for Environmental Analysis (GPL)
 # This file is part of Honeybee.
 #
@@ -11,7 +12,6 @@
 """
 Add a Honeybee Aperture or Door to a parent Face or Room.
 -
-
     Args:
         _hb_obj: A Honeybee Face or a Room to which the _sub_faces should be added.
         _sub_faces: A list of Honeybee Apertures and/or Doors that will be added
@@ -25,7 +25,7 @@ Add a Honeybee Aperture or Door to a parent Face or Room.
 
 ghenv.Component.Name = "HB Add Subface"
 ghenv.Component.NickName = 'AddSubface'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
