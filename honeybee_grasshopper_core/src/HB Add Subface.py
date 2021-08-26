@@ -37,8 +37,10 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
+    from ladybug_rhino import fromgeometry as fg
     from ladybug_rhino.config import tolerance, angle_tolerance
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning
+ 
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -84,3 +86,6 @@ if all_required_inputs(ghenv.Component):
     if len(unmatched_ids) != 0:
         print msg
         give_warning(ghenv.Component, msg)
+    bad_aps = [ sub for sub in sub_faces if sub.display_name in unmatched_ids ]
+    for bad in bad_aps:
+        a = fg.from_face3d_to_solid(bad.geometry,1)
