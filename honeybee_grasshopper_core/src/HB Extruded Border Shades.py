@@ -18,20 +18,27 @@ simulations or in the solar distribution calculation of EnergyPlus.
     Args:
         _hb_objs: A list of honeybee Rooms, Faces, or Apertures to which extruded
             border shades will be added.
-        _depth: A number for the extrusion depth.
+        _depth: A number for the extrusion depth. If an array of values are input
+            here, different depths will be assigned based on cardinal
+            direction, starting with north and moving clockwise.
         indoor_: Boolean for whether the extrusion should be generated facing the
             opposite direction of the aperture normal and added to the Aperture's
-            indoor_shades instead of outdoor_shades. Note that, by default, indoor
-            shades are not used in energy simulations but they are used in all
-            simulations involving Radiance. Default: False.
-        ep_constr_: Optional text for an energy construction to be used for all
-            generated shades. This text will be used to look up a construction
-            in the shade construction library. This can also be a custom
-            ShadeConstruction object.
-        rad_mod_: Optional text for a radiance modifier to be used for all
-            generated shades. This text will be used to look up a modifier
-            in the modifier library. This can also be a custom modifier object.
-    
+            indoor_shades instead of outdoor_shades. If an array of values are
+            input here, different indoor booleans will be assigned based on
+            cardinal direction, starting with north and moving clockwise.
+            Note that indoor shades are not used in energy simulations but
+            they are used in all simulations involving Radiance. (Default: False).
+        p_constr_: Optional Honeybee ShadeConstruction to be applied to the input _hb_objs.
+            This can also be text for a construction to be looked up in the shade
+            construction library. If an array of text or construction objects
+            are input here, different constructions will be assigned based on
+            cardinal direction, starting with north and moving clockwise.
+        rad_mod_: Optional Honeybee Modifier to be applied to the input _hb_objs.
+            This can also be text for a modifier to be looked up in the shade
+            modifier library. If an array of text or modifier objects
+            are input here, different modifiers will be assigned based on
+            cardinal direction, starting with north and moving clockwise.
+
     Returns:
         report: Reports, errors, warnings, etc.
         hb_objs: The input Honeybee Face or Room or Aperture with extruded border
@@ -40,7 +47,7 @@ simulations or in the solar distribution calculation of EnergyPlus.
 
 ghenv.Component.Name = "HB Extruded Border Shades"
 ghenv.Component.NickName = 'BorderShades'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -50,6 +57,8 @@ try:  # import the core honeybee dependencies
     from honeybee.room import Room
     from honeybee.face import Face
     from honeybee.face import Aperture
+    from honeybee.orientation import check_matching_inputs, angles_from_num_orient, \
+        face_orient_index, inputs_by_index
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -93,29 +102,56 @@ if all_required_inputs(ghenv.Component):
     hb_objs = [obj.duplicate() for obj in _hb_objs]
 
     # assign default indoor_ property
-    indoor_ = indoor_ if indoor_ is not None else False
+    indoor_ = indoor_ if len(indoor_) != 0 else [False]
 
-    # get energyplus constructions if they are requested
-    if ep_constr_ is not None:
-        if isinstance(ep_constr_, str):
-            ep_constr_ = shade_construction_by_identifier(ep_constr_)
+    # process the input constructions
+    if len(ep_constr_) != 0:
+        for i, constr in enumerate(ep_constr_):
+            if isinstance(constr, str):
+                ep_constr_[i] = shade_construction_by_identifier(constr)
+    else:
+        ep_constr_ = [None]
 
-    # get radiance modifiers if they are requested
-    if rad_mod_ is not None:
-        if isinstance(rad_mod_, str):
-            rad_mod_ = modifier_by_identifier(rad_mod_)
+    # process the input modifiers
+    if len(rad_mod_) != 0:
+        for i, mod in enumerate(rad_mod_):
+            if isinstance(mod, str):
+                rad_mod_[i] = modifier_by_identifier(mod)
+    else:
+        rad_mod_ = [None]
+
+    # gather all of the inputs together
+    all_inputs = [_depth, indoor_, ep_constr_, rad_mod_]
+
+    # ensure matching list lengths across all values
+    all_inputs, num_orient = check_matching_inputs(all_inputs)
+
+    # get a list of angles used to categorize the faces
+    angles = angles_from_num_orient(num_orient)
 
     # loop through the input objects and add shades
     for obj in hb_objs:
         if isinstance(obj, Room):
             for face in obj.faces:
+                orient_i = face_orient_index(face, angles)
+                if orient_i is None:
+                    orient_i = 0
+                depth, indr, con, mod = inputs_by_index(orient_i, all_inputs)
                 for ap in face.apertures:
-                    assign_shades(ap, _depth, indoor_, ep_constr_, rad_mod_)
+                    assign_shades(ap, depth, indr, con, mod)
         elif isinstance(obj, Face):
+            orient_i = face_orient_index(obj, angles)
+            if orient_i is None:
+                orient_i = 0
+            depth, indr, con, mod = inputs_by_index(orient_i, all_inputs)
             for ap in obj.apertures:
-                assign_shades(ap, _depth, indoor_, ep_constr_, rad_mod_)
+                assign_shades(ap, depth, indr, con, mod)
         elif isinstance(obj, Aperture):
-            assign_shades(obj, _depth, indoor_, ep_constr_, rad_mod_)
+            orient_i = face_orient_index(obj, angles)
+            if orient_i is None:
+                orient_i = 0
+            depth, indr, con, mod = inputs_by_index(orient_i, all_inputs)
+            assign_shades(obj, depth, indr, con, mod)
         else:
             raise TypeError('Input _hb_objs must be a Room, Face or Aperture. '
                             'Not {}.'.format(type(obj)))
