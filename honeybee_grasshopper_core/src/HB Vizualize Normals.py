@@ -16,7 +16,7 @@ geometry object the Rhino scene, including all sub-faces and assigned shades.
         _hb_objs: A Honeybee Model, Room, Face, Shade, Aperture, or Door for which
             points and vectors will be output in the Rhino scene to show the
             object's orientation.
-    
+
     Returns:
         points: Points that lie at the center of each surface of the connected _hb_objs.
             These should be connected to the "Anchor" input of a native Grasshopper
@@ -28,7 +28,7 @@ geometry object the Rhino scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = 'HB Vizualize Normals'
 ghenv.Component.NickName = 'VizNorm'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.2.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -73,7 +73,7 @@ def add_face(face, points, vectors):
     for ap in face.apertures:
         add_aperture(ap, points, vectors)
     for dr in face.doors:
-        add_door(ap, points, vectors)
+        add_door(dr, points, vectors)
     for shd in face.shades:
         points.append(from_point3d(shd.center))
         vectors.append(from_vector3d(shd.normal))
