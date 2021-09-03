@@ -29,7 +29,7 @@ Visualize room geometry in the Rhino scene organized by boundary condition.
 
 ghenv.Component.Name = "HB Vizualize by BC"
 ghenv.Component.NickName = 'VizByBC'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.3.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
