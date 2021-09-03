@@ -38,7 +38,7 @@ the project folder, and other settings.
 
 ghenv.Component.Name = 'HB Recipe Settings'
 ghenv.Component.NickName = 'RecipeSettings'
-ghenv.Component.Message = '1.2.1'
+ghenv.Component.Message = '1.3.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '7'

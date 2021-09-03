@@ -36,7 +36,7 @@ by object and face type.
 
 ghenv.Component.Name = 'HB Faces by Type'
 ghenv.Component.NickName = 'FacesByType'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.3.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'

@@ -49,7 +49,7 @@ like setting Faces along a given stretch of a parti wall to be adiabatic.
 
 ghenv.Component.Name = 'HB Properties by Guide Surface'
 ghenv.Component.NickName = 'GuideSurface'
-ghenv.Component.Message = '1.2.1'
+ghenv.Component.Message = '1.3.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'

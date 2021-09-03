@@ -38,7 +38,7 @@ Scale any Honeybee geometry object or a Model by a factor.
 
 ghenv.Component.Name = "HB Scale"
 ghenv.Component.NickName = 'Scale'
-ghenv.Component.Message = '1.2.0'
+ghenv.Component.Message = '1.3.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
