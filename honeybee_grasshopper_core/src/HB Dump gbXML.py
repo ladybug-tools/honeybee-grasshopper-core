@@ -40,10 +40,12 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.3.0'
+ghenv.Component.Message = '1.3.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
+
+import os
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
@@ -56,15 +58,21 @@ try:  # import the honeybee_energy dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee_energy:\n\t{}'.format(e))
 
+try:
+    from lbt_recipes.version import check_openstudio_version
+except ImportError as e:
+    raise ImportError('\nFailed to import lbt_recipes:\n\t{}'.format(e))
+
 try:  # import the core ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
-import os
-
 
 if all_required_inputs(ghenv.Component) and _dump:
+    # check the presence of openstudio and check that the version is compatible
+    check_openstudio_version()
+
     # check the input and set the component defaults
     assert isinstance(_model, Model), \
         'Excpected Honeybee Model object. Got {}.'.format(type(_model))
