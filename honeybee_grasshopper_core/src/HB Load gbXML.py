@@ -31,10 +31,14 @@ file transfer is needed.
 
 ghenv.Component.Name = 'HB Load gbXML'
 ghenv.Component.NickName = 'LoadGBXML'
-ghenv.Component.Message = '1.3.0'
+ghenv.Component.Message = '1.3.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
+
+import os
+import subprocess
+import json
 
 try:  # import the ladybug_geometry dependencies
     from ladybug_geometry.geometry3d.pointvector import Vector3D
@@ -47,15 +51,16 @@ try:  # import the core honeybee dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
+try:
+    from lbt_recipes.version import check_openstudio_version
+except ImportError as e:
+    raise ImportError('\nFailed to import lbt_recipes:\n\t{}'.format(e))
+
 try:  # import the core ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning
     from ladybug_rhino.config import conversion_to_meters, units_system, tolerance
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
-
-import os
-import subprocess
-import json
 
 
 def model_units_tolerance_check(model):
@@ -82,6 +87,9 @@ def model_units_tolerance_check(model):
 
 
 if all_required_inputs(ghenv.Component) and _load:
+    # check the presence of openstudio and check that the version is compatible
+    check_openstudio_version()
+
     # sense the type of file we are loading
     lower_fname = _gbxml.lower()
     if lower_fname.endswith('.xml') or lower_fname.endswith('.gbxml'):
