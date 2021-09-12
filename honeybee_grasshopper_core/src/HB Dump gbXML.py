@@ -46,6 +46,7 @@ ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
 
 import os
+import json
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
@@ -83,11 +84,24 @@ if all_required_inputs(ghenv.Component) and _dump:
     folder = _folder_ if _folder_ is not None else folders.default_simulation_folder
     gbxml = os.path.join(folder, gbxml_file)
 
+    # duplicate model to avoid mutating it as we edit it for energy simulation
+    _model = _model.duplicate()
+    # remove colinear vertices using the Model tolerance to avoid E+ tolerance issues
+    for room in _model.rooms:
+        room.remove_colinear_vertices_envelope(_model.tolerance)
+    # scale the model if the units are not meters
+    if _model.units != 'Meters':
+        _model.convert_to_units('Meters')
+
     # write out the HBJSON and OpenStudio Workflow (OSW) that translates models to gbXML
     out_directory = os.path.join(folders.default_simulation_folder, 'temp_translate')
     if not os.path.isdir(out_directory):
         os.makedirs(out_directory)
-    hb_file = _model.to_hbjson(name, out_directory, included_prop=['energy'])
+    model_dict = _model.to_dict(included_prop=['energy'], triangulate_sub_faces=True)
+    _model.properties.energy.simplify_window_constructions_in_dict(model_dict)
+    hb_file = os.path.join(out_directory, '{}.hbjson'.format(_model.identifier))
+    with open(hb_file, 'w') as fp:
+        json.dump(model_dict, fp)
     osw = to_gbxml_osw(hb_file, gbxml, out_directory)
 
     # run the measure to translate the model JSON to an openstudio measure
