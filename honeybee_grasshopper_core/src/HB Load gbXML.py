@@ -31,7 +31,7 @@ file transfer is needed.
 
 ghenv.Component.Name = 'HB Load gbXML'
 ghenv.Component.NickName = 'LoadGBXML'
-ghenv.Component.Message = '1.3.1'
+ghenv.Component.Message = '1.3.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -58,7 +58,8 @@ except ImportError as e:
 
 try:  # import the core ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning
-    from ladybug_rhino.config import conversion_to_meters, units_system, tolerance
+    from ladybug_rhino.config import conversion_to_meters, units_system, \
+        tolerance, angle_tolerance
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -91,24 +92,29 @@ if all_required_inputs(ghenv.Component) and _load:
     check_openstudio_version()
 
     # sense the type of file we are loading
-    lower_fname = _gbxml.lower()
+    lower_fname = os.path.basename(_gbxml).lower()
     if lower_fname.endswith('.xml') or lower_fname.endswith('.gbxml'):
         cmd_name = 'model-from-gbxml'
+        f_name = lower_fname.replace('.gbxml', '.hbjson').replace('.xml', '.hbjson')
     elif lower_fname.endswith('.osm'):
         cmd_name = 'model-from-osm'
+        f_name = lower_fname.replace('.osm', '.hbjson')
     elif lower_fname.endswith('.idf'):
         cmd_name = 'model-from-idf'
+        f_name = lower_fname.replace('.idf', '.hbjson')
     else:
         raise ValueError('Failed to recongize the input _gbxml file type.\n'
                          'Make sure that it has an appropriate file extension.')
 
     # Execute the honybee CLI to obtain the model JSON via CPython
-    shell = True if os.name == 'nt' else False
+    out_path = os.path.join(folders.default_simulation_folder, f_name)
     cmds = [folders.python_exe_path, '-m', 'honeybee_energy', 'translate',
-            cmd_name, _gbxml]
+            cmd_name, _gbxml, '--output-file', out_path]
+    shell = True if os.name == 'nt' else False
     process = subprocess.Popen(cmds, stdout=subprocess.PIPE, shell=shell)
     stdout = process.communicate()
-    model_dict = json.loads(stdout[0])
+    with open(out_path) as json_file:
+        model_dict = json.load(json_file)
 
     # load the model from the JSON dictionary and convert it to Rhino model units
     model = Model.from_dict(model_dict)
@@ -120,6 +126,7 @@ if all_required_inputs(ghenv.Component) and _load:
         for face in room.faces:
             doors = face.doors
             for door in doors:
-                door.move(move_vec)
+                if not face.geometry.is_sub_face(door.geometry, tolerance, angle_tolerance):
+                    door.move(move_vec)
             if len(doors) != 0:
                 face._punched_geometry = None
