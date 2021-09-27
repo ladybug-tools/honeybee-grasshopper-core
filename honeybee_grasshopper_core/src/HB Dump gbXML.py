@@ -40,7 +40,7 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.3.1'
+ghenv.Component.Message = '1.3.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -98,6 +98,7 @@ if all_required_inputs(ghenv.Component) and _dump:
     if not os.path.isdir(out_directory):
         os.makedirs(out_directory)
     model_dict = _model.to_dict(included_prop=['energy'], triangulate_sub_faces=True)
+    _model.properties.energy.add_autocal_properties_to_dict(model_dict)
     _model.properties.energy.simplify_window_constructions_in_dict(model_dict)
     hb_file = os.path.join(out_directory, '{}.hbjson'.format(_model.identifier))
     with open(hb_file, 'w') as fp:
