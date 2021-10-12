@@ -12,11 +12,8 @@
 Dump any honeybee object to a JSON file. You can use "HB Load Objects" component
 to load the objects from the file back into Grasshopper.
 -
-Honeybee objects include any Model, Room, Face, Aperture, Door, Shade, or
-boundary condition object
--
-It also includes any honeybee energy Material, Construction, ConstructionSet,
-Schedule, Load, ProgramType, or Simulation object.
+Honeybee objects include any honeybee energy Material, Construction,
+ConstructionSet, Schedule, Load, ProgramType, or Simulation object.
 -
 
     Args:
@@ -40,24 +37,39 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Dump Objects'
 ghenv.Component.NickName = 'DumpObjects'
-ghenv.Component.Message = '1.3.0'
+ghenv.Component.Message = '1.3.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
 
+import os
+import json
+
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
+    from honeybee.room import Room
+    from honeybee.face import Face
+    from honeybee.aperture import Aperture
+    from honeybee.door import Door
+    from honeybee.shade import Shade
     from honeybee.config import folders
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the core ladybug_rhino dependencies
-    from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.grasshopper import all_required_inputs, give_warning
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
-import os
-import json
+
+def geo_object_warning(obj):
+    """Give a warning that individual geometry objects should be added to a Model."""
+    msg = 'An individual {} has been connected to the _hb_objs.\n' \
+        'The recommended practice is to add this object to a Model and\n' \
+        'serialize the Model instead of serializing individual objects.'.format(
+            obj.__class__.__name__)
+    print(msg)
+    give_warning(ghenv.Component, msg)
 
 
 if all_required_inputs(ghenv.Component) and _dump:
@@ -68,6 +80,12 @@ if all_required_inputs(ghenv.Component) and _dump:
     folder = _folder_ if _folder_ is not None else folders.default_simulation_folder
     hb_file = os.path.join(folder, file_name)
     abridged = bool(abridged_)
+
+    # check to see if any objects are of the geometry type and give a warning
+    geo_types = (Room, Face, Aperture, Door, Shade)
+    for obj in _hb_objs:
+        if isinstance(obj, geo_types):
+            geo_object_warning(obj)
 
     # create the dictionary to be written to a JSON file
     if len(_hb_objs) == 1:  # write a single object into a file if the length is 1
