@@ -1,0 +1,50 @@
+{
+  "version": "1.3.0", 
+  "nickname": "Skeleton", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "polyskel", 
+        "description": "A list of line segments that represent the straight skeleton of\nthe input _floor_geo. This will be output from the component no matter\nwhat the input _floor_geo is.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "perim_poly", 
+        "description": "A list of breps representing the perimeter polygons of the input\n_floor_geo. This will only be ouput if an offset_ is input and the\nstraight skeleton is not self-intersecting.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "core_poly", 
+        "description": "A list of breps representing the core polygons of the input\n_floor_geo. This will only be ouput if an offset_ is input and the\nstraight skeleton is not self-intersecting, and the offset is not\nso great as to eliminate the core.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_floor_geo", 
+      "description": "Horizontal Rhino surfaces for which the straight skeleton\nwill be computed.", 
+      "type": "Brep", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "offset_", 
+      "description": "An optional positive number that will be used to offset the\nperimeter of the geometry to output core/perimeter polygons.\nIf a value is plugged in here and the straight skeleton is not\nself-intersecting, perim_poly and core_poly will be ouput.", 
+      "type": "double", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core ladybug_geometry dependencies\n    from ladybug_geometry.geometry2d.line import LineSegment2D\n    from ladybug_geometry.geometry2d.polygon import Polygon2D\n    from ladybug_geometry.geometry3d.pointvector import Point3D\n    from ladybug_geometry.geometry3d.face import Face3D\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_geometry:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug_geometry dependencies\n    from ladybug_geometry_polyskel.polyskel import skeleton_as_edge_list\n    from ladybug_geometry_polyskel.polysplit import perimeter_core_subpolygons\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_geometry:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance\n    from ladybug_{{cad}}.togeometry import to_face3d\n    from ladybug_{{cad}}.fromgeometry import from_face3d, from_linesegment2d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, list_to_data_tree\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef polygon_to_brep(polygon, z_height):\n    \"\"\"Convert a ladybug Polygon2D or list of polygon2D into {{Cad}} breps.\"\"\"\n    if isinstance(polygon, list):  # face with holes\n        verts = []\n        for poly in polygon:\n            verts.append([Point3D(pt.x, pt.y, z_height) for pt in poly])\n        return from_face3d(Face3D(verts[0], holes=verts[1:]))\n    else:\n        verts = [Point3D(pt.x, pt.y, z_height) for pt in polygon]\n        return from_face3d(Face3D(verts))\n\n\nif all_required_inputs(ghenv.Component):\n    # first extract the straight skeleton from the geometry\n    polyskel, boundaries, hole_polygons = [], [], []\n    for face in to_face3d(_floor_geo):\n        # convert the input geometry into Polygon2D for straight skeleton analysis\n        boundary = Polygon2D.from_array([(pt.x, pt.y) for pt in face.boundary])\n        if boundary.is_clockwise:\n            boundary = boundary.reverse()\n        holes, z_height = None, face[0].z\n        if face.has_holes:\n            holes = []\n            for hole in face.holes:\n                h_poly = Polygon2D.from_array([(pt.x, pt.y) for pt in hole])\n                if not h_poly.is_clockwise:\n                    h_poly = h_poly.reverse()\n                holes.append(h_poly)\n        boundaries.append(boundary)\n        hole_polygons.append(holes)\n        # compute the skeleton and convert to line segments\n        skel_lines = skeleton_as_edge_list(boundary, holes, tolerance)\n        skel_lines_rh = [from_linesegment2d(LineSegment2D.from_array(line), z_height)\n                         for line in skel_lines]\n        polyskel.append(skel_lines_rh)\n\n    # try to compute core/perimeter polygons if an offset_ is input\n    if offset_:\n        perim_poly, core_poly = [], []\n        for bound, holes in zip(boundaries, hole_polygons):\n            try:\n                perim, core = perimeter_core_subpolygons(\n                    bound, offset_, holes, tolerance)\n                perim_poly.append([polygon_to_brep(p, z_height) for p in perim])\n                core_poly.append([polygon_to_brep(p, z_height) for p in core])\n            except RuntimeError as e:\n                print(e)\n                perim_poly.append(None)\n                core_poly.append(None)\n\n    # convert outputs to data trees\n    polyskel = list_to_data_tree(polyskel)\n    perim_poly = list_to_data_tree(perim_poly)\n    core_poly = list_to_data_tree(core_poly)\n", 
+  "category": "Honeybee", 
+  "name": "HB Straight Skeleton", 
+  "description": "Get the straight skeleton of any horizontal planar geometry.\n_\nThis is can also be used to generate core/perimeter sub-polygons if an offset is\ninput AND the straight skeleton is not self-intersecting. In the event of a\nself-intersecting straight skeleton, the output line segments can still be used\nto assist with the manual creation of core/perimeter offsets.\n_\nThis component uses a modified version of the the polyskel package\n(https://github.com/Botffy/polyskel) by Armin Scipiades (aka. @Bottfy),\nwhich is, itself, a Python implementation of the straight skeleton\nalgorithm as described by Felkel and Obdrzalek in their 1998 conference paper\nStraight skeleton implementation\n(https://github.com/Botffy/polyskel/blob/master/doc/StraightSkeletonImplementation.pdf).\n-"
+}
