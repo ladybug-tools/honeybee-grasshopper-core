@@ -37,7 +37,7 @@ ConstructionSet, Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Dump Objects'
 ghenv.Component.NickName = 'DumpObjects'
-ghenv.Component.Message = '1.3.1'
+ghenv.Component.Message = '1.3.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -104,5 +104,9 @@ if all_required_inputs(ghenv.Component) and _dump:
     # write the dictionary into a file
     if not os.path.isdir(folder):
         os.makedirs(folder)
-    with open(hb_file, 'w') as fp:
-        json.dump(obj_dict, fp, indent=indent_)
+    try:
+        with open(hb_file, 'w') as fp:
+            json.dump(obj_dict, fp, indent=indent_)
+    except UnicodeDecodeError:  # non-unicode character in display_name
+        with open(hb_file, 'w') as fp:
+            json.dump(obj_dict, fp, indent=indent_, ensure_ascii=False)
