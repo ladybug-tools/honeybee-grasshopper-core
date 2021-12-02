@@ -21,9 +21,9 @@ sub-faces and assigned shades.
             visible in the Rhino scene.
 """
 
-ghenv.Component.Name = "HB Vizualize All"
+ghenv.Component.Name = "HB Visualize All"
 ghenv.Component.NickName = 'VizAll'
-ghenv.Component.Message = '1.3.0'
+ghenv.Component.Message = '1.3.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"

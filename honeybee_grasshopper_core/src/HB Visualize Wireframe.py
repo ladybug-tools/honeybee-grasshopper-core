@@ -21,9 +21,9 @@ scene, including all sub-faces and assigned shades.
             will be visible in the Rhino scene.
 """
 
-ghenv.Component.Name = 'HB Vizualize Wireframe'
+ghenv.Component.Name = 'HB Visualize Wireframe'
 ghenv.Component.NickName = 'VizWireF'
-ghenv.Component.Message = '1.3.0'
+ghenv.Component.Message = '1.3.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'

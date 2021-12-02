@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0", 
+  "version": "1.3.1", 
   "nickname": "VizQuick", 
   "outputs": [
     [
@@ -24,6 +24,6 @@
   "subcategory": "1 :: Visualize", 
   "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.face import Face\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.fromgeometry import from_face3d, from_polyface3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # lists of {{cad}} geometry to be filled with content\n    geo = []\n    \n    # loop through all objects and add them\n    for hb_obj in _hb_objs:\n        try:  # Face, Shade, Aperture, or Door\n            if isinstance(hb_obj, Face):\n                geo.append(from_face3d(hb_obj.punched_geometry))\n            else:\n                geo.append(from_face3d(hb_obj.geometry))\n        except AttributeError:  # probably a Room\n            try:\n                geo.append(from_polyface3d(hb_obj.geometry))\n            except AttributeError:  # it's a whole Model\n                for room in hb_obj.rooms:\n                    geo.append(from_polyface3d(room.geometry))\n                for face in hb_obj.orphaned_faces:\n                    geo.append(from_face3d(face.punched_geometry))\n                for ap in hb_obj.orphaned_apertures:\n                    geo.append(from_face3d(ap.geometry))\n                for dr in hb_obj.orphaned_doors:\n                    geo.append(from_face3d(dr.geometry))\n                for shd in hb_obj.orphaned_shades:\n                    geo.append(from_face3d(shd.geometry))", 
   "category": "Honeybee", 
-  "name": "HB Vizualize Quick", 
+  "name": "HB Visualize Quick", 
   "description": "Quickly preview any Honeybee geometry object within the Rhino scene.\n_\nSub-faces and assigned shades will not be included in the output, allowing for\na faster preview of large lists of objects but without the ability to check the\nassignment of child objects.\n-"
 }
