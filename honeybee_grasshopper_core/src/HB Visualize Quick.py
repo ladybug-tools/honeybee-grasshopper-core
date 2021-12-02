@@ -24,9 +24,9 @@ assignment of child objects.
             visible in the Rhino scene.
 """
 
-ghenv.Component.Name = "HB Vizualize Quick"
+ghenv.Component.Name = "HB Visualize Quick"
 ghenv.Component.NickName = 'VizQuick'
-ghenv.Component.Message = '1.3.0'
+ghenv.Component.Message = '1.3.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"

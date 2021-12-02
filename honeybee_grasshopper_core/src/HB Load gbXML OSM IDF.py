@@ -29,9 +29,9 @@ file transfer is needed.
         model: A honeybee Model objects that has been re-serialized from the input file.
 """
 
-ghenv.Component.Name = 'HB Load gbXML'
-ghenv.Component.NickName = 'LoadGBXML'
-ghenv.Component.Message = '1.3.2'
+ghenv.Component.Name = 'HB Load gbXML OSM IDF'
+ghenv.Component.NickName = 'LoadEModel'
+ghenv.Component.Message = '1.3.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
