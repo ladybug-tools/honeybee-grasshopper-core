@@ -21,7 +21,7 @@ file transfer is needed.
 -
 
     Args:
-        _gbxml: A file path to a gbXML, OSM or IDF file from which a Honeybee Model
+        _model_file: A file path to a gbXML, OSM or IDF file from which a Honeybee Model
             will be loaded
         _load: Set to "True" to load the Model from the input file.
 
@@ -31,7 +31,7 @@ file transfer is needed.
 
 ghenv.Component.Name = 'HB Load gbXML OSM IDF'
 ghenv.Component.NickName = 'LoadEModel'
-ghenv.Component.Message = '1.3.3'
+ghenv.Component.Message = '1.3.4'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -92,7 +92,7 @@ if all_required_inputs(ghenv.Component) and _load:
     check_openstudio_version()
 
     # sense the type of file we are loading
-    lower_fname = os.path.basename(_gbxml).lower()
+    lower_fname = os.path.basename(_model_file).lower()
     if lower_fname.endswith('.xml') or lower_fname.endswith('.gbxml'):
         cmd_name = 'model-from-gbxml'
         f_name = lower_fname.replace('.gbxml', '.hbjson').replace('.xml', '.hbjson')
@@ -103,13 +103,13 @@ if all_required_inputs(ghenv.Component) and _load:
         cmd_name = 'model-from-idf'
         f_name = lower_fname.replace('.idf', '.hbjson')
     else:
-        raise ValueError('Failed to recongize the input _gbxml file type.\n'
+        raise ValueError('Failed to recongize the input _model_file file type.\n'
                          'Make sure that it has an appropriate file extension.')
 
     # Execute the honybee CLI to obtain the model JSON via CPython
     out_path = os.path.join(folders.default_simulation_folder, f_name)
     cmds = [folders.python_exe_path, '-m', 'honeybee_energy', 'translate',
-            cmd_name, _gbxml, '--output-file', out_path]
+            cmd_name, _model_file, '--output-file', out_path]
     shell = True if os.name == 'nt' else False
     process = subprocess.Popen(cmds, stdout=subprocess.PIPE, shell=shell)
     stdout = process.communicate()
