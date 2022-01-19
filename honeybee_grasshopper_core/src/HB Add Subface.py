@@ -24,7 +24,7 @@ Add a Honeybee Aperture or Door to a parent Face or Room.
 
 ghenv.Component.Name = "HB Add Subface"
 ghenv.Component.NickName = 'AddSubface'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -33,6 +33,7 @@ try:  # import the core honeybee dependencies
     from honeybee.room import Room
     from honeybee.face import Face
     from honeybee.aperture import Aperture
+    from honeybee.boundarycondition import Surface, boundary_conditions
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
@@ -43,21 +44,34 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 already_added_ids = set()  # track whether a given sub-face is already added
+indoor_faces = {}
+
+
+def add_sub_face(face, sub_face):
+    """Add a sub-face (either Aperture or Door) to a parent Face."""
+    if isinstance(sub_face, Aperture):  # the sub-face is an Aperture
+        face.add_aperture(sub_face)
+    else:  # the sub-face is a Door
+        face.add_door(sub_face)
+
 
 def check_and_add_sub_face(face, sub_faces):
     """Check whether a sub-face is valid for a face and, if so, add it."""
     for i, sf in enumerate(sub_faces):
         if face.geometry.is_sub_face(sf.geometry, tolerance, angle_tolerance):
-            if sf.identifier in already_added_ids:
-                sf = sf.duplicate()  # make sure the sub-face isn't added twice
-                sf.add_prefix('Ajd')
-                print sf.identifier
-            already_added_ids.add(sf.identifier)
-            sf_ids[i] = None
-            if isinstance(sf, Aperture):  # the sub-face is an Aperture
-                face.add_aperture(sf)
-            else:  # the sub-face is a Door
-                face.add_door(sf)
+            if isinstance(face.boundary_condition, Surface):
+                try:
+                    indoor_faces[face.identifier][1].append(sf)
+                except KeyError:  # the first time we're encountering the face
+                    indoor_faces[face.identifier] = [face, [sf]]
+                sf_ids[i] = None
+            else:
+                if sf.identifier in already_added_ids:
+                    sf = sf.duplicate()  # make sure the sub-face isn't added twice
+                    sf.add_prefix('Ajd')
+                already_added_ids.add(sf.identifier)
+                sf_ids[i] = None
+                add_sub_face(face, sf)
 
 
 if all_required_inputs(ghenv.Component):
@@ -76,6 +90,31 @@ if all_required_inputs(ghenv.Component):
         else:
             raise TypeError('Expected Honeybee Face or Room. '
                             'Got {}.'.format(type(obj)))
+
+    # for any Faces with a Surface boundary condition, add subfaces as a pair
+    already_adj_ids = set()
+    for in_face_id, in_face_props in indoor_faces.items():
+        if in_face_id in already_adj_ids:
+            continue
+        face_1 = in_face_props[0]
+        try:
+            face_2 = indoor_faces[face_1.boundary_condition.boundary_condition_object][0]
+        except KeyError as e:
+            msg = 'Adding sub-faces to faces with interior (Surface) boundary ' \
+                'conditions\nis only possible when both adjacent faces are in ' \
+                'the input _hb_obj.\nFailed to find {}, which is adjacent ' \
+                'to {}.'.format(e, in_face_id)
+            print msg
+            raise ValueError(msg)
+        face_1.boundary_condition = boundary_conditions.outdoors
+        face_2.boundary_condition = boundary_conditions.outdoors
+        for sf in in_face_props[1]:
+            add_sub_face(face_1, sf)
+            sf2 = sf.duplicate()  # make sure the sub-face isn't added twice
+            sf2.add_prefix('Ajd')
+            add_sub_face(face_2, sf2)
+        face_1.set_adjacency(face_2)
+        already_adj_ids.add(face_2.identifier)
 
     # if any of the sub-faces were not added, give a warning
     unmatched_ids = [sf_id for sf_id in sf_ids if sf_id is not None]
