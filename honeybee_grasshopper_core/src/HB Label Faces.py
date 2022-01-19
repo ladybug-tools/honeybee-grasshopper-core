@@ -40,7 +40,7 @@ different faces and sub-faces.
 
 ghenv.Component.Name = 'HB Label Faces'
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -151,10 +151,10 @@ if all_required_inputs(ghenv.Component):
                          label_face(dr, _attribute_, _font_, label_text, base_pts,
                                     labels, wire_frame)
             elif isinstance(obj, Face):
-                for ap in face.apertures:
+                for ap in obj.apertures:
                     label_face(ap, _attribute_, _font_, label_text, base_pts,
                                labels, wire_frame)
-                for dr in face.doors:
+                for dr in obj.doors:
                     label_face(dr, _attribute_, _font_, label_text, base_pts,
                                labels, wire_frame)
             elif isinstance(obj, (Aperture, Door)):
