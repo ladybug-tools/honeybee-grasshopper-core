@@ -43,10 +43,12 @@ avoid light leaks in Radiance simulations.
             effectively map to OpenStudio space types upon export to OpenStudio.
         conditioned_: Boolean to note whether the Rooms have heating and cooling
             systems.
-        _roof_angle_: A number between 0 and 90 to set the threshold below which faces
-            will be considered roofs instead of walls. 90 indicates that all
-            vertical faces are roofs and 0 indicates that all horizotnal faces
-            are walls. (Default: 30).
+        _roof_angle_: A number between 0 and 90 to set the angle from the horizontal plane
+            below which faces will be considered roofs or floors instead of
+            walls. 90 indicates that all vertical faces are roofs and 0
+            indicates that all horizotnal faces are walls. The default value
+            of 60 degrees is the recommended value given by the ASHRAE 90.1
+            standard. (Default: 60).
 
     Returns:
         report: Reports, errors, warnings, etc.
@@ -56,7 +58,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -101,7 +103,8 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     # set the default roof angle
-    roof_angle = _roof_angle_ if _roof_angle_ is not None else 30
+    roof_angle = _roof_angle_ if _roof_angle_ is not None else 60
+    floor_angle = 180 - roof_angle
 
     rooms = []  # list of rooms that will be returned
     for i, geo in enumerate(_geo):
@@ -114,7 +117,9 @@ if all_required_inputs(ghenv.Component):
         name = clean_and_id_string(display_name)
 
         # create the Room
-        room = Room.from_polyface3d(name, to_polyface3d(geo), roof_angle, ground_depth=tolerance)
+        room = Room.from_polyface3d(
+            name, to_polyface3d(geo), roof_angle=roof_angle,
+            floor_angle=floor_angle, ground_depth=tolerance)
         room.display_name = display_name
 
         # check that the Room geometry is closed.
