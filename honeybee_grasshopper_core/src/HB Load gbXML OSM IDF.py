@@ -31,7 +31,7 @@ file transfer is needed.
 
 ghenv.Component.Name = 'HB Load gbXML OSM IDF'
 ghenv.Component.NickName = 'LoadEModel'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -50,6 +50,11 @@ try:  # import the core honeybee dependencies
     from honeybee.config import folders
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
+
+try:
+    from honeybee_energy.result.osw import OSW
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee_energy:\n\t{}'.format(e))
 
 try:
     from lbt_recipes.version import check_openstudio_version
@@ -108,15 +113,29 @@ if all_required_inputs(ghenv.Component) and _load:
 
     # Execute the honybee CLI to obtain the model JSON via CPython
     out_path = os.path.join(folders.default_simulation_folder, f_name)
+    if os.path.isfile(out_path):
+        os.remove(out_path)
     cmds = [folders.python_exe_path, '-m', 'honeybee_energy', 'translate',
             cmd_name, _model_file, '--output-file', out_path]
     shell = True if os.name == 'nt' else False
-    process = subprocess.Popen(cmds, stdout=subprocess.PIPE, shell=shell)
-    stdout = process.communicate()
+    process = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell)
+    result = process.communicate()
+
+    # check to see if the file was successfully output and, if not, report the error
+    if not os.path.isfile(out_path):
+        osw_path = os.path.join(folders.default_simulation_folder, 'temp_translate', 'out.osw')
+        if os.path.isfile(osw_path):
+            log_osw = OSW(osw_path)
+            print(log_osw.stdout)
+            errors = []
+            for error, tb in zip(log_osw.errors, log_osw.error_tracebacks):
+                print(tb)
+                errors.append(error)
+            raise Exception('Failed to run OpenStudio CLI:\n{}'.format('\n'.join(errors)))
+    
+    # if it's all good, load the model and convert it to Rhino model units
     with open(out_path) as json_file:
         model_dict = json.load(json_file)
-
-    # load the model from the JSON dictionary and convert it to Rhino model units
     model = Model.from_dict(model_dict)
     model_units_tolerance_check(model)
 
