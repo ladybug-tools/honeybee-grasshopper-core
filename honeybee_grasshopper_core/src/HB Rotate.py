@@ -41,7 +41,7 @@ Rotate any Honeybee geometry object or a Model by an angle.
 
 ghenv.Component.Name = "HB Rotate"
 ghenv.Component.NickName = 'Rotate'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
@@ -85,11 +85,11 @@ if all_required_inputs(ghenv.Component):
     elif _origin_ is not None and _axis_ is not None:
         _axis_ = to_vector3d(_axis_)
         for obj in hb_objs:
-            obj.rotate(_angle, pt, _axis_)
+            obj.rotate(_axis_, _angle, pt)
     else:
         _axis_ = to_vector3d(_axis_)
         for i, obj in enumerate(hb_objs):
-            obj.rotate(_angle, pt[i], _axis_)
+            obj.rotate(_axis_, _angle, pt[i])
     
     # add the prefix if specified
     if prefix_ is not None:
