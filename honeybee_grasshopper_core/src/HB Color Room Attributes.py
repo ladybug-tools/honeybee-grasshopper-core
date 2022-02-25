@@ -40,7 +40,7 @@ different Rooms.
 
 ghenv.Component.Name = 'HB Color Room Attributes'
 ghenv.Component.NickName = 'ColorRoomAttr'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -79,5 +79,5 @@ if all_required_inputs(ghenv.Component):
     for room in rooms:
         wire_frame.extend(from_polyface3d_to_wireframe(room.geometry))
     legend = legend_objects(graphic.legend)
-    values = color_obj.attributes
+    values = color_obj.attributes_original
     colors = [color_to_color(col) for col in graphic.value_colors]
