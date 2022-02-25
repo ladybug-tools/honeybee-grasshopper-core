@@ -40,7 +40,7 @@ different faces.
 
 ghenv.Component.Name = 'HB Color Face Attributes'
 ghenv.Component.NickName = 'ColorFaceAttr'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -89,5 +89,5 @@ if all_required_inputs(ghenv.Component):
     for face in color_obj.flat_faces:
         wire_frame.extend(from_face3d_to_wireframe(face.geometry))
     legend = legend_objects(graphic.legend)
-    values = color_obj.attributes
+    values = color_obj.attributes_original
     colors = [color_to_color(col) for col in graphic.value_colors]
