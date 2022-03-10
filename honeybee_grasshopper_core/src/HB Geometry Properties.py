@@ -22,14 +22,18 @@ Get geometry properties of honeybee Rooms or a honeybee Model.
             with an Outdoors boundary condition (in Rhino model units).
         volume: A number for the volume of the honeybee rooms (in Rhino model units).
         floor_area: A number for the floor area  of the honeybee rooms (in Rhino
-            model units).
+            model units). When a Model is connected, the floor area will exclude
+            plenums and other Rooms with that have a True exclude_floor_area
+            property.
         floor_ep_constr: A number for the floor area of the Room accounting for the thickness
-            of EnergyPlus wall constructions. (in Rhino model units).
+            of EnergyPlus wall constructions. (in Rhino model units). When a
+            Model is connected, the floor area will exclude plenums and other
+            Rooms with that have a True exclude_floor_area property.
 """
 
 ghenv.Component.Name = 'HB Geometry Properties'
 ghenv.Component.NickName = 'GeoProp'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -66,11 +70,11 @@ if all_required_inputs(ghenv.Component):
         ext_wall_area = sum([r.exterior_wall_area * r.multiplier for r in rooms])
         ext_win_area = sum([r.exterior_aperture_area * r.multiplier for r in rooms])
         volume = sum([r.volume * r.multiplier for r in rooms])
-        floor_area = sum([r.floor_area * r.multiplier for r in rooms])
+        floor_area = sum([r.floor_area * r.multiplier for r in rooms if not r.exclude_floor_area])
         try:
             floor_ep_constr = \
                 sum([r.properties.energy.floor_area_with_constructions(units, units, tolerance) * r.multiplier
-                     for r in rooms])
+                     for r in rooms if not r.exclude_floor_area])
         except AttributeError:
             pass  # honeybee-energy is not installed
     else:
