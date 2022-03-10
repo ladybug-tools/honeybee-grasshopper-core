@@ -24,8 +24,13 @@ speed up the calculation.
         _rooms: Honeybee Rooms to which the input _multipier should be assigned.
         _multiplier: An integer noting how many times the Rooms are repeated.
             This can also be an array of integers, which align with the input
-            _rooms and will be matched to them accordingly
-    
+            _rooms and will be matched to them accordingly.
+        excl_floor_: Boolean to indicate whether the floor area of the room is excluded
+            from the Model it is a part of. Note that this will not affect the
+            floor_area property of this Room but it will ensure the Room's
+            floor area is excluded from any calculations when the Room is part
+            of a Model and when it is simulated in EnergyPlus.
+
     Returns:
         report: ...
         rooms: The input Rooms with their multipliers edited.
@@ -33,7 +38,7 @@ speed up the calculation.
 
 ghenv.Component.Name = "HB Set Multiplier"
 ghenv.Component.NickName = 'Multiplier'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -57,4 +62,8 @@ if all_required_inputs(ghenv.Component):
             'Expected honeybee room. Got {}.'.format(type(room))
         room_dup = room.duplicate()
         room_dup.multiplier = longest_list(_multiplier, i)
+        if len(excl_floor_) != 0:
+            x_floor = longest_list(excl_floor_, i)
+            if x_floor:
+                room_dup.exclude_floor_area = x_floor
         rooms.append(room_dup)

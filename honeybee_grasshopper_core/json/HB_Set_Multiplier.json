@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0", 
+  "version": "1.4.1", 
   "nickname": "Multiplier", 
   "outputs": [
     [
@@ -23,13 +23,20 @@
     {
       "access": "list", 
       "name": "_multiplier", 
-      "description": "An integer noting how many times the Rooms are repeated.\nThis can also be an array of integers, which align with the input\n_rooms and will be matched to them accordingly", 
+      "description": "An integer noting how many times the Rooms are repeated.\nThis can also be an array of integers, which align with the input\n_rooms and will be matched to them accordingly.", 
       "type": "int", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "x", 
+      "description": "Boolean to indicate whether the floor area of the room is excluded\nfrom the Model it is a part of. Note that this will not affect the\nfloor_area property of this Room but it will ensure the Room's\nfloor area is excluded from any calculations when the Room is part\nof a Model and when it is simulated in EnergyPlus.", 
+      "type": "bool", 
       "default": null
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\n\ntry:  # import the honeybee-energy extension\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, longest_list\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    rooms = []\n    for i, room in enumerate(_rooms):\n        assert isinstance(room, Room), \\\n            'Expected honeybee room. Got {}.'.format(type(room))\n        room_dup = room.duplicate()\n        room_dup.multiplier = longest_list(_multiplier, i)\n        rooms.append(room_dup)\n", 
+  "code": "\n\ntry:  # import the honeybee-energy extension\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, longest_list\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    rooms = []\n    for i, room in enumerate(_rooms):\n        assert isinstance(room, Room), \\\n            'Expected honeybee room. Got {}.'.format(type(room))\n        room_dup = room.duplicate()\n        room_dup.multiplier = longest_list(_multiplier, i)\n        if len(excl_floor_) != 0:\n            x_floor = longest_list(excl_floor_, i)\n            if x_floor:\n                room_dup.exclude_floor_area = x_floor\n        rooms.append(room_dup)\n", 
   "category": "Honeybee", 
   "name": "HB Set Multiplier", 
   "description": "Change the multiplier of a honeybee Room.\n_\nMultipliers are used to speed up the calculation when similar Rooms are\nrepeated more than once. Essentially, a given simulation with the\nRoom is run once and then the result is mutliplied by the multiplier.\nThis means that the \"repetition\" isn't in a particualr direction (it's\nessentially in the exact same location) and this comes with some\ninaccuracy. However, this error might not be too large if the Rooms\nare similar enough and it can often be worth it since it can greatly\nspeed up the calculation.\n-"

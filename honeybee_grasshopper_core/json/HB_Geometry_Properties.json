@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0", 
+  "version": "1.4.1", 
   "nickname": "GeoProp", 
   "outputs": [
     [
@@ -27,14 +27,14 @@
       {
         "access": "None", 
         "name": "floor_area", 
-        "description": "A number for the floor area  of the honeybee rooms (in Rhino\nmodel units).", 
+        "description": "A number for the floor area  of the honeybee rooms (in Rhino\nmodel units). When a Model is connected, the floor area will exclude\nplenums and other Rooms with that have a True exclude_floor_area\nproperty.", 
         "type": null, 
         "default": null
       }, 
       {
         "access": "None", 
         "name": "floor_ep_constr", 
-        "description": "A number for the floor area of the Room accounting for the thickness\nof EnergyPlus wall constructions. (in Rhino model units).", 
+        "description": "A number for the floor area of the Room accounting for the thickness\nof EnergyPlus wall constructions. (in Rhino model units). When a\nModel is connected, the floor area will exclude plenums and other\nRooms with that have a True exclude_floor_area property.", 
         "type": null, 
         "default": null
       }
@@ -50,7 +50,7 @@
     }
   ], 
   "subcategory": "1 :: Visualize", 
-  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\n    from ladybug_{{cad}}.config import units_system, tolerance\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # extract any rooms from input Models\n    rooms, is_model = [], False\n    for hb_obj in _rooms:\n        if isinstance(hb_obj, Room):\n            rooms.append(hb_obj)\n        elif isinstance(hb_obj, Model):\n            rooms.extend(hb_obj.rooms)\n            is_model = True\n        else:\n            raise ValueError(\n                'Expected Honeybee Room or Model. Got {}.'.format(type(hb_obj)))\n\n    # get the properties that all objects share\n    units = units_system()\n    if is_model:\n        ext_wall_area = sum([r.exterior_wall_area * r.multiplier for r in rooms])\n        ext_win_area = sum([r.exterior_aperture_area * r.multiplier for r in rooms])\n        volume = sum([r.volume * r.multiplier for r in rooms])\n        floor_area = sum([r.floor_area * r.multiplier for r in rooms])\n        try:\n            floor_ep_constr = \\\n                sum([r.properties.energy.floor_area_with_constructions(units, units, tolerance) * r.multiplier\n                     for r in rooms])\n        except AttributeError:\n            pass  # honeybee-energy is not installed\n    else:\n        ext_wall_area = [r.exterior_wall_area for r in rooms]\n        ext_win_area = [r.exterior_aperture_area for r in rooms]\n        volume = [r.volume for r in rooms]\n        floor_area = [r.floor_area for r in rooms]\n        try:\n            floor_ep_constr = \\\n                [r.properties.energy.floor_area_with_constructions(units, units, tolerance)\n                 for r in rooms]\n        except AttributeError:\n            pass  # honeybee-energy is not installed\n", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\n    from ladybug_{{cad}}.config import units_system, tolerance\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # extract any rooms from input Models\n    rooms, is_model = [], False\n    for hb_obj in _rooms:\n        if isinstance(hb_obj, Room):\n            rooms.append(hb_obj)\n        elif isinstance(hb_obj, Model):\n            rooms.extend(hb_obj.rooms)\n            is_model = True\n        else:\n            raise ValueError(\n                'Expected Honeybee Room or Model. Got {}.'.format(type(hb_obj)))\n\n    # get the properties that all objects share\n    units = units_system()\n    if is_model:\n        ext_wall_area = sum([r.exterior_wall_area * r.multiplier for r in rooms])\n        ext_win_area = sum([r.exterior_aperture_area * r.multiplier for r in rooms])\n        volume = sum([r.volume * r.multiplier for r in rooms])\n        floor_area = sum([r.floor_area * r.multiplier for r in rooms if not r.exclude_floor_area])\n        try:\n            floor_ep_constr = \\\n                sum([r.properties.energy.floor_area_with_constructions(units, units, tolerance) * r.multiplier\n                     for r in rooms if not r.exclude_floor_area])\n        except AttributeError:\n            pass  # honeybee-energy is not installed\n    else:\n        ext_wall_area = [r.exterior_wall_area for r in rooms]\n        ext_win_area = [r.exterior_aperture_area for r in rooms]\n        volume = [r.volume for r in rooms]\n        floor_area = [r.floor_area for r in rooms]\n        try:\n            floor_ep_constr = \\\n                [r.properties.energy.floor_area_with_constructions(units, units, tolerance)\n                 for r in rooms]\n        except AttributeError:\n            pass  # honeybee-energy is not installed\n", 
   "category": "Honeybee", 
   "name": "HB Geometry Properties", 
   "description": "Get geometry properties of honeybee Rooms or a honeybee Model.\n-"
