@@ -24,6 +24,13 @@ model geometry and properties.
             If unspecified, it will be derived from the model identifier.
         _folder_: An optional directory into which the honeybee objects will be
             written.  The default is set to the default simulation folder.
+        triangulate_: Boolean to note whether sub-faces (including Apertures and Doors)
+            should be triangulated if they have more than 4 sides (True) or
+            whether they should be left as they are (False). This triangulation
+            is necessary when exporting directly to EnergyPlus since it cannot
+            accept sub-faces with more than 4 vertices. However, it is not a
+            general requirement of gbXML or all of the simulation engines that
+            gbXML can import to/from. (Default: False).
         full_geo_: Boolean to note whether space boundaries and shell geometry should
             be included in the exported gbXML vs. just the minimal required
             non-manifold geometry. Setting to True to include the full geometry
@@ -40,7 +47,7 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -97,7 +104,8 @@ if all_required_inputs(ghenv.Component) and _dump:
     out_directory = os.path.join(folders.default_simulation_folder, 'temp_translate')
     if not os.path.isdir(out_directory):
         os.makedirs(out_directory)
-    model_dict = _model.to_dict(included_prop=['energy'], triangulate_sub_faces=True)
+    triangulate_ = False if triangulate_ is None else triangulate_
+    model_dict = _model.to_dict(included_prop=['energy'], triangulate_sub_faces=triangulate_)
     _model.properties.energy.add_autocal_properties_to_dict(model_dict)
     _model.properties.energy.simplify_window_constructions_in_dict(model_dict)
     hb_file = os.path.join(out_directory, '{}.hbjson'.format(_model.identifier))
