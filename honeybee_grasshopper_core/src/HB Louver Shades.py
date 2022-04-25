@@ -62,6 +62,9 @@ that are Walls (not Floors or Roofs).
             construction library. If an array of text or construction objects
             are input here, different constructions will be assigned based on
             cardinal direction, starting with north and moving clockwise.
+        ep_trans_sch_: Optional schedule for the transmittance to be applied to the
+            input _hb_objs in energy simulation. If no energy schedule is
+            input here, the default will be always opaque.
         rad_mod_: Optional Honeybee Modifier to be applied to the input _hb_objs.
             This can also be text for a modifier to be looked up in the shade
             modifier library. If an array of text or modifier objects
@@ -76,7 +79,7 @@ that are Walls (not Floors or Roofs).
 
 ghenv.Component.Name = "HB Louver Shades"
 ghenv.Component.NickName = 'LouverShades'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -99,6 +102,7 @@ except ImportError as e:
 
 try:  # import the honeybee-energy extension
     from honeybee_energy.lib.constructions import shade_construction_by_identifier
+    from honeybee_energy.lib.schedules import schedule_by_identifier
 except ImportError as e:
     if len(ep_constr_) != 0:
         raise ValueError('ep_constr_ has been specified but honeybee-energy '
@@ -124,7 +128,7 @@ def can_host_louvers(face):
         isinstance(face.type, Wall)
 
 
-def assign_louvers(ap, depth, count, dist, off, angle, vec, flip, indr, ep, rad):
+def assign_louvers(ap, depth, count, dist, off, angle, vec, flip, indr, ep, ep_tr, rad):
     """Assign louvers to an Aperture based on a set of inputs."""
     if depth == 0 or count == 0:
         return None
@@ -135,10 +139,13 @@ def assign_louvers(ap, depth, count, dist, off, angle, vec, flip, indr, ep, rad)
         louvers = ap.louvers_by_distance_between(
             dist, depth, off, angle, vec, flip, indr, tolerance, max_count=count)
 
-    # try to assign the energyplus construction
+    # try to assign the energyplus construction and transmittance schedule
     if ep is not None:
         for shd in louvers:
             shd.properties.energy.construction = ep
+    if ep_tr is not None:
+        for shd in louvers:
+            shd.properties.energy.transmittance_schedule = ep_tr
     # try to assign the radiance modifier
     if rad is not None:
         for shd in louvers:
@@ -173,13 +180,19 @@ if all_required_inputs(ghenv.Component):
     else:
         vertical_ = [Vector2D(0, 1)]
 
-    # process the input constructions
+    # process the input constructions and shade transmittances
     if len(ep_constr_) != 0:
         for i, constr in enumerate(ep_constr_):
             if isinstance(constr, str):
                 ep_constr_[i] = shade_construction_by_identifier(constr)
     else:
         ep_constr_ = [None]
+    if len(ep_trans_sch_) != 0:
+        for i, sch in enumerate(ep_trans_sch_):
+            if isinstance(sch, str):
+                ep_trans_sch_[i] = schedule_by_identifier(sch)
+    else:
+        ep_trans_sch_ = [None]
 
     # process the input modifiers
     if len(rad_mod_) != 0:
@@ -191,7 +204,7 @@ if all_required_inputs(ghenv.Component):
 
     # gather all of the inputs together
     all_inputs = [_depth, _shade_count_, _dist_between_, _facade_offset_, _angle_,
-                  vertical_, flip_start_, indoor_, ep_constr_, rad_mod_]
+                  vertical_, flip_start_, indoor_, ep_constr_, ep_trans_sch_, rad_mod_]
 
     # ensure matching list lengths across all values
     all_inputs, num_orient = check_matching_inputs(all_inputs)
@@ -205,25 +218,25 @@ if all_required_inputs(ghenv.Component):
             for face in obj.faces:
                 if can_host_louvers(face):
                     orient_i = face_orient_index(face, angles)
-                    depth, count, dist, off, angle, vec, flip, indr, con, mod = \
+                    depth, count, dist, off, angle, vec, flip, indr, con, sh_t, mod = \
                         inputs_by_index(orient_i, all_inputs)
                     for ap in face.apertures:
                         assign_louvers(ap, depth, count, dist, off, angle, vec,
-                                       flip, indr, con, mod)
+                                       flip, indr, con, sh_t, mod)
         elif isinstance(obj, Face):
             if can_host_louvers(obj):
                 orient_i = face_orient_index(obj, angles)
-                depth, count, dist, off, angle, vec, flip, indr, con, mod = \
+                depth, count, dist, off, angle, vec, flip, indr, con, sh_t, mod = \
                     inputs_by_index(orient_i, all_inputs)
                 for ap in obj.apertures:
                     assign_louvers(ap, depth, count, dist, off, angle, vec,
-                                   flip, indr, con, mod)
+                                   flip, indr, con, sh_t, mod)
         elif isinstance(obj, Aperture):
             orient_i = face_orient_index(obj, angles)
-            depth, count, dist, off, angle, vec, flip, indr, con, mod = \
+            depth, count, dist, off, angle, vec, flip, indr, con, sh_t, mod = \
                 inputs_by_index(orient_i, all_inputs)
             assign_louvers(obj, depth, count, dist, off, angle, vec, flip,
-                           indr, con, mod)
+                           indr, con, sh_t, mod)
         else:
             raise TypeError(
                 'Input _hb_objs must be a Room, Face, or Aperture. Not {}.'.format(type(obj)))
