@@ -1,0 +1,28 @@
+{
+  "version": "1.4.0", 
+  "nickname": "ValidateModel", 
+  "outputs": [
+    []
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_model", 
+      "description": "A Honeybee Model object to be validated. This can also be the file path\nto a Model HBJSON which will validated.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_validate", 
+      "description": "Set to \"True\" to validate the the Model and get a report of all\nissues with the model.", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "3 :: Serialize", 
+  "code": "\nimport os\n\ntry:  # import the core honeybee dependencies\n    from honeybee.config import folders\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, give_warning\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component) and _validate:\n    # re-serialize the model if it is a HBJSON file\n    if isinstance(_model, Model):\n        parsed_model = _model\n    elif isinstance(_model, str) and os.path.isfile(_model):\n        parsed_model = Model.from_hbjson(_model)\n    else:\n        raise ValueError(\n            'Expected Honeybee Model object or path to a HBJSON file. '\n            'Got {}.'.format(type(_model))\n        )\n\n    # validate the model\n    print(\n        'Validating Model using honeybee-core=={} and honeybee-schema=={}'.format(\n            folders.honeybee_core_version_str, folders.honeybee_schema_version_str)\n    )\n    # perform several checks for geometry rules\n    report = parsed_model.check_all(raise_exception=False)\n    print('Model checks completed.')\n    # check the report and write the summary of errors\n    if report == '':\n        print('Congratulations! Your Model is valid!')\n    else:\n        error_msg = 'Your Model is invalid for the following reasons:'\n        print('\\n'.join([error_msg, report]))\n        give_warning(ghenv.Component, report)\n", 
+  "category": "Honeybee", 
+  "name": "HB Validate Model", 
+  "description": "Get a validation report that contains a summary of all issues with the Model.\n_\nThis includes basic properties like adjacency checks and all geometry checks.\nFurthermore, all extension attributes for Energy and Radiance will be checked\nto ensure that the model can be simulated correctly in these engines.\n-"
+}
