@@ -27,36 +27,34 @@ an Outdoors boundary condition.
             realistic and is important to consider for detailed daylight and
             thermal comfort simulations but the former is likely better when the
             only concern is building energy use since energy use doesn't change
-            much while the glazing ratio remains constant. Default: True.
+            much while the glazing ratio remains constant. (Default: True).
         _win_height_: A number for the target height of the output apertures.
             Note that, if the ratio is too large for the height, the ratio will
             take precedence and the actual aperture height will be larger
             than this value. If an array of values are input here, different
             heights will be assigned based on cardinal direction, starting with
-            north and moving clockwise. Default: 2 meters.
+            north and moving clockwise. (Default: 2 meters).
         _sill_height_: A number for the target height above the bottom edge of
             the face to start the apertures. Note that, if the ratio is too large
             for the height, the ratio will take precedence and the sill_height
             will be smaller than this value. If an array of values are input here,
             different heights will be assigned based on cardinal direction, starting
-            with north and moving clockwise. Default: 0.8 meters.
+            with north and moving clockwise. (Default: 0.8 meters).
         _horiz_separ_: A number for the horizontal separation between
             individual aperture centerlines.  If this number is larger than
             the parent face's length, only one aperture will be produced.
             If an array of values are input here, different separation distances
             will be assigned based on cardinal direction, starting with north
-            and moving clockwise. Default: 3 meters.
-        vert_separ_: An optional number to create a single vertical
-            separation between top and bottom apertures. If an array of values
-            are input here, different separation distances will be assigned based
-            on cardinal direction, starting with north and moving clockwise.
-            Default: 0.
-        operable_: An optional boolean to note whether the generated Apertures
-            can be opened for ventilation. If an array of booleans are input
-            here, different operable properties will be assigned based on
-            cardinal direction, starting with north and moving clockwise.
-            Default: False.
-    
+            and moving clockwise. (Default: 3 meters).
+        vert_separ_: An optional number to create a single vertical separation between
+            top and bottom apertures. If an array of values are input here,
+            different separation distances will be assigned based on cardinal
+            direction, starting with north and moving clockwise. (Default: 0).
+        operable_: An optional boolean to note whether the generated Apertures can be
+            opened for ventilation. If an array of booleans are input here, different
+            operable properties will be assigned based on cardinal direction,
+            starting with north and moving clockwise. (Default: False).
+
     Returns:
         report: Reports, errors, warnings, etc.
         hb_objs: The input Honeybee Face or Room with Apertures generated from
@@ -65,7 +63,7 @@ an Outdoors boundary condition.
 
 ghenv.Component.Name = "HB Apertures by Ratio"
 ghenv.Component.NickName = 'AperturesByRatio'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -118,17 +116,17 @@ if all_required_inputs(ghenv.Component):
     _horiz_separ_ = _horiz_separ_ if len(_horiz_separ_) != 0 else [3.0 / conversion]
     vert_separ_ = vert_separ_ if len(vert_separ_) != 0 else [0.0]
     operable_ = operable_ if len(operable_) != 0 else [False]
-    
+
     # gather all of the inputs together
     all_inputs = [_subdivide_, _ratio, _win_height_, _sill_height_, _horiz_separ_,
                   vert_separ_, operable_]
-    
+
     # ensure matching list lengths across all values
     all_inputs, num_orient = check_matching_inputs(all_inputs)
-    
+
     # get a list of angles used to categorize the faces
     angles = angles_from_num_orient(num_orient)
-    
+
     # loop through the input objects and add apertures
     for obj in hb_objs:
         if isinstance(obj, Room):
