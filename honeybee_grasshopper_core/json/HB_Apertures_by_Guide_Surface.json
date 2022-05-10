@@ -1,0 +1,85 @@
+{
+  "version": "1.4.0", 
+  "nickname": "AperturesByGuide", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "rooms", 
+        "description": "The input Rooms with their Face properties changed.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_rooms", 
+      "description": "Honeybee Rooms which will have their apertures set based on their\nrelation to the guide surface(s).", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_guide", 
+      "description": "Rhino Breps or Meshes that represent the guide surfaces.", 
+      "type": "GeometryBase", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_ratio", 
+      "description": "A number between 0 and 0.95 for the ratio between the area of\nthe apertures and the area of the parent face.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_subdivide_", 
+      "description": "Boolean to note whether to generate a single window in the\ncenter of each Face (False) or to generate a series of rectangular\nwindows using the other inputs below (True). The latter is often more\nrealistic and is important to consider for detailed daylight and\nthermal comfort simulations but the former is likely better when the\nonly concern is building energy use since energy use doesn't change\nmuch while the glazing ratio remains constant. (Default: True).", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_win_height_", 
+      "description": "A number for the target height of the output apertures.\nNote that, if the ratio is too large for the height, the ratio will\ntake precedence and the actual aperture height will be larger\nthan this value. (Default: 2 meters).", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_sill_height_", 
+      "description": "A number for the target height above the bottom edge of\nthe face to start the apertures. Note that, if the ratio is too large\nfor the height, the ratio will take precedence and the sill_height\nwill be smaller than this value. If an array of values are input here,\ndifferent heights will be assigned based on cardinal direction, starting\nwith north and moving clockwise. Default: 0.8 meters.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_horiz_separ_", 
+      "description": "A number for the horizontal separation between\nindividual aperture centerlines.  If this number is larger than\nthe parent face's length, only one aperture will be produced.\nIf an array of values are input here, different separation distances\nwill be assigned based on cardinal direction, starting with north\nand moving clockwise. Default: 3 meters.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "vert_separ_", 
+      "description": "An optional number to create a single vertical\nseparation between top and bottom apertures. If an array of values\nare input here, different separation distances will be assigned based\non cardinal direction, starting with north and moving clockwise.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "operable_", 
+      "description": "An optional boolean to note whether the generated Apertures\ncan be opened for ventilation. If an array of booleans are input\nhere, different operable properties will be assigned based on\ncardinal direction, starting with north and moving clockwise.", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core honeybee dependencies\n     from honeybee.boundarycondition import Outdoors\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance, angle_tolerance, conversion_to_meters\n    from ladybug_{{cad}}.togeometry import to_face3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef assign_apertures(face, sub, rat, hgt, sil, hor, vert, op):\n    \"\"\"Assign apertures to a Face based on a set of inputs.\"\"\"\n    if sub:\n        face.apertures_by_ratio_rectangle(rat, hgt, sil, hor, vert, tolerance)\n    else:\n        face.apertures_by_ratio(rat, tolerance)\n\n    # try to assign the operable property\n    if op:\n        for ap in face.apertures:\n            ap.is_operable = op\n\n\nif all_required_inputs(ghenv.Component):\n    # process the inputs\n    rooms = [room.duplicate() for room in _rooms]  # duplicate to avoid editing input\n    guide_faces = [g for geo in _guide for g in to_face3d(geo)]  # convert to lb geometry\n    conversion = conversion_to_meters()\n    _subdivide_ = _subdivide_ if _subdivide_ is not None else True\n    _win_height_ = _win_height_ if _win_height_ is not None else 2.0 / conversion\n    _sill_height_ = _sill_height_ if _sill_height_ is not None else 0.8 / conversion\n    _horiz_separ_ = _horiz_separ_ if _horiz_separ_ is not None else 3.0 / conversion\n    vert_separ_ = vert_separ_ if vert_separ_ is not None else 0.0\n    operable_ = operable_ if operable_ is not None else False\n\n    # loop through the rooms and set the face properties\n    for room in rooms:\n        select_faces = room.faces_by_guide_surface(\n            guide_faces, tolerance=tolerance, angle_tolerance=angle_tolerance)\n        for hb_face in select_faces:\n            if isinstance(hb_face.boundary_condition, Outdoors):\n                assign_apertures(hb_face, _subdivide_, _ratio, _win_height_,\n                                 _sill_height_, _horiz_separ_, vert_separ_, operable_)\n", 
+  "category": "Honeybee", 
+  "name": "HB Apertures by Guide Surface", 
+  "description": "Set the apertures of room Faces using (a) guide surface(s) or polysurface(s).\n_\nFaces that are touching and coplanar with the guide surface will get their\naperters changed according to the input properties.\n-"
+}
