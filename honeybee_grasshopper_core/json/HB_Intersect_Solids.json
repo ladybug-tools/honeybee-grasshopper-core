@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0", 
+  "version": "1.4.1", 
   "nickname": "IntSolid", 
   "outputs": [
     [
@@ -36,7 +36,7 @@
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.intersect import intersect_solids, intersect_solids_parallel\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, recommended_processor_count\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\n\nif all_required_inputs(ghenv.Component) and _run:\n    # generate bounding boxes for all inputs\n    b_boxes = [brep.GetBoundingBox(False) for brep in _solids]\n    \n    # intersect all of the solid geometries\n    workers = _cpu_count_ if _cpu_count_ is not None else recommended_processor_count()\n    if workers > 1:\n        int_solids = intersect_solids_parallel(_solids, b_boxes, workers)\n    else:  # just use the single-core process\n        int_solids = intersect_solids(_solids, b_boxes)\n", 
+  "code": "\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.intersect import bounding_box, intersect_solids, \\\n        intersect_solids_parallel\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, recommended_processor_count\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\n\nif all_required_inputs(ghenv.Component) and _run:\n    # generate bounding boxes for all inputs\n    b_boxes = [bounding_box(brep) for brep in _solids]\n\n    # intersect all of the solid geometries\n    workers = _cpu_count_ if _cpu_count_ is not None else recommended_processor_count()\n    if workers > 1:\n        int_solids = intersect_solids_parallel(_solids, b_boxes, workers)\n    else:  # just use the single-core process\n        int_solids = intersect_solids(_solids, b_boxes)\n", 
   "category": "Honeybee", 
   "name": "HB Intersect Solids", 
   "description": "Take a list of closed breps (polysurfaces) and split their Faces to ensure that\nthere are matching surfaces between them.\n_\nThis matching between Room faces is required in order to contruct a correct\nmulti-room energy model since conductive heat flow won't occur correctly across\ninterior faces when their surface areas do not match.\n-"
