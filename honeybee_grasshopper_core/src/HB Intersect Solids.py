@@ -35,14 +35,15 @@ interior faces when their surface areas do not match.
 
 ghenv.Component.Name = "HB Intersect Solids"
 ghenv.Component.NickName = 'IntSolid'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
 
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.intersect import intersect_solids, intersect_solids_parallel
+    from ladybug_rhino.intersect import bounding_box, intersect_solids, \
+        intersect_solids_parallel
     from ladybug_rhino.grasshopper import all_required_inputs, recommended_processor_count
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -51,8 +52,8 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component) and _run:
     # generate bounding boxes for all inputs
-    b_boxes = [brep.GetBoundingBox(False) for brep in _solids]
-    
+    b_boxes = [bounding_box(brep) for brep in _solids]
+
     # intersect all of the solid geometries
     workers = _cpu_count_ if _cpu_count_ is not None else recommended_processor_count()
     if workers > 1:
