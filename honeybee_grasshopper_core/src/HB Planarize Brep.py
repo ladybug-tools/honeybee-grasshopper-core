@@ -30,7 +30,7 @@ of curved edges.
 
 ghenv.Component.Name = "HB Planarize Brep"
 ghenv.Component.NickName = 'Planarize'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -39,14 +39,31 @@ try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.config import tolerance
     from ladybug_rhino.planarize import curved_solid_faces
     from ladybug_rhino.fromgeometry import from_face3ds_to_joined_brep
-    from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.grasshopper import all_required_inputs, give_warning
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 
 if all_required_inputs(ghenv.Component):
     # planarize each of the breps
-    pl_brep = []
-    for brep in _brep:
-        lb_faces = curved_solid_faces(brep, _mesh_par_)
-        pl_brep.extend(from_face3ds_to_joined_brep(lb_faces))
+    pl_brep, smaller_than_tol = [], set()
+    for i, brep in enumerate(_brep):
+        lb_faces = curved_solid_faces(brep, _mesh_par_, ignore_sliver=False)
+        all_lb_faces = []
+        for face in lb_faces:
+            if face is not None:
+                all_lb_faces.append(face)
+            else:
+                smaller_than_tol.add(i)
+        pl_brep.extend(from_face3ds_to_joined_brep(all_lb_faces))
+
+    # if one of the breps has slivers smaller than the tolerance, give a warning
+    if smaller_than_tol:
+        base_rec = 'Consider lowering the Rhino model tolernace and restarting ' \
+            'Rhino to get a better planar representation'
+        for brep_i in smaller_than_tol:
+            msg = 'Brep at index {} could not be perfectly planarized at ' \
+                'the current Rhino model tolernace and may have gaps or ' \
+                'holes.\n{}.'.format(brep_i, base_rec)
+            print(msg)
+            give_warning(ghenv.Component, msg)
