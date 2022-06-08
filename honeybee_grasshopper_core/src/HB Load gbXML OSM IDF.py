@@ -31,13 +31,14 @@ file transfer is needed.
 
 ghenv.Component.Name = 'HB Load gbXML OSM IDF'
 ghenv.Component.NickName = 'LoadEModel'
-ghenv.Component.Message = '1.4.1'
+ghenv.Component.Message = '1.4.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
 
 import os
 import subprocess
+import re
 import json
 
 try:  # import the ladybug_geometry dependencies
@@ -52,6 +53,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:
+    from honeybee_energy.config import folders as e_folders
     from honeybee_energy.result.osw import OSW
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee_energy:\n\t{}'.format(e))
@@ -123,10 +125,30 @@ if all_required_inputs(ghenv.Component) and _load:
 
     # check to see if the file was successfully output and, if not, report the error
     if not os.path.isfile(out_path):
+        if lower_fname.endswith('.idf'):
+            # check the version of the IDF since, most of the time, people don't check this
+            try:
+                ver_regex = r'[V|v][E|e][R|r][S|s][I|i][O|o][N|n],\s*(\d*\.\d*);'
+                ver_pattern = re.compile(ver_regex)
+                with open(_model_file, 'r') as mf:
+                    ver_val = re.search(ver_pattern, mf.read())
+                ver_tup = tuple(int(v) for v in ver_val.groups()[0].split('.'))
+                if e_folders.energyplus_version[:2] != ver_tup:
+                    msg = 'The IDF is from EnergyPlus version {}.\nThis must be changed ' \
+                        'to {} with the IDFVersionUpdater\nin order to import ' \
+                        'it with this Ladybug Tools installation.'.format(
+                            '.'.join((str(v) for v in ver_tup)),
+                            '.'.join((str(v) for v in e_folders.energyplus_version[:2]))
+                        )
+                    print(msg)
+                    give_warning(ghenv.Component, msg)
+            except Exception:
+                pass  # failed to parse the version; it may not be in the IDF
+        # parse any of the errors that came with the output OSW
         osw_path = os.path.join(folders.default_simulation_folder, 'temp_translate', 'out.osw')
         if os.path.isfile(osw_path):
             log_osw = OSW(osw_path)
-            print(log_osw.stdout)
+            print(log_osw.stdout[0])
             errors = []
             for error, tb in zip(log_osw.errors, log_osw.error_tracebacks):
                 print(tb)
