@@ -18,7 +18,7 @@ to ensure that the model can be simulated correctly in these engines.
 
     Args:
         _model: A Honeybee Model object to be validated. This can also be the file path
-            to a Model HBJSON which will validated.
+            to a Model HBJSON that will be validated.
         _validate: Set to "True" to validate the the Model and get a report of all
             issues with the model.
 
@@ -32,7 +32,7 @@ to ensure that the model can be simulated correctly in these engines.
 
 ghenv.Component.Name = 'HB Validate Model'
 ghenv.Component.NickName = 'ValidateModel'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.4.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

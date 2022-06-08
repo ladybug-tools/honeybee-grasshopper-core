@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0", 
+  "version": "1.4.1", 
   "nickname": "ValidateModel", 
   "outputs": [
     []
@@ -8,7 +8,7 @@
     {
       "access": "item", 
       "name": "_model", 
-      "description": "A Honeybee Model object to be validated. This can also be the file path\nto a Model HBJSON which will validated.", 
+      "description": "A Honeybee Model object to be validated. This can also be the file path\nto a Model HBJSON that will be validated.", 
       "type": "System.Object", 
       "default": null
     }, 
