@@ -25,7 +25,7 @@ in a Model.
 
 ghenv.Component.Name = 'HB Set Story'
 ghenv.Component.NickName = 'SetStory'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.5.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

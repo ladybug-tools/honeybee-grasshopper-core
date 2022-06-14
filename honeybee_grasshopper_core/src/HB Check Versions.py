@@ -26,7 +26,7 @@ and that the versions of the engines are as expected.
 
 ghenv.Component.Name = 'HB Check Versions'
 ghenv.Component.NickName = 'Versions'
-ghenv.Component.Message = '1.4.1'
+ghenv.Component.Message = '1.5.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

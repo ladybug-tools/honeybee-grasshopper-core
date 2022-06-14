@@ -36,7 +36,7 @@ and that the engines are configured as expected.
 
 ghenv.Component.Name = 'HB Config'
 ghenv.Component.NickName = 'Config'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.5.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

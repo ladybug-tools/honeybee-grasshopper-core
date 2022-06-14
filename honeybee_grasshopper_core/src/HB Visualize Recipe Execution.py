@@ -30,7 +30,7 @@ about a given recipe run. Selecting "View Graph" for this task and then un-check
 
 ghenv.Component.Name = 'HB Visualize Recipe Execution'
 ghenv.Component.NickName = 'VizRecipe'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.5.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '7'
