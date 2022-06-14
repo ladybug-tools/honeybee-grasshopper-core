@@ -40,7 +40,7 @@ different faces and sub-faces.
 
 ghenv.Component.Name = 'HB Label Faces'
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '1.4.1'
+ghenv.Component.Message = '1.5.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'

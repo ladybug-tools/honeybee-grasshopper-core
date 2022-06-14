@@ -23,7 +23,7 @@ scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = 'HB Visualize Wireframe'
 ghenv.Component.NickName = 'VizWireF'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.5.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'

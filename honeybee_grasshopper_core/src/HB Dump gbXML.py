@@ -47,7 +47,7 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.4.1'
+ghenv.Component.Message = '1.5.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'

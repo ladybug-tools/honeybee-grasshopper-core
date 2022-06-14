@@ -50,7 +50,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room"
 ghenv.Component.NickName = 'Room'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.5.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"

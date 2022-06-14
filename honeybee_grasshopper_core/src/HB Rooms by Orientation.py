@@ -34,7 +34,7 @@ with an Outdoors boundary condition.
 
 ghenv.Component.Name = "HB Rooms by Orientation"
 ghenv.Component.NickName = 'Orientation'
-ghenv.Component.Message = '1.4.0'
+ghenv.Component.Message = '1.5.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
