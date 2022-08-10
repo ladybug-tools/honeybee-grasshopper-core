@@ -23,6 +23,10 @@ this is intersection should be done prior to the creation of the Honeybee Rooms.
         _rooms: Honeybee Rooms which will have their Face boundary conditions set
             based on their spatial relation to the _ground geometry below.
         _ground: Rhino Breps or Meshes that represent the Ground.
+        reset_: A Boolean to note whether the _ground geometry simply adds additional
+            ground boundary conditions to the _rooms (False) or it resets
+            all existing ground boundary conditions to only exist at or below
+            the _ground geometry (True). (Default: False).
 
     Returns:
         rooms: The input Rooms with their Ground boundary conditions set.
@@ -30,10 +34,15 @@ this is intersection should be done prior to the creation of the Honeybee Rooms.
 
 ghenv.Component.Name = 'HB Custom Ground'
 ghenv.Component.NickName = 'CustomGround'
-ghenv.Component.Message = '1.5.0'
+ghenv.Component.Message = '1.5.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
+
+try:  # import the honeybee dependencies
+    from honeybee.boundarycondition import Ground, boundary_conditions
+except ImportError as e:
+    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.config import tolerance, angle_tolerance
@@ -44,8 +53,16 @@ except ImportError as e:
 
 
 if all_required_inputs(ghenv.Component):
+    # process the inputs
     rooms = [room.duplicate() for room in _rooms]  # duplicate to avoid editing input
     ground_faces = [g for geo in _ground for g in to_face3d(geo)]  # convert to lb geometry
+
+    # reset the boundary conditions if requested
+    if reset_:
+        for room in rooms:
+            for face in room.faces:
+                if isinstance(face.boundary_condition, Ground):
+                    face.boundary_condition = boundary_conditions.outdoors
 
     # loop through the rooms and set the ground boundary conditions
     for room in rooms:
