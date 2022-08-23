@@ -52,7 +52,7 @@ adjacent.
 
 ghenv.Component.Name = "HB Solve Adjacency"
 ghenv.Component.NickName = 'SolveAdj'
-ghenv.Component.Message = '1.5.0'
+ghenv.Component.Message = '1.5.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -93,16 +93,16 @@ def reversed_opaque_constr(construction):
     """Get a version of a given OpaqueConstruction that is reversed."""
     if construction.is_symmetric:
         return construction
-    return OpaqueConstruction('{}_Rev'.format(ep_constr_.identifier),
-                              [mat for mat in reversed(ep_constr_.materials)])
+    return OpaqueConstruction('{}_Rev'.format(construction.identifier),
+                              [mat for mat in reversed(construction.materials)])
 
 
 def reversed_window_constr(construction):
     """Get a version of a given WindowConstruction that is reversed."""
     if construction.is_symmetric:
         return construction
-    return WindowConstruction('{}_Rev'.format(ep_constr_.identifier),
-                              [mat for mat in reversed(ep_constr_.materials)])
+    return WindowConstruction('{}_Rev'.format(construction.identifier),
+                              [mat for mat in reversed(construction.materials)])
 
 
 def apply_constr_to_face(adjacent_faces, construction, face_type):
