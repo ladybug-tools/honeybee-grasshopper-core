@@ -52,7 +52,7 @@ adjacent.
 
 ghenv.Component.Name = "HB Solve Adjacency"
 ghenv.Component.NickName = 'SolveAdj'
-ghenv.Component.Message = '1.5.1'
+ghenv.Component.Message = '1.5.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -152,19 +152,19 @@ def apply_mod_to_face(adjacent_faces, modifier, face_type):
     """Apply a given modifier to adjacent faces of a certain type."""
     for face_pair in adjacent_faces:
         if isinstance(face_pair[0].type, face_type):
-            face_pair[0].properties.energy.modifier = modifier
-            face_pair[1].properties.energy.modifier = modifier
+            face_pair[0].properties.radiance.modifier = modifier
+            face_pair[1].properties.radiance.modifier = modifier
         elif isinstance(face_pair[1].type, face_type):
-            face_pair[1].properties.energy.modifier = modifier
-            face_pair[0].properties.energy.modifier = modifier
+            face_pair[1].properties.radiance.modifier = modifier
+            face_pair[0].properties.radiance.modifier = modifier
 
 
 def apply_mod_to_door(adjacent_doors, modifier, is_glass):
     """Apply a given modifier to adjacent doors of a certain type."""
     for dr_pair in adjacent_doors:
         if dr_pair[0].is_glass is is_glass:
-            dr_pair[1].properties.energy.modifier = modifier
-            dr_pair[0].properties.energy.modifier = modifier
+            dr_pair[1].properties.radiance.modifier = modifier
+            dr_pair[0].properties.radiance.modifier = modifier
 
 
 def apply_rad_int_mod(adj_info, rad_int_mod):
@@ -179,8 +179,8 @@ def apply_rad_int_mod(adj_info, rad_int_mod):
         apply_mod_to_face(adj_info['adjacent_faces'], rad_int_mod[2], Floor)
     if rad_int_mod[3] is not None:
         for ap_pair in adj_info['adjacent_apertures']:
-            ap_pair[1].properties.energy.modifier = rad_int_mod[3]
-            ap_pair[0].properties.energy.modifier = rad_int_mod[3]
+            ap_pair[1].properties.radiance.modifier = rad_int_mod[3]
+            ap_pair[0].properties.radiance.modifier = rad_int_mod[3]
     if rad_int_mod[4] is not None:
         apply_mod_to_door(adj_info['adjacent_doors'], rad_int_mod[4], False)
     if rad_int_mod[5] is not None:
