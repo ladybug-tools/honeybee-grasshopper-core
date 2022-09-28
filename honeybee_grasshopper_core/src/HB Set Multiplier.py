@@ -12,8 +12,8 @@ Change the multiplier of a honeybee Room.
 _
 Multipliers are used to speed up the calculation when similar Rooms are
 repeated more than once. Essentially, a given simulation with the
-Room is run once and then the result is mutliplied by the multiplier.
-This means that the "repetition" isn't in a particualr direction (it's
+Room is run once and then the result is multiplied by the multiplier.
+This means that the "repetition" isn't in a particular direction (it's
 essentially in the exact same location) and this comes with some
 inaccuracy. However, this error might not be too large if the Rooms
 are similar enough and it can often be worth it since it can greatly
@@ -38,7 +38,7 @@ speed up the calculation.
 
 ghenv.Component.Name = "HB Set Multiplier"
 ghenv.Component.NickName = 'Multiplier'
-ghenv.Component.Message = '1.5.0'
+ghenv.Component.Message = '1.5.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
