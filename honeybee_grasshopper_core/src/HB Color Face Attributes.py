@@ -36,11 +36,15 @@ different faces.
             Rhino scene. This can be used in conjunction with the native
             Grasshopper "Custom Preview" component to create custom
             visualizations in the Rhino scene.
+        vis_set: An object containing VisualizationSet arguments for drawing a detailed
+            version of the ColorRoom in the Rhino scene. This can be connected to
+            the "LB Preview Visualization Set" component to display this version
+            of the visualization in Rhino.
 """
 
 ghenv.Component.Name = 'HB Color Face Attributes'
 ghenv.Component.NickName = 'ColorFaceAttr'
-ghenv.Component.Message = '1.5.1'
+ghenv.Component.Message = '1.5.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -127,3 +131,4 @@ if all_required_inputs(ghenv.Component):
         wire_frame.extend(from_face3d_to_wireframe(face.geometry))
     legend = legend_objects(graphic.legend)
     colors = [color_to_color(col) for col in graphic.value_colors]
+    vis_set = color_obj

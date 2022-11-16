@@ -36,11 +36,15 @@ different Rooms.
             with the native Grasshopper "Custom Preview" component and other
             honeybee visualization components (like "HB Visulaize Quick") to
             create custom visualizations in the Rhino scene.
+        vis_set: An object containing VisualizationSet arguments for drawing a detailed
+            version of the ColorRoom in the Rhino scene. This can be connected to
+            the "LB Preview Visualization Set" component to display this version
+            of the visualization in Rhino.
 """
 
 ghenv.Component.Name = 'HB Color Room Attributes'
 ghenv.Component.NickName = 'ColorRoomAttr'
-ghenv.Component.Message = '1.5.0'
+ghenv.Component.Message = '1.5.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -81,3 +85,4 @@ if all_required_inputs(ghenv.Component):
     legend = legend_objects(graphic.legend)
     values = color_obj.attributes_original
     colors = [color_to_color(col) for col in graphic.value_colors]
+    vis_set = color_obj
