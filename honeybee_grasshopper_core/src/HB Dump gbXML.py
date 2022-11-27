@@ -47,7 +47,7 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.5.0'
+ghenv.Component.Message = '1.5.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -93,12 +93,11 @@ if all_required_inputs(ghenv.Component) and _dump:
 
     # duplicate model to avoid mutating it as we edit it for energy simulation
     _model = _model.duplicate()
+    # scale the model if the units are not meters
+    _model.convert_to_units('Meters')
     # remove colinear vertices using the Model tolerance to avoid E+ tolerance issues
     for room in _model.rooms:
-        room.remove_colinear_vertices_envelope(_model.tolerance)
-    # scale the model if the units are not meters
-    if _model.units != 'Meters':
-        _model.convert_to_units('Meters')
+        room.remove_colinear_vertices_envelope(0.01, delete_degenerate=True)
 
     # write out the HBJSON and OpenStudio Workflow (OSW) that translates models to gbXML
     out_directory = os.path.join(folders.default_simulation_folder, 'temp_translate')
