@@ -47,7 +47,7 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.5.1'
+ghenv.Component.Message = '1.5.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -62,6 +62,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the honeybee_energy dependencies
+    from honeybee_energy.result.osw import OSW
     from honeybee_energy.run import to_gbxml_osw, run_osw, add_gbxml_space_boundaries
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee_energy:\n\t{}'.format(e))
@@ -95,9 +96,8 @@ if all_required_inputs(ghenv.Component) and _dump:
     _model = _model.duplicate()
     # scale the model if the units are not meters
     _model.convert_to_units('Meters')
-    # remove colinear vertices using the Model tolerance to avoid E+ tolerance issues
-    for room in _model.rooms:
-        room.remove_colinear_vertices_envelope(0.01, delete_degenerate=True)
+    # remove degenerate geometry within native E+ tolerance of 1 cm
+    _model.remove_degenerate_geometry(0.01)
 
     # write out the HBJSON and OpenStudio Workflow (OSW) that translates models to gbXML
     out_directory = os.path.join(folders.default_simulation_folder, 'temp_translate')
@@ -115,7 +115,9 @@ if all_required_inputs(ghenv.Component) and _dump:
     # run the measure to translate the model JSON to an openstudio measure
     osm, idf = run_osw(osw, silent=True)
     if idf is None:
-        raise Exception('Running OpenStudio CLI failed.')
+        log_osw = OSW(os.path.join(out_directory, 'out.osw'))
+        raise Exception(
+            'Failed to run OpenStudio CLI:\n{}'.format('\n'.join(log_osw.errors)))
 
     # add in the space boundary geometry if the user has requested it
     if full_geo_:
