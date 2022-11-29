@@ -47,7 +47,7 @@ Straight skeleton implementation
 
 ghenv.Component.Name = 'HB Straight Skeleton'
 ghenv.Component.NickName = 'Skeleton'
-ghenv.Component.Message = '1.5.0'
+ghenv.Component.Message = '1.5.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -120,7 +120,7 @@ if all_required_inputs(ghenv.Component):
                     bound, offset_, holes, tolerance)
                 perim_poly.append([polygon_to_brep(p, z_height) for p in perim])
                 core_poly.append([polygon_to_brep(p, z_height) for p in core])
-            except RuntimeError as e:
+            except (RuntimeError, TypeError) as e:
                 print(e)
                 perim_poly.append(None)
                 core_poly.append(None)
