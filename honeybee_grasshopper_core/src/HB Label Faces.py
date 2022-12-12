@@ -28,7 +28,7 @@ different faces and sub-faces.
         _font_: An optional name of a font in which the labels will display. This
             must be a font that is installed on this machine in order to work
             correctly. Default: "Arial".
-    
+
     Returns:
         label_text: The text with which each of the faces or sub-faces are labeled.
         base_pts: The base point for each of the text labels.
@@ -40,7 +40,7 @@ different faces and sub-faces.
 
 ghenv.Component.Name = 'HB Label Faces'
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '1.5.0'
+ghenv.Component.Message = '1.5.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -65,6 +65,7 @@ except ImportError as e:
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3d_to_wireframe, from_plane
     from ladybug_rhino.text import text_objects
+    from ladybug_rhino.config import tolerance, conversion_to_meters
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -72,6 +73,8 @@ except ImportError as e:
 
 # hide the base_pts output from the scene
 ghenv.Component.Params.Output[1].Hidden = True
+# maximum text height in meters - converted to model units
+max_txt_h = 0.25 / conversion_to_meters()
 
 
 def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_frame):
@@ -79,17 +82,26 @@ def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_fra
     face_prop = get_attr_nested(face, _attribute_)
 
     # get a base plane and text height for the text label
-    cent_pt = face.geometry.center  # base point for the text
-    base_plane = Plane(face.normal, cent_pt)
+    f_geo = face.geometry
+    cent_pt = f_geo.center if f_geo.is_convex else f_geo.pole_of_inaccessibility(tolerance)
+    base_plane = Plane(f_geo.normal, cent_pt)
     if base_plane.y.z < 0:  # base plane pointing downwards; rotate it
         base_plane = base_plane.rotate(base_plane.n, math.pi, base_plane.o)
     if _txt_height_ is None:  # auto-calculate default text height
         txt_len = len(face_prop) if len(face_prop) > 10 else 10
-        largest_dim = max((face.geometry.max.x - face.geometry.min.x),
-                           (face.geometry.max.y - face.geometry.min.y))
-        txt_h = largest_dim / (txt_len * 2)
+        dims = [
+            (f_geo.max.x - f_geo.min.x),
+            (f_geo.max.y - f_geo.min.y),
+            (f_geo.max.z - f_geo.min.z)]
+        dims.sort()
+        txt_h = dims[1] / txt_len
     else:
         txt_h = _txt_height_
+    if txt_h < tolerance:
+        return
+    txt_h = max_txt_h if txt_h > max_txt_h else txt_h
+    if base_plane.y.z < 0:  # base plane pointing downwards; rotate it
+        base_plane = base_plane.rotate(base_plane.n, math.pi, base_plane.o)
 
     # move base plane origin a little to avoid overlaps of adjacent labels
     if base_plane.n.x != 0:

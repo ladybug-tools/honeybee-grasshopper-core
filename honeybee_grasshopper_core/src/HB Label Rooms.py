@@ -28,7 +28,7 @@ different Rooms.
         _font_: An optional name of a font in which the labels will display. This
             must be a font that is installed on this machine in order to work
             correctly. Default: "Arial".
-    
+
     Returns:
         label_text: The text with which each of the rooms are labeled.
         base_pts: The base planes for each of the text labels.
@@ -40,19 +40,20 @@ different Rooms.
 
 ghenv.Component.Name = "HB Label Rooms"
 ghenv.Component.NickName = 'LabelRooms'
-ghenv.Component.Message = '1.5.0'
+ghenv.Component.Message = '1.5.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
 
 try:  # import the ladybug_geometry dependencies
-    from ladybug_geometry.geometry3d.pointvector import Vector3D
-    from ladybug_geometry.geometry3d.plane import Plane
+    from ladybug_geometry.geometry3d import Vector3D, Polyline3D, Plane, \
+        Face3D, Polyface3D
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
+    from honeybee.facetype import Floor
     from honeybee.search import get_attr_nested
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -60,12 +61,16 @@ except ImportError as e:
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_polyface3d_to_wireframe, from_plane
     from ladybug_rhino.text import text_objects
+    from ladybug_rhino.config import conversion_to_meters, tolerance
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 # hide the base_pts output from the scene
 ghenv.Component.Params.Output[1].Hidden = True
+# maximum text height in meters - converted to model units
+max_txt_h = 0.25 / conversion_to_meters()
+max_txt_v = 1.0 / conversion_to_meters()
 
 
 if all_required_inputs(ghenv.Component):
@@ -90,16 +95,36 @@ if all_required_inputs(ghenv.Component):
             rooms.append(hb_obj)
 
     for room in rooms:
+        # get the attribute to be displayed
         room_prop = get_attr_nested(room, _attribute_)
-
-        # create the text label
-        cent_pt = room.geometry.center  # base point for the text
-        base_plane = Plane(Vector3D(0, 0, 1), cent_pt)
+        # compute the center point for the text
+        room_h = room.geometry.max.z - room.geometry.min.z
+        m_vec = Vector3D(0, 0, max_txt_v) if room_h > max_txt_v * 2 \
+            else Vector3D(0, 0, room_h / 2)
+        floor_faces = [face.geometry for face in room.faces if isinstance(face.type, Floor)]
+        if len(floor_faces) == 1:
+            flr_geo = floor_faces[0]
+            base_pt = flr_geo.center if flr_geo.is_convex else \
+                flr_geo.pole_of_inaccessibility(tolerance)
+        elif len(floor_faces) == 0:
+            c_pt = room.geometry.center
+            base_pt = Point3D(c_pt.x, c_pt.y, room.geometry.min.z)
+        else:
+            floor_p_face = Polyface3D.from_faces(floor_faces, tolerance)
+            floor_outline = Polyline3D.join_segments(floor_p_face.naked_edges, tolerance)[0]
+            flr_geo = Face3D(floor_outline.vertices[:-1])
+            base_pt = flr_geo.center if flr_geo.is_convex else \
+                flr_geo.pole_of_inaccessibility(tolerance)
+        base_pt = base_pt.move(m_vec)
+        base_plane = Plane(Vector3D(0, 0, 1), base_pt)
+        # determine the text height
         if _txt_height_ is None:  # auto-calculate default text height
             txt_len = len(room_prop) if len(room_prop) > 10 else 10
             txt_h = (room.geometry.max.x - room.geometry.min.x) / txt_len
         else:
             txt_h = _txt_height_
+        txt_h = max_txt_h if txt_h > max_txt_h else txt_h
+        # create the text label
         label = text_objects(room_prop, base_plane, txt_h, font=_font_,
                              horizontal_alignment=1, vertical_alignment=3)
 
