@@ -42,7 +42,7 @@ Create Honeybee Shade
 
 ghenv.Component.Name = "HB Shade"
 ghenv.Component.NickName = 'Shade'
-ghenv.Component.Message = '1.5.0'
+ghenv.Component.Message = '1.5.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
@@ -78,6 +78,12 @@ except ImportError as e:
         raise ValueError('rad_mod_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
 
+# define special meshing parameters that are better for shades
+try:  # use try/except so that the code is still usable without RhinoCommon
+    import Rhino.Geometry.MeshingParameters as mp
+    meshing_parameters = mp.FastRenderMesh
+except ImportError:
+    meshing_parameters = None
 
 if all_required_inputs(ghenv.Component):
     shades = []  # list of shades that will be returned
@@ -90,7 +96,7 @@ if all_required_inputs(ghenv.Component):
             name = clean_and_id_string(display_name)
         is_detached = not longest_list(attached_, j) if len(attached_) != 0 else True
 
-        lb_faces = to_face3d(geo)
+        lb_faces = to_face3d(geo, meshing_parameters)
         for i, lb_face in enumerate(lb_faces):
             shd_name = '{}_{}'.format(name, i) if len(lb_faces) > 1 else name
             hb_shd = Shade(shd_name, lb_face, is_detached)
