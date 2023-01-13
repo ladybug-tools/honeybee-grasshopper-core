@@ -1,7 +1,7 @@
 # Honeybee: A Plugin for Environmental Analysis (GPL)
 # This file is part of Honeybee.
 #
-# Copyright (c) 2022, Ladybug Tools.
+# Copyright (c) 2023, Ladybug Tools.
 # You should have received a copy of the GNU Affero General Public License
 # along with Honeybee; If not, see <http://www.gnu.org/licenses/>.
 # 
@@ -34,7 +34,7 @@ Move any Honeybee geometry object or a Model object along a vector.
 
 ghenv.Component.Name = "HB Move"
 ghenv.Component.NickName = 'Move'
-ghenv.Component.Message = '1.5.0'
+ghenv.Component.Message = '1.6.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
