@@ -28,7 +28,7 @@ geometry object the Rhino scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = 'HB Visualize Normals'
 ghenv.Component.NickName = 'VizNorm'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -44,38 +44,44 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
+    from ladybug_rhino.config import tolerance
     from ladybug_rhino.fromgeometry import from_point3d, from_vector3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 
+def point_on_face(f_geo):
+    """Get a point that lies on a Face3D."""
+    return f_geo.center if f_geo.is_convex else f_geo.pole_of_inaccessibility(tolerance)
+
+
 def add_door(door, points, vectors):
     """Add Door normals."""
-    points.append(from_point3d(door.center))
+    points.append(from_point3d(point_on_face(door.geometry)))
     vectors.append(from_vector3d(door.normal))
     for shd in door.shades:
-        points.append(from_point3d(shd.center))
+        points.append(from_point3d(point_on_face(shd.geometry)))
         vectors.append(from_vector3d(shd.normal))
 
 def add_aperture(aperture, points, vectors):
     """Add Aperture normals."""
-    points.append(from_point3d(aperture.center))
+    points.append(from_point3d(point_on_face(aperture.geometry)))
     vectors.append(from_vector3d(aperture.normal))
     for shd in aperture.shades:
-        points.append(from_point3d(shd.center))
+        points.append(from_point3d(point_on_face(shd.geometry)))
         vectors.append(from_vector3d(shd.normal))
 
 def add_face(face, points, vectors):
     """Add Face normals."""
-    points.append(from_point3d(face.center))
+    points.append(from_point3d(point_on_face(face.geometry)))
     vectors.append(from_vector3d(face.normal))
     for ap in face.apertures:
         add_aperture(ap, points, vectors)
     for dr in face.doors:
         add_door(dr, points, vectors)
     for shd in face.shades:
-        points.append(from_point3d(shd.center))
+        points.append(from_point3d(point_on_face(shd.geometry)))
         vectors.append(from_vector3d(shd.normal))
 
 def add_room(room, points, vectors):
@@ -83,7 +89,7 @@ def add_room(room, points, vectors):
     for face in room.faces:
         add_face(face, points, vectors)
     for shd in room.shades:
-        points.append(from_point3d(shd.center))
+        points.append(from_point3d(point_on_face(shd.geometry)))
         vectors.append(from_vector3d(shd.normal))
 
 def add_model(model, points, vectors):
@@ -97,7 +103,7 @@ def add_model(model, points, vectors):
     for dr in model.orphaned_doors:
         add_door(door, points, vectors)
     for shd in model.orphaned_shades:
-        points.append(from_point3d(shd.center))
+        points.append(from_point3d(point_on_face(shd.geometry)))
         vectors.append(from_vector3d(shd.normal))
 
 
