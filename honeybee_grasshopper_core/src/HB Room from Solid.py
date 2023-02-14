@@ -46,7 +46,7 @@ avoid light leaks in Radiance simulations.
         _roof_angle_: A number between 0 and 90 to set the angle from the horizontal plane
             below which faces will be considered roofs or floors instead of
             walls. 90 indicates that all vertical faces are roofs and 0
-            indicates that all horizotnal faces are walls. The default value
+            indicates that all horizontal faces are walls. The default value
             of 60 degrees is the recommended value given by the ASHRAE 90.1
             standard. (Default: 60).
 
@@ -58,7 +58,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
