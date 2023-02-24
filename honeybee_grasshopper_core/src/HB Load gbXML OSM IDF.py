@@ -31,7 +31,7 @@ file transfer is needed.
 
 ghenv.Component.Name = 'HB Load gbXML OSM IDF'
 ghenv.Component.NickName = 'LoadEModel'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -128,7 +128,7 @@ if all_required_inputs(ghenv.Component) and _load:
         if lower_fname.endswith('.idf'):
             # check the version of the IDF since, most of the time, people don't check this
             try:
-                ver_regex = r'[V|v][E|e][R|r][S|s][I|i][O|o][N|n],\s*(\d*\.\d*);'
+                ver_regex = r'[V|v][E|e][R|r][S|s][I|i][O|o][N|n],\s*(\d*\.\d*)[;|.]'
                 ver_pattern = re.compile(ver_regex)
                 with open(_model_file, 'r') as mf:
                     ver_val = re.search(ver_pattern, mf.read())
