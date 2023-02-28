@@ -28,7 +28,7 @@ geometry object the Rhino scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = 'HB Visualize Normals'
 ghenv.Component.NickName = 'VizNorm'
-ghenv.Component.Message = '1.6.1'
+ghenv.Component.Message = '1.6.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -40,20 +40,25 @@ try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
     from honeybee.door import Door
     from honeybee.shade import Shade
+    from honeybee.units import parse_distance_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance
+    from ladybug_rhino.config import units_system
     from ladybug_rhino.fromgeometry import from_point3d, from_vector3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 
+# tolerance for computing the pole of inaccessibility
+p_tol = parse_distance_string('0.01m', units_system())
+
+
 def point_on_face(f_geo):
     """Get a point that lies on a Face3D."""
-    return f_geo.center if f_geo.is_convex else f_geo.pole_of_inaccessibility(tolerance)
+    return f_geo.center if f_geo.is_convex else f_geo.pole_of_inaccessibility(p_tol)
 
 
 def add_door(door, points, vectors):

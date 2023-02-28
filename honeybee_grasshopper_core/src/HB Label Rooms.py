@@ -40,7 +40,7 @@ different Rooms.
 
 ghenv.Component.Name = "HB Label Rooms"
 ghenv.Component.NickName = 'LabelRooms'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -55,13 +55,14 @@ try:  # import the core honeybee dependencies
     from honeybee.model import Model
     from honeybee.facetype import Floor
     from honeybee.search import get_attr_nested
+    from honeybee.units import parse_distance_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_polyface3d_to_wireframe, from_plane
     from ladybug_rhino.text import text_objects
-    from ladybug_rhino.config import conversion_to_meters, tolerance
+    from ladybug_rhino.config import conversion_to_meters, units_system, tolerance
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -71,6 +72,8 @@ ghenv.Component.Params.Output[1].Hidden = True
 # maximum text height in meters - converted to model units
 max_txt_h = 0.25 / conversion_to_meters()
 max_txt_v = 1.0 / conversion_to_meters()
+# tolerance for computing the pole of inaccessibility
+p_tol = parse_distance_string('0.01m', units_system())
 
 
 if all_required_inputs(ghenv.Component):
@@ -105,7 +108,7 @@ if all_required_inputs(ghenv.Component):
         if len(floor_faces) == 1:
             flr_geo = floor_faces[0]
             base_pt = flr_geo.center if flr_geo.is_convex else \
-                flr_geo.pole_of_inaccessibility(tolerance)
+                flr_geo.pole_of_inaccessibility(p_tol)
         elif len(floor_faces) == 0:
             c_pt = room.geometry.center
             base_pt = Point3D(c_pt.x, c_pt.y, room.geometry.min.z)
@@ -114,7 +117,7 @@ if all_required_inputs(ghenv.Component):
             floor_outline = Polyline3D.join_segments(floor_p_face.naked_edges, tolerance)[0]
             flr_geo = Face3D(floor_outline.vertices[:-1])
             base_pt = flr_geo.center if flr_geo.is_convex else \
-                flr_geo.pole_of_inaccessibility(tolerance)
+                flr_geo.pole_of_inaccessibility(p_tol)
         base_pt = base_pt.move(m_vec)
         base_plane = Plane(Vector3D(0, 0, 1), base_pt)
         # determine the text height
