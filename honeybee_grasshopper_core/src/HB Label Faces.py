@@ -40,7 +40,7 @@ different faces and sub-faces.
 
 ghenv.Component.Name = 'HB Label Faces'
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -59,13 +59,14 @@ try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
     from honeybee.door import Door
     from honeybee.search import get_attr_nested
+    from honeybee.units import parse_distance_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3d_to_wireframe, from_plane
     from ladybug_rhino.text import text_objects
-    from ladybug_rhino.config import tolerance, conversion_to_meters
+    from ladybug_rhino.config import tolerance, conversion_to_meters, units_system
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -75,6 +76,8 @@ except ImportError as e:
 ghenv.Component.Params.Output[1].Hidden = True
 # maximum text height in meters - converted to model units
 max_txt_h = 0.25 / conversion_to_meters()
+# tolerance for computing the pole of inaccessibility
+p_tol = parse_distance_string('0.01m', units_system())
 
 
 def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_frame):
@@ -83,7 +86,7 @@ def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_fra
 
     # get a base plane and text height for the text label
     f_geo = face.geometry
-    cent_pt = f_geo.center if f_geo.is_convex else f_geo.pole_of_inaccessibility(tolerance)
+    cent_pt = f_geo.center if f_geo.is_convex else f_geo.pole_of_inaccessibility(p_tol)
     base_plane = Plane(f_geo.normal, cent_pt)
     if base_plane.y.z < 0:  # base plane pointing downwards; rotate it
         base_plane = base_plane.rotate(base_plane.n, math.pi, base_plane.o)
