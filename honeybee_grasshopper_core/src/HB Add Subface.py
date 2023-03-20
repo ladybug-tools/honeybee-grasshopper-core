@@ -24,7 +24,7 @@ Add a Honeybee Aperture or Door to a parent Face or Room.
 
 ghenv.Component.Name = "HB Add Subface"
 ghenv.Component.NickName = 'AddSubface'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -104,7 +104,7 @@ if all_required_inputs(ghenv.Component):
                 'conditions\nis only possible when both adjacent faces are in ' \
                 'the input _hb_obj.\nFailed to find {}, which is adjacent ' \
                 'to {}.'.format(e, in_face_id)
-            print msg
+            print(msg)
             raise ValueError(msg)
         face_1.boundary_condition = boundary_conditions.outdoors
         face_2.boundary_condition = boundary_conditions.outdoors

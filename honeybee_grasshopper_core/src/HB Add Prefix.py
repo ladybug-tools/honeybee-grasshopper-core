@@ -35,7 +35,7 @@ within a Model must have unique identifiers.
 
 ghenv.Component.Name = "HB Add Prefix"
 ghenv.Component.NickName = 'Prefix'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -54,7 +54,7 @@ except ImportError as e:
 
 
 def check_adjacency(room):
-    """Check if a room has had adjacnecies solved on it and give a warning if so."""
+    """Check if a room has had adjacencies solved on it and give a warning if so."""
     for face in room.faces:
         if isinstance(face.boundary_condition, Surface):
             msg = 'Room "{}" has had adjacencies solved on it and this can ' \
