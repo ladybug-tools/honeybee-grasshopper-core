@@ -47,7 +47,7 @@ ghenv.Component.AdditionalHelpFromDocStrings = '4'
 
 try:  # import the ladybug_geometry dependencies
     from ladybug_geometry.geometry3d import Vector3D, Polyline3D, Plane, \
-        Face3D, Polyface3D
+        Face3D, Polyface3D, Point3D
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
 
