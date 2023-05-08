@@ -79,7 +79,7 @@ that are Walls (not Floors or Roofs).
 
 ghenv.Component.Name = "HB Louver Shades"
 ghenv.Component.NickName = 'LouverShades'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "5"
@@ -117,7 +117,7 @@ except ImportError as e:
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.config import tolerance
-    from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.grasshopper import all_required_inputs, document_counter
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -128,16 +128,17 @@ def can_host_louvers(face):
         isinstance(face.type, Wall)
 
 
-def assign_louvers(ap, depth, count, dist, off, angle, vec, flip, indr, ep, ep_tr, rad):
+def assign_louvers(ap, depth, count, dist, off, angle, vec, flip, indr, ep, ep_tr, rad, bn):
     """Assign louvers to an Aperture based on a set of inputs."""
     if depth == 0 or count == 0:
         return None
     if dist is None:
         louvers = ap.louvers_by_count(
-            count, depth, off, angle, vec, flip, indr, tolerance)
+            count, depth, off, angle, vec, flip, indr, tolerance, base_name=bn)
     else:
         louvers = ap.louvers_by_distance_between(
-            dist, depth, off, angle, vec, flip, indr, tolerance, max_count=count)
+            dist, depth, off, angle, vec, flip, indr, tolerance,
+            max_count=count, base_name=bn)
 
     # try to assign the energyplus construction and transmittance schedule
     if ep is not None:
@@ -161,6 +162,9 @@ if all_required_inputs(ghenv.Component):
     _angle_ = _angle_ if len(_angle_) != 0 else [0.0]
     flip_start_ = flip_start_ if len(flip_start_) != 0 else [False]
     indoor_ = indoor_ if len(indoor_) != 0 else [False]
+
+    # get a unique base name for the shades
+    b_name = 'Louver{}'.format(document_counter('louver_count'))
 
     # process the defaults for _shade_count_ vs _dist_between
     if len(_shade_count_) != 0 and len(_dist_between_) != 0:
@@ -222,7 +226,7 @@ if all_required_inputs(ghenv.Component):
                         inputs_by_index(orient_i, all_inputs)
                     for ap in face.apertures:
                         assign_louvers(ap, depth, count, dist, off, angle, vec,
-                                       flip, indr, con, sh_t, mod)
+                                       flip, indr, con, sh_t, mod, b_name)
         elif isinstance(obj, Face):
             if can_host_louvers(obj):
                 orient_i = face_orient_index(obj, angles)
@@ -230,13 +234,13 @@ if all_required_inputs(ghenv.Component):
                     inputs_by_index(orient_i, all_inputs)
                 for ap in obj.apertures:
                     assign_louvers(ap, depth, count, dist, off, angle, vec,
-                                   flip, indr, con, sh_t, mod)
+                                   flip, indr, con, sh_t, mod, b_name)
         elif isinstance(obj, Aperture):
             orient_i = face_orient_index(obj, angles)
             depth, count, dist, off, angle, vec, flip, indr, con, sh_t, mod = \
                 inputs_by_index(orient_i, all_inputs)
             assign_louvers(obj, depth, count, dist, off, angle, vec, flip,
-                           indr, con, sh_t, mod)
+                           indr, con, sh_t, mod, b_name)
         else:
             raise TypeError(
                 'Input _hb_objs must be a Room, Face, or Aperture. Not {}.'.format(type(obj)))
