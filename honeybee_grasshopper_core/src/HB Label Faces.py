@@ -40,7 +40,7 @@ different faces and sub-faces.
 
 ghenv.Component.Name = 'HB Label Faces'
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '1.6.1'
+ghenv.Component.Message = '1.6.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -77,12 +77,23 @@ ghenv.Component.Params.Output[1].Hidden = True
 # maximum text height in meters - converted to model units
 max_txt_h = 0.25 / conversion_to_meters()
 # tolerance for computing the pole of inaccessibility
-p_tol = parse_distance_string('0.01m', units_system())
+units = units_system()
+p_tol = parse_distance_string('0.01m', units)
+# dictionary of unit-sensitive propperties to be handled specially
+UNIT_SENSITIVE = {
+    'properties.energy.r_factor': 'R Factor',
+    'properties.energy.u_factor': 'U Factor',
+    'properties.energy.shgc': 'SHGC'
+}
 
 
 def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_frame):
     """Generate labels for a face or sub-face and add it to a list."""
-    face_prop = get_attr_nested(face, _attribute_)
+    if _attribute_ in UNIT_SENSITIVE:
+        obj_method = get_attr_nested(face, _attribute_, cast_to_str=False)
+        face_prop = str(obj_method(units))
+    else:
+        face_prop = get_attr_nested(face, _attribute_)
 
     # get a base plane and text height for the text label
     f_geo = face.geometry

@@ -44,7 +44,7 @@ different faces.
 
 ghenv.Component.Name = 'HB Color Face Attributes'
 ghenv.Component.NickName = 'ColorFaceAttr'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -103,12 +103,13 @@ if all_required_inputs(ghenv.Component):
     color_obj = ColorFace(faces, _attribute, legend_par_)
     # if the U-factor is requested, compute it in a unit-sensitive way
     if _attribute in UNIT_SENSITIVE:
+        nd = color_obj.legend_parameters.decimal_count
         units = units_system()
         values, flat_geo = [], []
         for face_obj in color_obj.flat_faces:
             try:
                 obj_method = get_attr_nested(face_obj, _attribute, cast_to_str=False)
-                values.append(obj_method(units))
+                values.append(round(obj_method(units), nd))
                 if isinstance(face_obj, Face):
                     flat_geo.append(face_obj.punched_geometry)
                 else:
@@ -118,6 +119,10 @@ if all_required_inputs(ghenv.Component):
         l_par = color_obj.legend_parameters.duplicate()
         l_par.title = UNIT_SENSITIVE[_attribute]
         graphic = GraphicContainer(values, color_obj.min_point, color_obj.max_point, l_par)
+        color_obj._attributes = tuple(str(v) for v in values)
+        attributes_unique = [v for v in set(values)]
+        attributes_unique.sort()
+        color_obj._attributes_unique = tuple(str(val) for val in attributes_unique)
     else:
         graphic = color_obj.graphic_container
         values = color_obj.attributes_original
