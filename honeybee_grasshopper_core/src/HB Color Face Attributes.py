@@ -44,7 +44,7 @@ different faces.
 
 ghenv.Component.Name = 'HB Color Face Attributes'
 ghenv.Component.NickName = 'ColorFaceAttr'
-ghenv.Component.Message = '1.6.1'
+ghenv.Component.Message = '1.6.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -123,6 +123,7 @@ if all_required_inputs(ghenv.Component):
         attributes_unique = [v for v in set(values)]
         attributes_unique.sort()
         color_obj._attributes_unique = tuple(str(val) for val in attributes_unique)
+        color_obj._flat_geometry = flat_geo
     else:
         graphic = color_obj.graphic_container
         values = color_obj.attributes_original
