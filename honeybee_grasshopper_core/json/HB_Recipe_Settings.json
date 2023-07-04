@@ -1,5 +1,5 @@
 {
-  "version": "1.6.0", 
+  "version": "1.6.1", 
   "nickname": "RecipeSettings", 
   "outputs": [
     [
@@ -36,14 +36,14 @@
     }, 
     {
       "access": "item", 
-      "name": "report_out_", 
-      "description": "A boolean to indicate whether the recipe progress should be\ndisplayed in the cmd window (False) or output form the \"report\" of\nthe recipe component (True). Outputting from the component can be\nuseful for debugging but recipe reports can often be very long\nand so it can slow Grasshopper slightly. (Default: False).", 
-      "type": "bool", 
+      "name": "debug_folder_", 
+      "description": "An optional path to a debug folder. If debug folder is\nprovided, all the steps of the simulation will be executed inside\nthe debug folder which can be used for further inspection.", 
+      "type": "string", 
       "default": null
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\n\ntry:\n    from lbt_recipes.settings import RecipeSettings\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import lbt_recipes:\\n\\t{}'.format(e))\n\n\n# create the settings\nsettings = RecipeSettings(_folder_, _workers_, reload_old_, report_out_)\n", 
+  "code": "\n\ntry:\n    from lbt_recipes.settings import RecipeSettings\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import lbt_recipes:\\n\\t{}'.format(e))\n\n\n# create the settings\nsettings = RecipeSettings(_folder_, _workers_, reload_old_, debug_folder=debug_folder_)\n", 
   "category": "Honeybee", 
   "name": "HB Recipe Settings", 
   "description": "Specify settings for the run of a recipe, including the number of workers/CPUs,\nthe project folder, and other settings.\n-"
