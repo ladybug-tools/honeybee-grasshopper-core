@@ -25,11 +25,9 @@ the project folder, and other settings.
             model and recipe should be reloaded (if they are found) instead of
             re-running the entire recipe from the beginning. If False or
             None, any existing results will be overwritten by the new simulation.
-        report_out_: A boolean to indicate whether the recipe progress should be
-            displayed in the cmd window (False) or output form the "report" of
-            the recipe component (True). Outputting from the component can be
-            useful for debugging but recipe reports can often be very long
-            and so it can slow Grasshopper slightly. (Default: False).
+        debug_folder_: An optional path to a debug folder. If debug folder is
+            provided, all the steps of the simulation will be executed inside
+            the debug folder which can be used for further inspection.
 
     Returns:
         settings: Recipe settings that can be plugged into any recipe component to
@@ -38,7 +36,7 @@ the project folder, and other settings.
 
 ghenv.Component.Name = 'HB Recipe Settings'
 ghenv.Component.NickName = 'RecipeSettings'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '7'
@@ -51,4 +49,4 @@ except ImportError as e:
 
 
 # create the settings
-settings = RecipeSettings(_folder_, _workers_, reload_old_, report_out_)
+settings = RecipeSettings(_folder_, _workers_, reload_old_, debug_folder=debug_folder_)
