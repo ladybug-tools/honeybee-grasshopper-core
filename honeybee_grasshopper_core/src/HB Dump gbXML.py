@@ -47,11 +47,12 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.6.1'
+ghenv.Component.Message = '1.6.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
 
+import sys
 import os
 import json
 
@@ -108,12 +109,13 @@ if all_required_inputs(ghenv.Component) and _dump:
     _model.properties.energy.add_autocal_properties_to_dict(model_dict)
     _model.properties.energy.simplify_window_constructions_in_dict(model_dict)
     hb_file = os.path.join(out_directory, '{}.hbjson'.format(_model.identifier))
-    try:
-        with open(hb_file, 'w') as fp:
-            json.dump(model_dict, fp)
-    except UnicodeDecodeError:  # non-unicode character in display_name
-        with open(hb_file, 'w') as fp:
-            json.dump(model_dict, fp, ensure_ascii=False)
+    if (sys.version_info < (3, 0)):  # we need to manually encode it as UTF-8
+        with open(hb_file, 'wb') as fp:
+            obj_str = json.dumps(model_dict, indent=4, ensure_ascii=False)
+            fp.write(obj_str.encode('utf-8'))
+    else:
+        with open(hb_file, 'w', encoding='utf-8') as fp:
+            obj_str = json.dump(model_dict, fp, indent=4, ensure_ascii=False)
     osw = to_gbxml_osw(hb_file, gbxml, out_directory)
 
     # run the measure to translate the model JSON to an openstudio measure
