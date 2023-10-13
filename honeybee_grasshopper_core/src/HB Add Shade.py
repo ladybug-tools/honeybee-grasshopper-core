@@ -27,12 +27,12 @@ Add a Honeybee Shades to an Aperture, Door, Face or Room.
             added to it.
 """
 
-ghenv.Component.Name = "HB Add Shade"
+ghenv.Component.Name = 'HB Add Shade'
 ghenv.Component.NickName = 'AddShade'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = "5"
+ghenv.Component.AdditionalHelpFromDocStrings = '5'
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs

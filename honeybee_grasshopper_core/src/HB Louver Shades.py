@@ -77,12 +77,12 @@ that are Walls (not Floors or Roofs).
             added to it.
 """
 
-ghenv.Component.Name = "HB Louver Shades"
+ghenv.Component.Name = 'HB Louver Shades'
 ghenv.Component.NickName = 'LouverShades'
-ghenv.Component.Message = '1.6.1'
+ghenv.Component.Message = '1.6.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = "5"
+ghenv.Component.AdditionalHelpFromDocStrings = '5'
 
 try:  # import the ladybug_geometry dependencies
     from ladybug_geometry.geometry2d.pointvector import Vector2D

@@ -45,12 +45,12 @@ simulations or in the solar distribution calculation of EnergyPlus.
             shades added to it.
 """
 
-ghenv.Component.Name = "HB Extruded Border Shades"
+ghenv.Component.Name = 'HB Extruded Border Shades'
 ghenv.Component.NickName = 'BorderShades'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = "5"
+ghenv.Component.AdditionalHelpFromDocStrings = '5'
 
 try:  # import the core honeybee dependencies
     from honeybee.boundarycondition import Outdoors

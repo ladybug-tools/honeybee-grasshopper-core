@@ -8,7 +8,7 @@
 # @license AGPL-3.0-or-later <https://spdx.org/licenses/AGPL-3.0-or-later>
 
 """
-Create Honeybee Shade
+Create Honeybee Shade.
 -
 
     Args:
@@ -40,9 +40,9 @@ Create Honeybee Shade
             energy simulations.
 """
 
-ghenv.Component.Name = "HB Shade"
+ghenv.Component.Name = 'HB Shade'
 ghenv.Component.NickName = 'Shade'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
