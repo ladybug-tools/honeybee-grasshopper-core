@@ -31,12 +31,12 @@ Create a Honeybee Model, which can be sent for simulation.
             objects.
 """
 
-ghenv.Component.Name = "HB Model"
+ghenv.Component.Name = 'HB Model'
 ghenv.Component.NickName = 'Model'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = "1"
+ghenv.Component.AdditionalHelpFromDocStrings = '1'
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model

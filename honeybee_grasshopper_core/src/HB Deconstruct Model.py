@@ -14,7 +14,7 @@ Deconstruct a Honeybee Model object into all of its constituent Honeybee objects
     Args:
         _model: A Honeybee Model to be deconstructed into into its constituent
             objects (Rooms, Faces, Apertures, Doors Shades).
-    
+
     Returns:
         rooms: All of the Room objects contained within the input Model.
         faces: All of the orphaned Face objects within the input Model.
@@ -31,12 +31,12 @@ Deconstruct a Honeybee Model object into all of its constituent Honeybee objects
             that belong to an Aperture, Face, or Room.
 """
 
-ghenv.Component.Name = "HB Deconstruct Model"
+ghenv.Component.Name = 'HB Deconstruct Model'
 ghenv.Component.NickName = 'DeconstructModel'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.6.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = "1"
+ghenv.Component.AdditionalHelpFromDocStrings = '1'
 
 try:  # import the honeybee dependencies
     from honeybee.model import Model
