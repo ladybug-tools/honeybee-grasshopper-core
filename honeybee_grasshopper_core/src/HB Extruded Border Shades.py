@@ -47,7 +47,7 @@ simulations or in the solar distribution calculation of EnergyPlus.
 
 ghenv.Component.Name = 'HB Extruded Border Shades'
 ghenv.Component.NickName = 'BorderShades'
-ghenv.Component.Message = '1.6.1'
+ghenv.Component.Message = '1.6.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
@@ -84,7 +84,7 @@ except ImportError as e:
 
 def assign_shades(aperture, depth, indoor, ep, rad):
     """Assign shades to an Aperture based on a set of inputs."""
-    if isinstance(aperture.boundary_condition, Outdoors):
+    if isinstance(aperture.boundary_condition, Outdoors) and depth > 0:
         new_shades = aperture.extruded_border(depth, indoor)
         
         # try to assign the energyplus construction
