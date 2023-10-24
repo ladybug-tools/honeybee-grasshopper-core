@@ -28,7 +28,7 @@ geometry object the Rhino scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = 'HB Visualize Normals'
 ghenv.Component.NickName = 'VizNorm'
-ghenv.Component.Message = '1.6.2'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'

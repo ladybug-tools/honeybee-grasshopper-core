@@ -33,7 +33,7 @@ interior faces when their surface areas do not match.
 
 ghenv.Component.Name = 'HB Intersect Solids'
 ghenv.Component.NickName = 'IntSolid'
-ghenv.Component.Message = '1.6.1'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'

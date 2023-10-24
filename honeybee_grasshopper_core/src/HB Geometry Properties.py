@@ -33,7 +33,7 @@ Get geometry properties of honeybee Rooms or a honeybee Model.
 
 ghenv.Component.Name = 'HB Geometry Properties'
 ghenv.Component.NickName = 'GeoProp'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

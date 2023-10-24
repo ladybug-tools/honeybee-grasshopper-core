@@ -33,7 +33,7 @@ Deconstruct a Honeybee Model object into all of its constituent Honeybee objects
 
 ghenv.Component.Name = 'HB Deconstruct Model'
 ghenv.Component.NickName = 'DeconstructModel'
-ghenv.Component.Message = '1.6.1'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'

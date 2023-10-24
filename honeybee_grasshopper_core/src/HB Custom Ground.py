@@ -34,7 +34,7 @@ this is intersection should be done prior to the creation of the Honeybee Rooms.
 
 ghenv.Component.Name = 'HB Custom Ground'
 ghenv.Component.NickName = 'CustomGround'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

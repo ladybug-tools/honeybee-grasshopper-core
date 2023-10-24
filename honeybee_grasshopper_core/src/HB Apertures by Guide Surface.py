@@ -60,7 +60,7 @@ aperters changed according to the input properties.
 
 ghenv.Component.Name = 'HB Apertures by Guide Surface'
 ghenv.Component.NickName = 'AperturesByGuide'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

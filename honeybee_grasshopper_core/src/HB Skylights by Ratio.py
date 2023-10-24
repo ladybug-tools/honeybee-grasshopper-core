@@ -34,7 +34,7 @@ an Outdoors boundary condition.
 
 ghenv.Component.Name = 'HB Skylights by Ratio'
 ghenv.Component.NickName = 'SkylightsByRatio'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'

@@ -37,7 +37,7 @@ ConstructionSet, Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Dump Objects'
 ghenv.Component.NickName = 'DumpObjects'
-ghenv.Component.Message = '1.6.1'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'

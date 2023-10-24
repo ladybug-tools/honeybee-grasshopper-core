@@ -30,7 +30,7 @@ of curved edges.
 
 ghenv.Component.Name = "HB Planarize Brep"
 ghenv.Component.NickName = 'Planarize'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"

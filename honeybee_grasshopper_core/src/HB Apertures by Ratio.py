@@ -63,7 +63,7 @@ an Outdoors boundary condition.
 
 ghenv.Component.Name = "HB Apertures by Ratio"
 ghenv.Component.NickName = 'AperturesByRatio'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
