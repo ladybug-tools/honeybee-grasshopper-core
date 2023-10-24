@@ -46,7 +46,7 @@ https://github.com/ladybug-tools/honeybee-schema/releases
 
 ghenv.Component.Name = 'HB Update HBJSON'
 ghenv.Component.NickName = 'UpdateHBJSON'
-ghenv.Component.Message = '1.6.0'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

@@ -33,7 +33,7 @@ Create a Honeybee Model, which can be sent for simulation.
 
 ghenv.Component.Name = 'HB Model'
 ghenv.Component.NickName = 'Model'
-ghenv.Component.Message = '1.6.1'
+ghenv.Component.Message = '1.7.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
