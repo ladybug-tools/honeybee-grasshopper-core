@@ -31,7 +31,7 @@ file transfer is needed.
 
 ghenv.Component.Name = 'HB Load gbXML OSM IDF'
 ghenv.Component.NickName = 'LoadEModel'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -120,7 +120,11 @@ if all_required_inputs(ghenv.Component) and _load:
     cmds = [folders.python_exe_path, '-m', 'honeybee_energy', 'translate',
             cmd_name, _model_file, '--output-file', out_path]
     shell = True if os.name == 'nt' else False
-    process = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell)
+    custom_env = os.environ.copy()
+    custom_env['PYTHONHOME'] = ''
+    process = subprocess.Popen(
+        cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        shell=shell, env=custom_env)
     result = process.communicate()
 
     # check to see if the file was successfully output and, if not, report the error

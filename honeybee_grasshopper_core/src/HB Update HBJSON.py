@@ -46,7 +46,7 @@ https://github.com/ladybug-tools/honeybee-schema/releases
 
 ghenv.Component.Name = 'HB Update HBJSON'
 ghenv.Component.NickName = 'UpdateHBJSON'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -78,11 +78,15 @@ if all_required_inputs(ghenv.Component) and _update:
 
     # execute the update command and update the HBJSON
     shell = True if os.name == 'nt' else False
+    custom_env = os.environ.copy()
+    custom_env['PYTHONHOME'] = ''
     cmds = [folders.python_exe_path, '-m', 'honeybee_schema', 'update-model',
             _hbjson, '--version', version, '--output-file', hbjson]
-    process = subprocess.Popen(cmds, stderr=subprocess.PIPE, shell=shell)
-    stderr = process.communicate()
-    print(stderr[-1])
+    process = subprocess.Popen(cmds, stderr=subprocess.PIPE, shell=shell, env=custom_env)
+    stderr = process.communicate()[-1]
+    print(stderr)
+    if 'Failed to update' in stderr:
+        raise ValueError('\n'.join(stderr.split('\n')[:2]))
 
     # validate the model if validation was requested
     if validate_:

@@ -30,7 +30,7 @@ about a given recipe run. Selecting "View Graph" for this task and then un-check
 
 ghenv.Component.Name = 'HB Visualize Recipe Execution'
 ghenv.Component.NickName = 'VizRecipe'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '7'
@@ -53,7 +53,9 @@ except ImportError as e:
 if all_required_inputs(ghenv.Component) and _launch:
     # set up and run the command to launch the luigi deamon
     ld_path = os.path.join(folders.python_scripts_path, 'luigid')
-    process = subprocess.Popen(ld_path, shell=True)
+    custom_env = os.environ.copy()
+    custom_env['PYTHONHOME'] = ''
+    process = subprocess.Popen(ld_path, shell=True, env=custom_env)
 
     # open the localhost URL where the recipe will be reported
     local_url = 'http://localhost:8082/'
