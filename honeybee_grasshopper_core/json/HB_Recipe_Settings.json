@@ -1,50 +1,50 @@
 {
-  "version": "1.7.0", 
-  "nickname": "RecipeSettings", 
+  "description": "Specify settings for the run of a recipe, including the number of workers/CPUs,\nthe project folder, and other settings.\n-", 
   "outputs": [
     [
       {
-        "access": "None", 
+        "type": null, 
         "name": "settings", 
         "description": "Recipe settings that can be plugged into any recipe component to\nspecify how the simulation should be run.", 
-        "type": null, 
+        "access": "None", 
         "default": null
       }
     ]
   ], 
+  "code": "\n\ntry:\n    from lbt_recipes.settings import RecipeSettings\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import lbt_recipes:\\n\\t{}'.format(e))\ntry:\n    from ladybug_{{cad}}.{{plugin}} import turn_off_old_tag\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\nturn_off_old_tag(ghenv.Component)\n\n\n# create the settings\nsettings = RecipeSettings(_folder_, _workers_, reload_old_, debug_folder=debug_folder_)\n", 
+  "name": "HB Recipe Settings", 
+  "version": "1.7.1", 
+  "category": "Honeybee", 
+  "subcategory": "0 :: Create", 
+  "nickname": "RecipeSettings", 
   "inputs": [
     {
-      "access": "item", 
+      "type": "string", 
       "name": "_folder_", 
       "description": "Path to a project folder in which the recipe will be executed.\nIf None, the default project folder for the Recipe will be used.", 
-      "type": "string", 
+      "access": "item", 
       "default": null
     }, 
     {
-      "access": "item", 
+      "type": "int", 
       "name": "_workers_", 
       "description": "An integer to set the number of CPUs used in the execution of the\nrecipe. This number should not exceed the number of CPUs on the\nmachine and should be lower if other tasks are running while the\nsimulation is running. If unspecified, it will automatically default\nto one less than the number of CPUs currently available on the\nmachine. (Default: None)", 
-      "type": "int", 
+      "access": "item", 
       "default": null
     }, 
     {
-      "access": "item", 
+      "type": "bool", 
       "name": "reload_old_", 
       "description": "A boolean to indicate whether existing results for a given\nmodel and recipe should be reloaded (if they are found) instead of\nre-running the entire recipe from the beginning. If False or\nNone, any existing results will be overwritten by the new simulation.", 
-      "type": "bool", 
+      "access": "item", 
       "default": "false"
     }, 
     {
-      "access": "item", 
+      "type": "string", 
       "name": "debug_folder_", 
       "description": "An optional path to a debug folder. If debug folder is\nprovided, all the steps of the simulation will be executed inside\nthe debug folder which can be used for further inspection.", 
-      "type": "string", 
+      "access": "item", 
       "default": null
     }
-  ], 
-  "subcategory": "0 :: Create", 
-  "code": "\n\ntry:\n    from lbt_recipes.settings import RecipeSettings\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import lbt_recipes:\\n\\t{}'.format(e))\n\n\n# create the settings\nsettings = RecipeSettings(_folder_, _workers_, reload_old_, debug_folder=debug_folder_)\n", 
-  "category": "Honeybee", 
-  "name": "HB Recipe Settings", 
-  "description": "Specify settings for the run of a recipe, including the number of workers/CPUs,\nthe project folder, and other settings.\n-"
+  ]
 }
