@@ -29,10 +29,16 @@ be shade depths, angles, etc. for the "HB Louver Shades" component.
 """
 ghenv.Component.Name = "HB Facade Parameters"
 ghenv.Component.NickName = 'FacParam'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
+
+try:
+    from ladybug_rhino.grasshopper import turn_off_old_tag
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
+turn_off_old_tag(ghenv.Component)
 
 
 def check_param(parameter):

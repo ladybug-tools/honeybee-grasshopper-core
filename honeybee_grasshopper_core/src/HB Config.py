@@ -36,7 +36,7 @@ and that the engines are configured as expected.
 
 ghenv.Component.Name = 'HB Config'
 ghenv.Component.NickName = 'Config'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -68,6 +68,12 @@ try:
     energy_loaded = True
 except ImportError:
     energy_loaded = False
+
+try:
+    from ladybug_rhino.grasshopper import turn_off_old_tag
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
+turn_off_old_tag(ghenv.Component)
 
 
 # output the paths to the honeybee core folders

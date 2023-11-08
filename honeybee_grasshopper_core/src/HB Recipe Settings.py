@@ -36,7 +36,7 @@ the project folder, and other settings.
 
 ghenv.Component.Name = 'HB Recipe Settings'
 ghenv.Component.NickName = 'RecipeSettings'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '7'
@@ -46,6 +46,11 @@ try:
     from lbt_recipes.settings import RecipeSettings
 except ImportError as e:
     raise ImportError('\nFailed to import lbt_recipes:\n\t{}'.format(e))
+try:
+    from ladybug_rhino.grasshopper import turn_off_old_tag
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
+turn_off_old_tag(ghenv.Component)
 
 
 # create the settings
