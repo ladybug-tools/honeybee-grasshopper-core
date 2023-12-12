@@ -16,7 +16,7 @@ Create a Honeybee Model, which can be sent for simulation.
             least one Room is necessary to make a simulate-able energy model.
         faces_: A list of honeybee Faces to be added to the Model. Note that
             faces without a parent Room are not allowed for energy models.
-        shades_: A list of honeybee Shades to be added to the Model.
+        shades_: A list of honeybee Shades or ShadeMeshes to be added to the Model.
         apertures_: A list of honeybee Apertures to be added to the Model. Note
             that apertures without a parent Face are not allowed for energy models.
         doors_: A list of honeybee Doors to be added to the Model. Note
@@ -33,12 +33,13 @@ Create a Honeybee Model, which can be sent for simulation.
 
 ghenv.Component.Name = 'HB Model'
 ghenv.Component.NickName = 'Model'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
 
 try:  # import the core honeybee dependencies
+    from honeybee.shademesh import ShadeMesh
     from honeybee.model import Model
     from honeybee.typing import clean_string, clean_and_id_string
 except ImportError as e:
@@ -62,7 +63,17 @@ if all_required_inputs(ghenv.Component) and not check_all_geo_none():
     name = clean_string(_name_) if _name_ is not None else clean_and_id_string('unnamed')
     units = units_system()
 
+    # separate shades and shade meshes
+    shades, shade_meshes = [], []
+    if len(shades_) != 0:
+        for obj in shades_:
+            if isinstance(obj, ShadeMesh):
+                shade_meshes.append(obj)
+            else:
+                shades.append(obj)
+
     # create the model
-    model = Model(name, rooms_, faces_, shades_, apertures_, doors_,
-                  units=units, tolerance=tolerance, angle_tolerance=angle_tolerance)
+    model = Model(
+        name, rooms_, faces_, shades, apertures_, doors_, shade_meshes,
+        units=units, tolerance=tolerance, angle_tolerance=angle_tolerance)
     model.display_name = _name_ if _name_ is not None else 'unnamed'

@@ -15,7 +15,7 @@ sub-faces and assigned shades.
     Args:
         _hb_objs: A Honeybee Model, Room, Face, Shade, Aperture, or Door to be
             previewed in the Rhino scene.
-    
+
     Returns:
         geo: The Rhino version of the Honeybee geometry object, which will be
             visible in the Rhino scene.
@@ -23,7 +23,7 @@ sub-faces and assigned shades.
 
 ghenv.Component.Name = "HB Visualize All"
 ghenv.Component.NickName = 'VizAll'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
@@ -35,12 +35,13 @@ try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
     from honeybee.door import Door
     from honeybee.shade import Shade
+    from honeybee.shademesh import ShadeMesh
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the core ladybug_rhino dependencies
     from ladybug_rhino.config import tolerance
-    from ladybug_rhino.fromgeometry import from_face3d
+    from ladybug_rhino.fromgeometry import from_face3d, from_mesh3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -95,23 +96,27 @@ def add_model(model, geo, shades):
         add_door(dr, geo, shades)
     for shd in model.orphaned_shades:
         add_shade(shd, shades)
+    for sm in model.shade_meshes:
+        shades.append(from_mesh3d(sm.geometry))
 
 
 if all_required_inputs(ghenv.Component):
     # lists of rhino geometry to be filled with content
     geo = []
     shades = []
-    
+
     # loop through all objects and add them
     for hb_obj in _hb_objs:
         if isinstance(hb_obj, Room):
             add_room(hb_obj, geo, shades)
+        elif isinstance(hb_obj, Shade):
+            add_shade(hb_obj, shades)
+        elif isinstance(hb_obj, ShadeMesh):
+            shades.append(from_mesh3d(hb_obj.geometry))
         elif isinstance(hb_obj, Face):
             add_face(hb_obj, geo, shades)
         elif isinstance(hb_obj, Aperture):
             add_aperture(hb_obj, geo, shades)
-        elif isinstance(hb_obj, Shade):
-            add_shade(hb_obj, shades)
         elif isinstance(hb_obj, Door):
             add_door(hb_obj, geo, shades)
         elif isinstance(hb_obj, Model):
@@ -119,6 +124,6 @@ if all_required_inputs(ghenv.Component):
         else:
             raise TypeError(
                 'Unrecognized honeybee object type: {}'.format(type(hb_obj)))
-    
+
     # group the shade geometry with the other objects
     geo.extend(shades)

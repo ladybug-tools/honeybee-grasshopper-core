@@ -42,19 +42,25 @@ Create Honeybee Shade.
 
 ghenv.Component.Name = 'HB Shade'
 ghenv.Component.NickName = 'Shade'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
 
+try:  # import the ladybug_geometry dependencies
+    from ladybug_geometry.geometry3d import Face3D
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
+
 try:  # import the core honeybee dependencies
     from honeybee.shade import Shade
+    from honeybee.shademesh import ShadeMesh
     from honeybee.typing import clean_and_id_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.togeometry import to_face3d
+    from ladybug_rhino.togeometry import to_face3d, to_mesh3d
     from ladybug_rhino.grasshopper import all_required_inputs, longest_list, \
         wrap_output
 except ImportError as e:
@@ -80,10 +86,12 @@ except ImportError as e:
 
 # define special meshing parameters that are better for shades
 try:  # use try/except so that the code is still usable without RhinoCommon
+    import Rhino.Geometry.Mesh as rhm
     import Rhino.Geometry.MeshingParameters as mp
     meshing_parameters = mp.FastRenderMesh
 except ImportError:
-    meshing_parameters = None
+    rhm, meshing_parameters = None, None
+
 
 if all_required_inputs(ghenv.Component):
     shades = []  # list of shades that will be returned
@@ -96,10 +104,12 @@ if all_required_inputs(ghenv.Component):
             name = clean_and_id_string(display_name)
         is_detached = not longest_list(attached_, j) if len(attached_) != 0 else True
 
-        lb_faces = to_face3d(geo, meshing_parameters)
+        lb_faces = [to_mesh3d(geo)] if isinstance(geo, rhm) else \
+            to_face3d(geo, meshing_parameters)
         for i, lb_face in enumerate(lb_faces):
             shd_name = '{}_{}'.format(name, i) if len(lb_faces) > 1 else name
-            hb_shd = Shade(shd_name, lb_face, is_detached)
+            hb_shd = Shade(shd_name, lb_face, is_detached) \
+                if isinstance(lb_face, Face3D) else ShadeMesh(shd_name, lb_face, is_detached)
             hb_shd.display_name = display_name
 
             # try to assign the energyplus construction

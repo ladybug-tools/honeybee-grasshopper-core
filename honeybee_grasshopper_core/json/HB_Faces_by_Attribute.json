@@ -1,5 +1,5 @@
 {
-  "version": "1.7.0", 
+  "version": "1.7.1", 
   "nickname": "FacesByAttr", 
   "outputs": [
     [
@@ -23,7 +23,7 @@
     {
       "access": "list", 
       "name": "_hb_objs", 
-      "description": "An array of honeybee Rooms, Faces, Apertures, Doors or Shades\nto be colored with their attributes in the Rhino scene.", 
+      "description": "An array of honeybee Rooms, Faces, Apertures, Doors or Shades\nto be separated by their attributes in the Rhino scene.", 
       "type": "System.Object", 
       "default": null
     }, 
@@ -36,7 +36,7 @@
     }
   ], 
   "subcategory": "2 :: Organize", 
-  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.room import Room\n    from honeybee.colorobj import ColorFace\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    \n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, list_to_data_tree\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # extract any faces from input Rooms or Models\n    faces = []\n    for hb_obj in _hb_objs:\n        if isinstance(hb_obj, Model):\n            for room in hb_obj.rooms:\n                faces.extend(room.faces)\n                faces.extend(room.shades)\n            faces.extend(hb_obj.orphaned_faces)\n            faces.extend(hb_obj.orphaned_apertures)\n            faces.extend(hb_obj.orphaned_doors)\n            faces.extend(hb_obj.orphaned_shades)\n        elif isinstance(hb_obj, Room):\n            faces.extend(hb_obj.faces)\n            faces.extend(hb_obj.shades)\n        else:\n            faces.append(hb_obj)\n\n    # use the ColorRoom object to get a set of attributes assigned to the faces\n    color_obj = ColorFace(faces, _attribute)\n    values = color_obj.attributes_unique\n\n    # loop through each of the hb_objs and get the floor height\n    hb_objs = [[] for val in values]\n    for atr, face in zip(color_obj.attributes, color_obj.flat_faces):\n        atr_i = values.index(atr)\n        hb_objs[atr_i].append(face)\n    hb_objs = list_to_data_tree(hb_objs)\n", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.room import Room\n    from honeybee.colorobj import ColorFace\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    \n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, list_to_data_tree\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # extract any faces from input Rooms or Models\n    faces = []\n    for hb_obj in _hb_objs:\n        if isinstance(hb_obj, Model):\n            for room in hb_obj.rooms:\n                faces.extend(room.faces)\n                faces.extend(room.shades)\n            faces.extend(hb_obj.orphaned_faces)\n            faces.extend(hb_obj.orphaned_apertures)\n            faces.extend(hb_obj.orphaned_doors)\n            faces.extend(hb_obj.orphaned_shades)\n            faces.extend(hb_obj.shade_meshes)\n        elif isinstance(hb_obj, Room):\n            faces.extend(hb_obj.faces)\n            faces.extend(hb_obj.shades)\n        else:\n            faces.append(hb_obj)\n\n    # use the ColorRoom object to get a set of attributes assigned to the faces\n    color_obj = ColorFace(faces, _attribute)\n    values = color_obj.attributes_unique\n\n    # loop through each of the hb_objs and get the floor height\n    hb_objs = [[] for val in values]\n    for atr, face in zip(color_obj.attributes, color_obj.flat_faces):\n        atr_i = values.index(atr)\n        hb_objs[atr_i].append(face)\n    hb_objs = list_to_data_tree(hb_objs)\n", 
   "category": "Honeybee", 
   "name": "HB Faces by Attribute", 
   "description": "Separate and group Honeybee Faces, Apertures, Doors and Shades by any attribute\nthat the objects possess.\n_\nThis can be used to group faces by construction, modifier, etc.\n-"

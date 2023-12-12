@@ -16,7 +16,7 @@ by boundary condition.
         _hb_objs: Honeybee Rooms, Faces, Apertures, Doors and/or Shades which will
             be separated based on boundary condition. This can also be an entire
             honeybee Model.
-    
+
     Returns:
         outdoors: The objects with an Outdoors boundary condition.
         surface: The objects with a Surface (interior) boundary condition.
@@ -28,7 +28,7 @@ by boundary condition.
 
 ghenv.Component.Name = 'HB Faces by BC'
 ghenv.Component.NickName = 'FacesByBC'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -40,6 +40,7 @@ try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
     from honeybee.door import Door
     from honeybee.shade import Shade
+    from honeybee.shademesh import ShadeMesh
     from honeybee.boundarycondition import Outdoors, Surface, Ground
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -120,7 +121,8 @@ if all_required_inputs(ghenv.Component):
                 sort_subface(ap)
             for dr in obj.orphaned_doors:
                 sort_subface(dr)
-            other.extend([shd for shd in obj.orphaned_shades])
+            other.extend(obj.orphaned_shades)
+            other.extend(obj.shade_meshes)
         elif isinstance(obj, Room):
             add_shades(obj)
             for face in obj:
@@ -132,4 +134,6 @@ if all_required_inputs(ghenv.Component):
         elif isinstance(obj, Door):
             sort_subface(obj)
         elif isinstance(obj, Shade):
+            other.append(obj)
+        elif isinstance(obj, ShadeMesh):
             other.append(obj)

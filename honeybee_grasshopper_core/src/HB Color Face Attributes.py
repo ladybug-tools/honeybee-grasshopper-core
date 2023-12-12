@@ -44,10 +44,15 @@ different faces.
 
 ghenv.Component.Name = 'HB Color Face Attributes'
 ghenv.Component.NickName = 'ColorFaceAttr'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
+
+try:
+    from ladybug_geometry.geometry3d import Face3D
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
 
 try:
     from ladybug.graphic import GraphicContainer
@@ -58,6 +63,7 @@ try:  # import the core honeybee dependencies
     from honeybee.model import Model
     from honeybee.room import Room
     from honeybee.face import Face
+    from honeybee.shademesh import ShadeMesh
     from honeybee.colorobj import ColorFace
     from honeybee.search import get_attr_nested
 except ImportError as e:
@@ -65,7 +71,8 @@ except ImportError as e:
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3ds_to_colored_mesh, \
-        from_face3d_to_wireframe
+        from_face3d_to_wireframe, from_mesh3ds_to_colored_mesh, \
+        from_mesh3d_to_wireframe
     from ladybug_rhino.fromobjects import legend_objects
     from ladybug_rhino.color import color_to_color
     from ladybug_rhino.config import units_system
@@ -93,6 +100,7 @@ if all_required_inputs(ghenv.Component):
             faces.extend(hb_obj.orphaned_apertures)
             faces.extend(hb_obj.orphaned_doors)
             faces.extend(hb_obj.orphaned_shades)
+            faces.extend(hb_obj.shade_meshes)
         elif isinstance(hb_obj, Room):
             faces.extend(hb_obj.faces)
             faces.extend(hb_obj.shades)
@@ -130,11 +138,18 @@ if all_required_inputs(ghenv.Component):
         flat_geo = color_obj.flat_geometry
 
     # output the visualization geometry
-    mesh = [from_face3ds_to_colored_mesh([fc], col) for fc, col in
-            zip(flat_geo, graphic.value_colors)]
+    mesh = []
+    for fc, col in zip(flat_geo, graphic.value_colors):
+        if isinstance(fc, Face3D):
+            mesh.append(from_face3ds_to_colored_mesh([fc], col))
+        else:
+            mesh.append(from_mesh3ds_to_colored_mesh([fc], col))
     wire_frame = []
-    for face in color_obj.flat_faces:
-        wire_frame.extend(from_face3d_to_wireframe(face.geometry))
+    for face in flat_geo:
+        if isinstance(face, Face3D):
+            wire_frame.extend(from_face3d_to_wireframe(face))
+        else:
+            wire_frame.extend(from_mesh3d_to_wireframe(face))
     legend = legend_objects(graphic.legend)
     colors = [color_to_color(col) for col in graphic.value_colors]
     vis_set = color_obj

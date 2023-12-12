@@ -23,7 +23,7 @@ scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = 'HB Visualize Wireframe'
 ghenv.Component.NickName = 'VizWireF'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -35,11 +35,13 @@ try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
     from honeybee.door import Door
     from honeybee.shade import Shade
+    from honeybee.shademesh import ShadeMesh
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.fromgeometry import from_face3d_to_wireframe
+    from ladybug_rhino.fromgeometry import from_face3d_to_wireframe, \
+        from_mesh3d_to_wireframe
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -86,6 +88,8 @@ def add_model(model, geo):
         add_door(dr, geo)
     for shd in model.orphaned_shades:
         geo.extend(from_face3d_to_wireframe(shd.geometry))
+    for sm in model.shade_meshes:
+        geo.extend(from_mesh3d_to_wireframe(sm.geometry))
 
 
 if all_required_inputs(ghenv.Component):
@@ -104,6 +108,8 @@ if all_required_inputs(ghenv.Component):
             add_door(hb_obj, geo)
         elif isinstance(hb_obj, Shade):
             geo.extend(from_face3d_to_wireframe(hb_obj.geometry))
+        elif isinstance(hb_obj, ShadeMesh):
+            geo.extend(from_mesh3d_to_wireframe(hb_obj.geometry))
         elif isinstance(hb_obj, Model):
             add_model(hb_obj, geo)
         else:
