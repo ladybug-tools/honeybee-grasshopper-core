@@ -29,7 +29,7 @@ Visualize room geometry in the Rhino scene organized by boundary condition.
 
 ghenv.Component.Name = "HB Visualize by BC"
 ghenv.Component.NickName = 'VizByBC'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
@@ -46,13 +46,15 @@ try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
     from honeybee.door import Door
     from honeybee.shade import Shade
+    from honeybee.shademesh import ShadeMesh
     from honeybee.boundarycondition import Outdoors, Surface, Ground
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3ds_to_colored_mesh, \
-        from_face3d_to_wireframe
+        from_face3d_to_wireframe, from_mesh3ds_to_colored_mesh, \
+        from_mesh3d_to_wireframe
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -112,6 +114,7 @@ if all_required_inputs(ghenv.Component):
     _ground = []
     _adiabatic = []
     _other = []
+    _shade_meshes = []
 
     # loop through the objects and group them by boundary condition
     for hb_obj in _hb_objs:
@@ -121,6 +124,7 @@ if all_required_inputs(ghenv.Component):
             [add_subface(ap) for ap in hb_obj.orphaned_apertures]
             [add_subface(dr) for dr in hb_obj.orphaned_doors]
             _other.extend([shd.geometry for shd in hb_obj.orphaned_shades])
+            _shade_meshes.extend([shd.geometry for shd in hb_obj.shade_meshes])
         elif isinstance(hb_obj, Room):
             add_room(hb_obj)
         elif isinstance(hb_obj, Face):
@@ -131,6 +135,8 @@ if all_required_inputs(ghenv.Component):
             add_subface(hb_obj)
         elif isinstance(hb_obj, Shade):
             _other.append(hb_obj.geometry)
+        elif isinstance(hb_obj, ShadeMesh):
+            _shade_meshes.append(hb_obj.geometry)
 
     # color all of the geometry with its respective surface type
     palette = Colorset.openstudio_palette()
@@ -148,3 +154,13 @@ if all_required_inputs(ghenv.Component):
     # create the wire frame
     all_geo = _outdoors + _surface + _ground + _adiabatic + _other
     wire_frame = [curve for face in all_geo for curve in from_face3d_to_wireframe(face)]
+
+    # process the shade meshes
+    if len(_shade_meshes) != 0:
+        if other is None:
+            other = []
+        else:
+            other = [other]
+        other.append(from_mesh3ds_to_colored_mesh(_shade_meshes, palette[12]))
+        for mesh in _shade_meshes:
+            wire_frame.extend(from_mesh3d_to_wireframe(mesh))

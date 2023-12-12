@@ -16,13 +16,13 @@ This can be used to group faces by construction, modifier, etc.
 
     Args:
         _hb_objs: An array of honeybee Rooms, Faces, Apertures, Doors or Shades
-            to be colored with their attributes in the Rhino scene.
+            to be separated by their attributes in the Rhino scene.
         _attribute: Text for the name of the Face attribute with which the
             Faces should be labeled. The Honeybee "Face Attributes" component
             lists all of the core attributes of the room. Also, each Honeybee
             extension (ie. Radiance, Energy) includes its own component that
             lists the Face attributes of that extension.
-    
+
     Returns:
         values: A list of values with one attribute value for each branch of the
             output hb_objs.
@@ -32,7 +32,7 @@ This can be used to group faces by construction, modifier, etc.
 
 ghenv.Component.Name = "HB Faces by Attribute"
 ghenv.Component.NickName = 'FacesByAttr'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -63,6 +63,7 @@ if all_required_inputs(ghenv.Component):
             faces.extend(hb_obj.orphaned_apertures)
             faces.extend(hb_obj.orphaned_doors)
             faces.extend(hb_obj.orphaned_shades)
+            faces.extend(hb_obj.shade_meshes)
         elif isinstance(hb_obj, Room):
             faces.extend(hb_obj.faces)
             faces.extend(hb_obj.shades)

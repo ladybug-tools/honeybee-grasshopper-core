@@ -18,7 +18,7 @@ assignment of child objects.
     Args:
         _hb_objs: A Honeybee Model, Room, Face, Shade, Aperture, or Door to be previewed
             in the Rhino scene.
-    
+
     Returns:
         geo: The Rhino version of the Honeybee geometry object, which will be
             visible in the Rhino scene.
@@ -26,18 +26,21 @@ assignment of child objects.
 
 ghenv.Component.Name = "HB Visualize Quick"
 ghenv.Component.NickName = 'VizQuick'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = "1"
 
 try:  # import the core honeybee dependencies
     from honeybee.face import Face
+    from honeybee.room import Room
+    from honeybee.model import Model
+    from honeybee.shademesh import ShadeMesh
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the core ladybug_rhino dependencies
-    from ladybug_rhino.fromgeometry import from_face3d, from_polyface3d
+    from ladybug_rhino.fromgeometry import from_face3d, from_polyface3d, from_mesh3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -46,25 +49,27 @@ except ImportError as e:
 if all_required_inputs(ghenv.Component):
     # lists of rhino geometry to be filled with content
     geo = []
-    
+
     # loop through all objects and add them
     for hb_obj in _hb_objs:
-        try:  # Face, Shade, Aperture, or Door
-            if isinstance(hb_obj, Face):
-                geo.append(from_face3d(hb_obj.punched_geometry))
-            else:
-                geo.append(from_face3d(hb_obj.geometry))
-        except AttributeError:  # probably a Room
-            try:
-                geo.append(from_polyface3d(hb_obj.geometry))
-            except AttributeError:  # it's a whole Model
-                for room in hb_obj.rooms:
-                    geo.append(from_polyface3d(room.geometry))
-                for face in hb_obj.orphaned_faces:
-                    geo.append(from_face3d(face.punched_geometry))
-                for ap in hb_obj.orphaned_apertures:
-                    geo.append(from_face3d(ap.geometry))
-                for dr in hb_obj.orphaned_doors:
-                    geo.append(from_face3d(dr.geometry))
-                for shd in hb_obj.orphaned_shades:
-                    geo.append(from_face3d(shd.geometry))
+        if isinstance(hb_obj, Face):
+            geo.append(from_face3d(hb_obj.punched_geometry))
+        elif isinstance(hb_obj, Room):
+            geo.append(from_polyface3d(hb_obj.geometry))
+        elif isinstance(hb_obj, Model):
+            for room in hb_obj.rooms:
+                geo.append(from_polyface3d(room.geometry))
+            for face in hb_obj.orphaned_faces:
+                geo.append(from_face3d(face.punched_geometry))
+            for ap in hb_obj.orphaned_apertures:
+                geo.append(from_face3d(ap.geometry))
+            for dr in hb_obj.orphaned_doors:
+                geo.append(from_face3d(dr.geometry))
+            for shd in hb_obj.orphaned_shades:
+                geo.append(from_face3d(shd.geometry))
+            for sm in hb_obj.shade_meshes:
+                geo.append(from_mesh3d(sm.geometry))
+        elif isinstance(hb_obj, ShadeMesh):
+            geo.append(from_mesh3d(hb_obj.geometry))
+        else:
+            geo.append(from_face3d(hb_obj.geometry))

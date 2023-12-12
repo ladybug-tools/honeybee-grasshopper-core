@@ -36,7 +36,7 @@ by object and face type.
 
 ghenv.Component.Name = 'HB Faces by Type'
 ghenv.Component.NickName = 'FacesByType'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -48,6 +48,7 @@ try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
     from honeybee.door import Door
     from honeybee.shade import Shade
+    from honeybee.shademesh import ShadeMesh
     from honeybee.boundarycondition import Surface
     from honeybee.facetype import Wall, RoofCeiling, Floor, AirBoundary
 except ImportError as e:
@@ -132,6 +133,7 @@ if all_required_inputs(ghenv.Component):
     interior_doors = []
     outdoor_shades = []
     indoor_shades = []
+    shade_meshes = []
 
     # loop through all objects and add them
     for obj in _hb_objs:
@@ -145,7 +147,8 @@ if all_required_inputs(ghenv.Component):
                 add_aperture(ap)
             for dr in obj.orphaned_doors:
                 add_door(dr)
-            outdoor_shades.extend([shd for shd in obj.orphaned_shades])
+            outdoor_shades.extend(obj.orphaned_shades)
+            outdoor_shades.extend(obj.shade_meshes)
         elif isinstance(obj, Room):
             add_shade(obj)
             for face in obj:
@@ -157,4 +160,6 @@ if all_required_inputs(ghenv.Component):
         elif isinstance(obj, Door):
             add_door(obj)
         elif isinstance(obj, Shade):
+            outdoor_shades.append(obj)
+        elif isinstance(obj, ShadeMesh):
             outdoor_shades.append(obj)

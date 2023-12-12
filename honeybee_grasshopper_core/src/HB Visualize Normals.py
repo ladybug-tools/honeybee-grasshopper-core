@@ -28,7 +28,7 @@ geometry object the Rhino scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = 'HB Visualize Normals'
 ghenv.Component.NickName = 'VizNorm'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -40,6 +40,7 @@ try:  # import the core honeybee dependencies
     from honeybee.aperture import Aperture
     from honeybee.door import Door
     from honeybee.shade import Shade
+    from honeybee.shademesh import ShadeMesh
     from honeybee.units import parse_distance_string
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -110,6 +111,10 @@ def add_model(model, points, vectors):
     for shd in model.orphaned_shades:
         points.append(from_point3d(point_on_face(shd.geometry)))
         vectors.append(from_vector3d(shd.normal))
+    for sm in model.shade_meshes:
+        for pt, norm in zip(sm.geometry.face_centroids, sm.geometry.face_normals):
+            points.append(from_point3d(pt))
+            vectors.append(from_vector3d(norm))
 
 
 if all_required_inputs(ghenv.Component):
@@ -130,6 +135,10 @@ if all_required_inputs(ghenv.Component):
         elif isinstance(hb_obj, Shade):
             points.append(from_point3d(hb_obj.center))
             vectors.append(from_vector3d(hb_obj.normal))
+        elif isinstance(hb_obj, ShadeMesh):
+            for pt, norm in zip(hb_obj.geometry.face_centroids, hb_obj.geometry.face_normals):
+                points.append(from_point3d(pt))
+                vectors.append(from_vector3d(norm))
         elif isinstance(hb_obj, Model):
             add_model(hb_obj, points, vectors)
         else:
