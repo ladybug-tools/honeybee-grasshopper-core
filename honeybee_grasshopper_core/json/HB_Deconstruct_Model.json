@@ -1,5 +1,5 @@
 {
-  "version": "1.7.0", 
+  "version": "1.7.1", 
   "nickname": "DeconstructModel", 
   "outputs": [
     [
@@ -50,7 +50,7 @@
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\ntry:  # import the honeybee dependencies\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    assert isinstance(_model, Model), \\\n        'Input _model must be a Model. Got {}'.format(type(_model))\n\n    rooms = _model.rooms\n    faces = _model.orphaned_faces\n    apertures = _model.orphaned_apertures\n    doors = _model.orphaned_doors\n    shades = _model.orphaned_shades\n", 
+  "code": "\ntry:  # import the honeybee dependencies\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    assert isinstance(_model, Model), \\\n        'Input _model must be a Model. Got {}'.format(type(_model))\n\n    rooms = _model.rooms\n    faces = _model.orphaned_faces\n    apertures = _model.orphaned_apertures\n    doors = _model.orphaned_doors\n    shades = _model.orphaned_shades + _model.shade_meshes\n", 
   "category": "Honeybee", 
   "name": "HB Deconstruct Model", 
   "description": "Deconstruct a Honeybee Model object into all of its constituent Honeybee objects.\n-"

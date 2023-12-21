@@ -33,7 +33,7 @@ Deconstruct a Honeybee Model object into all of its constituent Honeybee objects
 
 ghenv.Component.Name = 'HB Deconstruct Model'
 ghenv.Component.NickName = 'DeconstructModel'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -57,4 +57,4 @@ if all_required_inputs(ghenv.Component):
     faces = _model.orphaned_faces
     apertures = _model.orphaned_apertures
     doors = _model.orphaned_doors
-    shades = _model.orphaned_shades
+    shades = _model.orphaned_shades + _model.shade_meshes
