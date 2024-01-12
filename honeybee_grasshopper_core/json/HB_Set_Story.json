@@ -1,5 +1,5 @@
 {
-  "version": "1.7.0", 
+  "version": "1.7.1", 
   "nickname": "SetStory", 
   "outputs": [
     [
@@ -21,7 +21,7 @@
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "_story", 
       "description": "Text for the story identifier to which the rooms belong.", 
       "type": "string", 
@@ -29,7 +29,7 @@
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\n\ntry:  # import the honeybee-energy extension\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    rooms = []\n    for i, room in enumerate(_rooms):\n        assert isinstance(room, Room), \\\n            'Expected honeybee room. Got {}.'.format(type(room))\n        room_dup = room.duplicate()\n        room_dup.story = _story\n        rooms.append(room_dup)\n", 
+  "code": "\n\ntry:  # import the honeybee-energy extension\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, longest_list\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    rooms = []\n    for i, room in enumerate(_rooms):\n        assert isinstance(room, Room), \\\n            'Expected honeybee room. Got {}.'.format(type(room))\n        story_id = longest_list(_story, i)\n        room_dup = room.duplicate()\n        room_dup.story = story_id\n        rooms.append(room_dup)\n", 
   "category": "Honeybee", 
   "name": "HB Set Story", 
   "description": "Set text for the story identifier for honeybee Rooms.\n_\nRooms sharing the same story identifier are considered part of the same story\nin a Model.\n-"
