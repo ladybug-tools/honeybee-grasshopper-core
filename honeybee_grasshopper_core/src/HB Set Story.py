@@ -17,7 +17,7 @@ in a Model.
     Args:
         _rooms: Honeybee Rooms to which the input _story should be assigned.
         _story: Text for the story identifier to which the rooms belong.
-    
+
     Returns:
         report: ...
         rooms: The input Rooms with their stories set.
@@ -25,7 +25,7 @@ in a Model.
 
 ghenv.Component.Name = 'HB Set Story'
 ghenv.Component.NickName = 'SetStory'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -37,7 +37,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.grasshopper import all_required_inputs
+    from ladybug_rhino.grasshopper import all_required_inputs, longest_list
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -47,6 +47,7 @@ if all_required_inputs(ghenv.Component):
     for i, room in enumerate(_rooms):
         assert isinstance(room, Room), \
             'Expected honeybee room. Got {}.'.format(type(room))
+        story_id = longest_list(_story, i)
         room_dup = room.duplicate()
-        room_dup.story = _story
+        room_dup.story = story_id
         rooms.append(room_dup)
