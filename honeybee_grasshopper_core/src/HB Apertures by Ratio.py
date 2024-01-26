@@ -16,7 +16,8 @@ an Outdoors boundary condition.
 
     Args:
         _hb_objs: A list of honeybee Rooms or Faces to which Apertures will be
-            added based on the inputs.
+            added based on the inputs. This can also be an entire honeybee
+            Model for which all Rooms will have Apertures assigned.
         _ratio: A number between 0 and 0.95 for the ratio between the area of
             the apertures and the area of the parent face. If an array of values
             are input here, different ratios will be assigned based on
@@ -57,22 +58,23 @@ an Outdoors boundary condition.
 
     Returns:
         report: Reports, errors, warnings, etc.
-        hb_objs: The input Honeybee Face or Room with Apertures generated from
+        hb_objs: The input Honeybee Face, Room or Model with Apertures generated from
             the input parameters.
 """
 
-ghenv.Component.Name = "HB Apertures by Ratio"
+ghenv.Component.Name = 'HB Apertures by Ratio'
 ghenv.Component.NickName = 'AperturesByRatio'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = "4"
+ghenv.Component.AdditionalHelpFromDocStrings = '4'
 
 try:  # import the core honeybee dependencies
     from honeybee.boundarycondition import Outdoors
     from honeybee.facetype import Wall
-    from honeybee.room import Room
     from honeybee.face import Face
+    from honeybee.room import Room
+    from honeybee.model import Model
     from honeybee.orientation import check_matching_inputs, angles_from_num_orient, \
         face_orient_index, inputs_by_index
 except ImportError as e:
@@ -97,7 +99,7 @@ def assign_apertures(face, sub, rat, hgt, sil, hor, vert, op):
         face.apertures_by_ratio_rectangle(rat, hgt, sil, hor, vert, tolerance)
     else:
         face.apertures_by_ratio(rat, tolerance)
-    
+
     # try to assign the operable property
     if op:
         for ap in face.apertures:
@@ -129,7 +131,15 @@ if all_required_inputs(ghenv.Component):
 
     # loop through the input objects and add apertures
     for obj in hb_objs:
-        if isinstance(obj, Room):
+        if isinstance(obj, Model):
+            for room in obj.rooms:
+                for face in room.faces:
+                    if can_host_apeture(face):
+                        orient_i = face_orient_index(face, angles)
+                        sub, rat, hgt, sil, hor, vert, op = \
+                            inputs_by_index(orient_i, all_inputs)
+                        assign_apertures(face, sub, rat, hgt, sil, hor, vert, op)
+        elif isinstance(obj, Room):
             for face in obj.faces:
                 if can_host_apeture(face):
                     orient_i = face_orient_index(face, angles)
@@ -142,4 +152,4 @@ if all_required_inputs(ghenv.Component):
                 assign_apertures(obj, sub, rat, hgt, sil, hor, vert, op)
         else:
             raise TypeError(
-                'Input _hb_objs must be a Room or Face. Not {}.'.format(type(obj)))
+                'Input _hb_objs must be a Model Room or Face. Not {}.'.format(type(obj)))
