@@ -1,0 +1,64 @@
+{
+  "version": "1.7.0", 
+  "nickname": "AperturesByWH", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_objs", 
+        "description": "The input Honeybee Face, Room or Model with Apertures generated from\nthe input parameters.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "A list of honeybee Rooms or Faces to which Apertures will be\nadded based on the inputs. This can also be an entire honeybee\nModel for which all Rooms will have Apertures assigned.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_win_height_", 
+      "description": "A number for the target height of the output apertures. Note\nthat, if the window height is larger than the height of the wall, the\ngenerated windows will have a height equal to the wall height in\norder to avoid having windows extend outside the wall face. If an\narray of values are input here, different heights will be assigned\nbased on cardinal direction, starting with north and moving\nclockwise. (Default: 2 meters).", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_win_width_", 
+      "description": "A number for the target width the output apertures. Note that,\nif the window width is larger than the width of the wall, the\ngenerated windows will have a width equal to the wall width in\norder to avoid having windows extend outside the wall face. If an\narray of values are input here, different widths will be assigned\nbased on cardinal direction, starting with north and moving\nclockwise. (Default: 1.5 meters).", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_sill_height_", 
+      "description": "A number for the target height above the bottom edge of the face to\nstart the apertures. Note that, if the window height is too large\nto acoomodate the sill height input here, the window height will take\nprecedence and the sill height will be smaller than this value. If\nan array of values are input here, different heights will be assigned\nbased on cardinal direction, starting with north and moving\nclockwise. (Default: 0.8 meters).", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_horiz_separ_", 
+      "description": "A number for the horizontal separation between individual aperture\ncenterlines.  If this number is larger than the parent face's length,\nonly one aperture will be produced. If an array of values are input\nhere, different separation distances will be assigned based on cardinal\ndirection, starting with north and moving clockwise. (Default: 3 meters).", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "operable_", 
+      "description": "An optional boolean to note whether the generated Apertures can be\nopened for ventilation. If an array of booleans are input here, different\noperable properties will be assigned based on cardinal direction,\nstarting with north and moving clockwise. (Default: False).", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.boundarycondition import Outdoors\n    from honeybee.facetype import Wall\n    from honeybee.face import Face\n    from honeybee.room import Room\n    from honeybee.model import Model\n    from honeybee.orientation import check_matching_inputs, angles_from_num_orient, \\\n        face_orient_index, inputs_by_index\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance, conversion_to_meters\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef can_host_apeture(face):\n    \"\"\"Test if a face is intended to host apertures (according to this component).\"\"\"\n    return isinstance(face.boundary_condition, Outdoors) and \\\n        isinstance(face.type, Wall)\n\n\ndef assign_apertures(face, hgt, wth, sil, hor, op):\n    \"\"\"Assign apertures to a Face based on a set of inputs.\"\"\"\n    face.apertures_by_width_height_rectangle(hgt, wth, sil, hor, tolerance)\n\n    # try to assign the operable property\n    if op:\n        for ap in face.apertures:\n            ap.is_operable = op\n\n\nif all_required_inputs(ghenv.Component):\n    # duplicate the initial objects\n    hb_objs = [obj.duplicate() for obj in _hb_objs]\n\n    # set defaults for any blank inputs\n    conversion = conversion_to_meters()\n    _win_height_ = _win_height_ if len(_win_height_) != 0 else [2.0 / conversion]\n    _win_width_ = _win_width_ if len(_win_width_) != 0 else [1.5 / conversion]\n    _sill_height_ = _sill_height_ if len(_sill_height_) != 0 else [0.8 / conversion]\n    _horiz_separ_ = _horiz_separ_ if len(_horiz_separ_) != 0 else [3.0 / conversion]\n    operable_ = operable_ if len(operable_) != 0 else [False]\n\n    # gather all of the inputs together\n    all_inputs = [_win_height_, _win_width_, _sill_height_, _horiz_separ_, operable_]\n\n    # ensure matching list lengths across all values\n    all_inputs, num_orient = check_matching_inputs(all_inputs)\n\n    # get a list of angles used to categorize the faces\n    angles = angles_from_num_orient(num_orient)\n\n    # loop through the input objects and add apertures\n    for obj in hb_objs:\n        if isinstance(obj, Model):\n            for room in obj.rooms:\n                for face in room.faces:\n                    if can_host_apeture(face):\n                        orient_i = face_orient_index(face, angles)\n                        hgt, wth, sil, hor, op = inputs_by_index(orient_i, all_inputs)\n                        assign_apertures(face, hgt, wth, sil, hor, op)\n        elif isinstance(obj, Room):\n            for face in obj.faces:\n                if can_host_apeture(face):\n                    orient_i = face_orient_index(face, angles)\n                    hgt, wth, sil, hor, op = inputs_by_index(orient_i, all_inputs)\n                    assign_apertures(face, hgt, wth, sil, hor, op)\n        elif isinstance(obj, Face):\n            if can_host_apeture(obj):\n                orient_i = face_orient_index(obj, angles)\n                hgt, wth, sil, hor, op = inputs_by_index(orient_i, all_inputs)\n                assign_apertures(obj, hgt, wth, sil, hor, op)\n        else:\n            raise TypeError(\n                'Input _hb_objs must be a Mode, Room or Face. Not {}.'.format(type(obj)))", 
+  "category": "Honeybee", 
+  "name": "HB Apertures by Width Height", 
+  "description": "Add apertures to a Honeybee Face or Room given a width and a height of windows\nthat repeat across the walls at a specific horizontal separation between window\ncenterlines.\n_\nNote that this component will only add Apertures to Faces that are Walls, have\nan Outdoors boundary condition, and have at least a portion of the Face that\nis clearly rectangular.\n-"
+}
