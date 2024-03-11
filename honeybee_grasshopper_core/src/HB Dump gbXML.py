@@ -24,6 +24,10 @@ model geometry and properties.
             If unspecified, it will be derived from the model identifier.
         _folder_: An optional directory into which the honeybee objects will be
             written.  The default is set to the default simulation folder.
+        int_floors_: A boolean to note whether all interior horizontal faces should
+            be written with the InteriorFloor type instead of the combination
+            of InteriorFloor and Ceiling that happens by default with OpenStudio
+            gbXML serialization. (Default: False).
         triangulate_: Boolean to note whether sub-faces (including Apertures and Doors)
             should be triangulated if they have more than 4 sides (True) or
             whether they should be left as they are (False). This triangulation
@@ -47,7 +51,7 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -64,7 +68,8 @@ except ImportError as e:
 
 try:  # import the honeybee_energy dependencies
     from honeybee_energy.result.osw import OSW
-    from honeybee_energy.run import to_gbxml_osw, run_osw, add_gbxml_space_boundaries
+    from honeybee_energy.run import to_gbxml_osw, run_osw, set_gbxml_floor_types, \
+        add_gbxml_space_boundaries
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee_energy:\n\t{}'.format(e))
 
@@ -125,6 +130,8 @@ if all_required_inputs(ghenv.Component) and _dump:
         raise Exception(
             'Failed to run OpenStudio CLI:\n{}'.format('\n'.join(log_osw.errors)))
 
-    # add in the space boundary geometry if the user has requested it
+    # add in the space boundary geometry or reset floor types if the user requested it
+    if int_floors_:
+        set_gbxml_floor_types(gbxml, interior_type='InteriorFloor')
     if full_geo_:
         add_gbxml_space_boundaries(gbxml, _model)
