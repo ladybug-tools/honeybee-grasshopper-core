@@ -37,7 +37,7 @@ ConstructionSet, Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Dump Objects'
 ghenv.Component.NickName = 'DumpObjects'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.7.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -107,8 +107,8 @@ if all_required_inputs(ghenv.Component) and _dump:
         os.makedirs(folder)
     if (sys.version_info < (3, 0)):  # we need to manually encode it as UTF-8
         with open(hb_file, 'wb') as fp:
-            obj_str = json.dumps(obj_dict, indent=4, ensure_ascii=False)
+            obj_str = json.dumps(obj_dict, indent=indent_, ensure_ascii=False)
             fp.write(obj_str.encode('utf-8'))
     else:
         with open(hb_file, 'w', encoding='utf-8') as fp:
-            obj_str = json.dump(obj_dict, fp, indent=4, ensure_ascii=False)
+            obj_str = json.dump(obj_dict, fp, indent=indent_, ensure_ascii=False)
