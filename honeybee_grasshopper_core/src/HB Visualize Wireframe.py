@@ -1,7 +1,7 @@
 # Honeybee: A Plugin for Environmental Analysis (GPL)
 # This file is part of Honeybee.
 #
-# Copyright (c) 2023, Ladybug Tools.
+# Copyright (c) 2024, Ladybug Tools.
 # You should have received a copy of the GNU Affero General Public License
 # along with Honeybee; If not, see <http://www.gnu.org/licenses/>.
 # 
@@ -23,7 +23,7 @@ scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = 'HB Visualize Wireframe'
 ghenv.Component.NickName = 'VizWireF'
-ghenv.Component.Message = '1.7.1'
+ghenv.Component.Message = '1.8.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
