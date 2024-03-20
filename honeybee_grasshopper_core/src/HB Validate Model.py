@@ -1,7 +1,7 @@
 # Honeybee: A Plugin for Environmental Analysis (GPL)
 # This file is part of Honeybee.
 #
-# Copyright (c) 2023, Ladybug Tools.
+# Copyright (c) 2024, Ladybug Tools.
 # You should have received a copy of the GNU Affero General Public License
 # along with Honeybee; If not, see <http://www.gnu.org/licenses/>.
 # 
@@ -32,7 +32,7 @@ to ensure that the model can be simulated correctly in these engines.
 
 ghenv.Component.Name = 'HB Validate Model'
 ghenv.Component.NickName = 'ValidateModel'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.8.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'

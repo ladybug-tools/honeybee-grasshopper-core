@@ -1,49 +1,49 @@
 {
-  "description": "Check the versions of the engines that are being used by the honeybee plugin.\nThis is useful for verifying that everything has been installed correctly\nand that the versions of the engines are as expected.\n-", 
+  "version": "1.8.0", 
+  "nickname": "Versions", 
   "outputs": [
     [
       {
-        "type": null, 
+        "access": "None", 
         "name": "lbt_gh", 
         "description": "The version of Ladybug Tools for Grasshopper that is installed.", 
-        "access": "None", 
+        "type": null, 
         "default": null
       }, 
       {
-        "type": null, 
+        "access": "None", 
         "name": "python", 
         "description": "The version of Python used for Ladybug Tools CLI calls.", 
-        "access": "None", 
+        "type": null, 
         "default": null
       }, 
       {
-        "type": null, 
+        "access": "None", 
         "name": "radiance", 
         "description": "The version of Radiance used by Ladybug Tools (will be None if\nit is not installed).", 
-        "access": "None", 
+        "type": null, 
         "default": null
       }, 
       {
-        "type": null, 
+        "access": "None", 
         "name": "openstudio", 
         "description": "The version of OpenStudio used by Ladybug Tools (will be None if\nit is not installed).", 
-        "access": "None", 
+        "type": null, 
         "default": null
       }, 
       {
-        "type": null, 
+        "access": "None", 
         "name": "energyplus", 
         "description": "The version of EnergyPlus used by Ladybug Tools (will be None if\nit is not installed).", 
-        "access": "None", 
+        "type": null, 
         "default": null
       }
     ]
   ], 
-  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.config import folders as hb_folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.config import folders as lbr_folders\n    lbr_loaded = True\nexcept ImportError as e:\n    lbr_loaded = False\n\ntry:\n    from honeybee_radiance.config import folders as radiance_folders\n    radiance_loaded = True\nexcept ImportError as e:\n    radiance_loaded = False\n\ntry:\n    from honeybee_energy.config import folders as energy_folders\n    energy_loaded = True\nexcept ImportError:\n    energy_loaded = False\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import turn_off_old_tag\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\nturn_off_old_tag(ghenv.Component)\n\n\n# output the versions\npython = hb_folders.python_version_str\nif lbr_loaded:\n    lbt_gh = lbr_folders.lbt_{{plugin}}_version_str\nif radiance_loaded:\n    radiance = radiance_folders.radiance_version_str\nif energy_loaded:\n    openstudio = energy_folders.openstudio_version_str\n    energyplus = energy_folders.energyplus_version_str\n", 
-  "name": "HB Check Versions", 
-  "version": "1.7.1", 
-  "category": "Honeybee", 
+  "inputs": [], 
   "subcategory": "1 :: Visualize", 
-  "nickname": "Versions", 
-  "inputs": []
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.config import folders as hb_folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.config import folders as lbr_folders\n    lbr_loaded = True\nexcept ImportError as e:\n    lbr_loaded = False\n\ntry:\n    from honeybee_radiance.config import folders as radiance_folders\n    radiance_loaded = True\nexcept ImportError as e:\n    radiance_loaded = False\n\ntry:\n    from honeybee_energy.config import folders as energy_folders\n    energy_loaded = True\nexcept ImportError:\n    energy_loaded = False\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import turn_off_old_tag\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\nturn_off_old_tag(ghenv.Component)\n\n\n# output the versions\npython = hb_folders.python_version_str\nif lbr_loaded:\n    lbt_gh = lbr_folders.lbt_{{plugin}}_version_str\nif radiance_loaded:\n    radiance = radiance_folders.radiance_version_str\nif energy_loaded:\n    openstudio = energy_folders.openstudio_version_str\n    energyplus = energy_folders.energyplus_version_str\n", 
+  "category": "Honeybee", 
+  "name": "HB Check Versions", 
+  "description": "Check the versions of the engines that are being used by the honeybee plugin.\nThis is useful for verifying that everything has been installed correctly\nand that the versions of the engines are as expected.\n-"
 }

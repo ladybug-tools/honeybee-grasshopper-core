@@ -1,5 +1,5 @@
 {
-  "version": "1.7.1", 
+  "version": "1.8.0", 
   "nickname": "DumpGBXML", 
   "outputs": [
     [
@@ -36,7 +36,7 @@
     }, 
     {
       "access": "item", 
-      "name": "x", 
+      "name": "int_floors_", 
       "description": "A boolean to note whether all interior horizontal faces should\nbe written with the InteriorFloor type instead of the combination\nof InteriorFloor and Ceiling that happens by default with OpenStudio\ngbXML serialization. (Default: False).", 
       "type": "bool", 
       "default": null

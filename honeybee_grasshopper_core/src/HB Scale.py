@@ -1,7 +1,7 @@
 # Honeybee: A Plugin for Environmental Analysis (GPL)
 # This file is part of Honeybee.
 #
-# Copyright (c) 2023, Ladybug Tools.
+# Copyright (c) 2024, Ladybug Tools.
 # You should have received a copy of the GNU Affero General Public License
 # along with Honeybee; If not, see <http://www.gnu.org/licenses/>.
 # 
@@ -38,7 +38,7 @@ Scale any Honeybee geometry object or a Model by a factor.
 
 ghenv.Component.Name = "HB Scale"
 ghenv.Component.NickName = 'Scale'
-ghenv.Component.Message = '1.7.0'
+ghenv.Component.Message = '1.8.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "6"
