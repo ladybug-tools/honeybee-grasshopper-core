@@ -40,7 +40,7 @@ different Rooms.
 
 ghenv.Component.Name = "HB Label Rooms"
 ghenv.Component.NickName = 'LabelRooms'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.8.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -99,7 +99,7 @@ if all_required_inputs(ghenv.Component):
 
     for room in rooms:
         # get the attribute to be displayed
-        room_prop = get_attr_nested(room, _attribute_)
+        room_prop = str(get_attr_nested(room, _attribute_, 5))
         # compute the center point for the text
         room_h = room.geometry.max.z - room.geometry.min.z
         m_vec = Vector3D(0, 0, max_txt_v) if room_h > max_txt_v * 2 \

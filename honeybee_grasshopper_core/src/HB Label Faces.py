@@ -40,7 +40,7 @@ different faces and sub-faces.
 
 ghenv.Component.Name = 'HB Label Faces'
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.8.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -93,7 +93,7 @@ def label_face(face, _attribute_, _font_, label_text, base_pts, labels, wire_fra
         obj_method = get_attr_nested(face, _attribute_, cast_to_str=False)
         face_prop = str(obj_method(units))
     else:
-        face_prop = get_attr_nested(face, _attribute_)
+        face_prop = str(get_attr_nested(face, _attribute_, 5))
 
     # get a base plane and text height for the text label
     f_geo = face.geometry
