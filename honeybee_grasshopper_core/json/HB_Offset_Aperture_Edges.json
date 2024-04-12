@@ -1,0 +1,43 @@
+{
+  "version": "1.8.0", 
+  "nickname": "OffsetApertures", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_objs", 
+        "description": "The input Honeybee Face, Room or Model with Apertures offset.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "A list of honeybee Rooms or Faces for which Apertures will have their\nedges offset. This can also be an entire honeybee Model for which\nall Rooms will have Apertures offset.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_offset", 
+      "description": "A number for the distance with which the edges of each Aperture will\nbe offset from the original geometry. Positive values will\noffset the geometry outwards and negative values will offset the\ngeometries inwards.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "repair_", 
+      "description": "A bool to note whether invalid Apertures and Doors should be fixed\nafter performing the initial offset operation. This repair process\ninvolves two steps. First, sub-faces that extend past their parent\nFace are trimmed with the parent and will have their edges offset\ntowards the inside of the Face. Second, any sub-faces that overlap\nor touch one another will be unioned into a single Aperture or\nDoor. (Default: False).", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.face import Face\n    from honeybee.room import Room\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef offset_face(face):\n    \"\"\"Offset and repair the Apertures of a Face.\"\"\"\n    if _offset != 0:\n        orig_area = [ap.area for ap in face.apertures]\n        face.offset_aperture_edges(_offset, tolerance)\n        for ap, o_area in zip(face.apertures, orig_area):\n            if ap.is_operable:\n                try:\n                    op_area = ap.properties.energy.vent_opening.fraction_area_operable\n                    new_op_area = (o_area / ap.area) * op_area\n                    new_op_area = 1 if new_op_area > 1 else new_op_area\n                    ap.properties.energy.vent_opening.fraction_area_operable = new_op_area\n                except AttributeError:\n                    pass  # no operable area assigned\n    if repair_:\n        face.fix_invalid_sub_faces(\n            True, True, offset_distance=tolerance * 5, tolerance=tolerance)\n    \n\n\nif all_required_inputs(ghenv.Component):\n    # duplicate the initial objects\n    hb_objs = [obj.duplicate() for obj in _hb_objs]\n\n    # loop through the input objects and add apertures\n    for obj in hb_objs:\n        if isinstance(obj, Model):\n            for room in obj.rooms:\n                for face in room.faces:\n                    if face.has_sub_faces:\n                        offset_face(face)\n        elif isinstance(obj, Room):\n            for face in obj.faces:\n                if face.has_sub_faces:\n                    offset_face(face)\n        elif isinstance(obj, Face):\n            if obj.has_sub_faces:\n                offset_face(obj)\n        else:\n            raise TypeError(\n                'Input _hb_objs must be a Model, Room or Face. Not {}.'.format(type(obj)))", 
+  "category": "Honeybee", 
+  "name": "HB Offset Aperture Edges", 
+  "description": "Offset the edges of all Apertures of a Honeybee Room or Face by a certain distance.\n_\nThis is useful for translating between interfaces that expect the window\nframe to be included within or excluded from the geometry of the Aperture.\nFor example, EnergyPlus expects Aperture geometry to be for only the glass\nportion of the window while IES-VE expects the Aperture geometry to include\nthe frame.\n_\nNote that this component also has usefulness to simply repair cases where\nApertures extend pas their parent Face or overlap with one another. In this\nsituation, the offset input can be set to zero and the repair_ boolean set to\nTrue to only run the repair operation.\n-"
+}
