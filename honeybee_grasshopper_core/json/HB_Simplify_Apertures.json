@@ -1,0 +1,57 @@
+{
+  "version": "1.8.0", 
+  "nickname": "SimplifyAps", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "hb_objs", 
+        "description": "The input Honeybee Face, Room or Model with Apertures simplified.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_hb_objs", 
+      "description": "A list of honeybee Rooms or Faces to which Apertures will be\nsimplified. This can also be an entire honeybee Model for\nwhich all Rooms will have Apertures simplified.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "merge_dist_", 
+      "description": "Distance between Apertures and/or Doors at which point they will be\nmerged into a single Aperture. When unspecified, only Apertures within\nconvex faces will be reduced to a ratio. This will match the\noriginal Aperture area exactly but it will change the placement of\nApertures within the Face, which can make it unsuitable for modeling\nthe impact of Shades on Apertures. When a value is specified here,\nconcave Faces will be addressed and Apertures will remain where\nthey are in the parent Face. The overall Aperture area may be a\nlittle larger thanks to merging across gaps that are less than or\nequal to the value specified but the result will be suitable\nfor evaluating the impact of Shades or simulating daylight.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "del_interior_", 
+      "description": "Boolean to note whether the simplification process should remove\nall interior Apertures with a Surface boundary condition (True) or\nan attempt will be made to reset adjacencies after Apertures\nhave been simplified/rebuilt (False). (Default: False).", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "ignore_skylights_", 
+      "description": "Boolean to note whether the simplification process should ignore\nall skylights and leave them as they are. (Default: False).", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "ignore_windows_", 
+      "description": "Boolean to note whether the simplification process should ignore\nall windows and leave them as they are. (Default: False).", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.boundarycondition import Surface, boundary_conditions\n    from honeybee.facetype import Wall, RoofCeiling\n    from honeybee.face import Face\n    from honeybee.room import Room\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import tolerance\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef can_simplify_apeture(face):\n    \"\"\"Test if a face is intended to have its Apertures simplified.\"\"\"\n    if ignore_skylights_ and isinstance(face.type, RoofCeiling):\n        return False\n    elif ignore_windows_ and isinstance(face.type, Wall):\n        return False\n    return True\n\n\ndef simplify_face(face):\n    \"\"\"Simplify the Apertures of a Face.\"\"\"\n    if can_simplify_apeture(face):\n        if merge_dist_ is None:\n            if face.geometry.is_convex:\n                face.apertures_by_ratio(face.aperture_ratio, tolerance)\n        else:\n            face.merge_neighboring_sub_faces(merge_dist_, tolerance)\n\n\nif all_required_inputs(ghenv.Component):\n    # duplicate the initial objects\n    hb_objs = [obj.duplicate() for obj in _hb_objs]\n\n    # loop through the input objects and collect all of the faces\n    faces = []\n    for obj in hb_objs:\n        if isinstance(obj, Model):\n            for room in obj.rooms:\n                for face in room.faces:\n                    if face.has_sub_faces:\n                        faces.append(face)\n        elif isinstance(obj, Room):\n            for face in obj.faces:\n                if face.has_sub_faces:\n                    faces.append(face)\n        elif isinstance(obj, Face):\n            if obj.has_sub_faces:\n                faces.append(obj)\n        else:\n            raise TypeError(\n                'Input _hb_objs must be a Model, Room or Face. Not {}.'.format(type(obj)))\n\n    # remove interior windows or build a list of adjacencies to reset\n    face_adj_pairs = []\n    if del_interior_:\n        del_i = []\n        for i, face in enumerate(faces):\n            if isinstance(face.boundary_condition, Surface):\n                face.remove_sub_faces()\n                del_i.append(i)\n        for di in reversed(del_i):\n            faces.pop(di)\n    else:\n        adj_dict = {}\n        for face in faces:\n            if isinstance(face.boundary_condition, Surface):\n                bc_obj_id = face.boundary_condition.boundary_condition_object\n                try:  # assume that we already found the adjacent pair\n                    adj_obj = adj_dict[bc_obj_id]\n                    face_adj_pairs.append((face, adj_obj))\n                except KeyError:  # we have not found the pair yet\n                    adj_dict[face.identifier] = face\n                face.boundary_condition = boundary_conditions.outdoors\n\n    # simplify the Apertures\n    for face in faces:\n        simplify_face(face)\n\n    # reset the adjacencies\n    for face_1, face_2 in face_adj_pairs:\n        face_1.set_adjacency(face_2)\n", 
+  "category": "Honeybee", 
+  "name": "HB Simplify Apertures", 
+  "description": "Simplify the Apertures assigned to Honeybee Rooms or Faces to be as few as\npossible while still maintaining approximately the same overall Aperture area.\n_\nBy default, this component will only simplify Apertures in convex Faces by \nreducing them to a ratio represented with one or two clean Apertures.\nFor models without many concave Faces, this process usually produces a\nfast-simulating result that matches the original window area exactly. However,\nthis operation will also change the placement of Apertures within a Face,\nwhich may make it unsuitable for modeling the impact of Shades on Apertures\nor for evaluating daylight.\n_\nFor cases with concave Faces (which is typical for Roofs/Skylights) or when it\nis desirable to keep Apertures in the same location within the parent Face,\nthe Apertures can be simplified by specifying a merge_dist_, which will join\ntogether Apertures in close proximity to one another rather than reducing\nthem to a ratio.\n-"
+}
