@@ -40,7 +40,7 @@ Straight skeleton implementation
 
 ghenv.Component.Name = 'HB Straight Skeleton'
 ghenv.Component.NickName = 'Skeleton'
-ghenv.Component.Message = '1.8.1'
+ghenv.Component.Message = '1.8.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -69,6 +69,7 @@ if all_required_inputs(ghenv.Component):
     # extract the straight skeleton and sub-faces from the geometry
     skeleton, perim_poly, core_poly = [], [], []
     for face in to_face3d(_floor_geo):
+        face = face.remove_colinear_vertices(tolerance)
         if offset_ is not None and offset_ > 0:
             skel, perim, core = perimeter_core_subfaces_and_skeleton(
                 face, offset_, tolerance)
