@@ -32,10 +32,12 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Load Objects'
 ghenv.Component.NickName = 'LoadObjects'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.8.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
+
+import io
 
 try:  # import the core honeybee dependencies
     import honeybee.dictutil as hb_dict_util
@@ -113,8 +115,13 @@ def version_check(data):
 
 
 if all_required_inputs(ghenv.Component) and _load:
-    with open(_hb_file) as json_file:
-        data = json.load(json_file)
+    with io.open(_hb_file, encoding='utf-8') as inf:
+        first_char = inf.read(1)
+        second_char = inf.read(1)
+    with io.open(_hb_file, encoding='utf-8') as inf:
+        if second_char == '{':
+            inf.read(1)
+        data = json.load(inf)
 
     version_check(data)  # try to check the version
     try:
