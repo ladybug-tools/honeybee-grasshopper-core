@@ -22,13 +22,22 @@ an Outdoors boundary condition.
             the apertures and the area of the parent face. If an array of values
             are input here, different ratios will be assigned based on
             cardinal direction, starting with north and moving clockwise.
-        _subdivide_: Boolean to note whether to generate a single window in the
-            center of each Face (False) or to generate a series of rectangular
+        _subdivide_: Boolean to note whether to generate only one or two windows
+            for each Face (False) or to generate a series of repeating rectangular
             windows using the other inputs below (True). The latter is often more
-            realistic and is important to consider for detailed daylight and
-            thermal comfort simulations but the former is likely better when the
-            only concern is building energy use since energy use doesn't change
-            much while the glazing ratio remains constant. (Default: True).
+            realistic and distributes the windows across the parent Face
+            for better daylight but the former is likely more useful when
+            modeling building energy use since energy use doesn't change
+            signifcantly while the glazing ratio remains constant. (Default: True).
+            _
+            Note that this input can also be the integer -1 to completely turn
+            off all spltting of the base face into underling rectangles. By
+            default, a False value here will result in two windows generated
+            for and input pentagonal gabled geometry - one rectangle and one
+            triangle. This is better for engines like EnergyPlus that cannot
+            model windows with more than 4 vertices. However, if a single
+            pentagonal window is desired for such a shape, setting this
+            input to -1 will produce such a result.
         _win_height_: A number for the target height of the output apertures.
             Note that, if the ratio is too large for the height, the ratio will
             take precedence and the actual aperture height will be larger
@@ -64,7 +73,7 @@ an Outdoors boundary condition.
 
 ghenv.Component.Name = 'HB Apertures by Ratio'
 ghenv.Component.NickName = 'AperturesByRatio'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.8.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -95,10 +104,11 @@ def can_host_apeture(face):
 
 def assign_apertures(face, sub, rat, hgt, sil, hor, vert, op):
     """Assign apertures to a Face based on a set of inputs."""
-    if sub:
+    if sub > 0:
         face.apertures_by_ratio_rectangle(rat, hgt, sil, hor, vert, tolerance)
     else:
-        face.apertures_by_ratio(rat, tolerance)
+        rect = True if sub == 0 else False
+        face.apertures_by_ratio(rat, tolerance, rect)
 
     # try to assign the operable property
     if op:
