@@ -1,5 +1,5 @@
 {
-  "version": "1.8.0", 
+  "version": "1.8.1", 
   "nickname": "ID", 
   "outputs": [
     [
@@ -26,10 +26,17 @@
       "description": "Text for the identifier of the object. Note that, if this identifier\ndoes not conform to acceptable values of the object type (eg. no\nspaces for a radiance modifier id), then an exception will be thrown.", 
       "type": "string", 
       "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "name_", 
+      "description": "An optional text string to set the name of the object to something\nother than the identifier.", 
+      "type": "string", 
+      "default": null
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    hb_obj = _hb_obj.duplicate()\n    hb_obj.identifier = _id\n    hb_obj.display_name = None\n", 
+  "code": "\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    hb_obj = _hb_obj.duplicate()\n    hb_obj.identifier = _id\n    hb_obj.display_name = None if name_ is None else name_\n", 
   "category": "Honeybee", 
   "name": "HB Set Identifier", 
   "description": "THIS COMPONENT IS INTENDED FOR ADVANCED USERS WHO UNDERSTAND THAT IDENTIFERS\nSHOULD BE UNIQUE AND THAT, TO SET THEM OTHERWISE CAN HAVE UNINTENDED CONSEQUENCES.\n_\nChange the identifier of any Honeybee object.\n_\nNote that this component only changes the identifer of the input _hb_obj and\nnone of the identifiers of the child objects.\n-"
