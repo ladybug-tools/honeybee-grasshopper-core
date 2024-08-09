@@ -24,6 +24,8 @@ none of the identifiers of the child objects.
         _id: Text for the identifier of the object. Note that, if this identifier
             does not conform to acceptable values of the object type (eg. no
             spaces for a radiance modifier id), then an exception will be thrown.
+        name_: An optional text string to set the name of the object to something
+            other than the identifier.
 
     Returns:
         report: ...
@@ -32,7 +34,7 @@ none of the identifiers of the child objects.
 
 ghenv.Component.Name = 'HB Set Identifier'
 ghenv.Component.NickName = 'ID'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.8.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -46,4 +48,4 @@ except ImportError as e:
 if all_required_inputs(ghenv.Component):
     hb_obj = _hb_obj.duplicate()
     hb_obj.identifier = _id
-    hb_obj.display_name = None
+    hb_obj.display_name = None if name_ is None else name_
