@@ -40,7 +40,7 @@ Straight skeleton implementation
 
 ghenv.Component.Name = 'HB Straight Skeleton'
 ghenv.Component.NickName = 'Skeleton'
-ghenv.Component.Message = '1.8.2'
+ghenv.Component.Message = '1.8.3'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -73,9 +73,9 @@ if all_required_inputs(ghenv.Component):
         if offset_ is not None and offset_ > 0:
             skel, perim, core = perimeter_core_subfaces_and_skeleton(
                 face, offset_, tolerance)
-            skeleton.append([from_linesegment3d(lin) for lin in skel])
-            perim_poly.append([from_face3d(p) for p in perim])
-            core_poly.append([from_face3d(c) for c in core])
+            skeleton.extend([from_linesegment3d(lin) for lin in skel])
+            perim_poly.extend([from_face3d(p) for p in perim])
+            core_poly.extend([from_face3d(c) for c in core])
         else:
             skel_2d = skeleton_as_edge_list(
                 face.boundary_polygon2d, face.hole_polygon2d,
@@ -84,9 +84,4 @@ if all_required_inputs(ghenv.Component):
             for seg in skel_2d:
                 verts_3d = tuple(face.plane.xy_to_xyz(pt) for pt in seg.vertices)
                 skel_3d.append(LineSegment3D.from_end_points(*verts_3d))
-            skeleton.append([from_linesegment3d(lin) for lin in skel_3d])
-
-    # convert outputs to data trees
-    skeleton = list_to_data_tree(skeleton)
-    perim_poly = list_to_data_tree(perim_poly)
-    core_poly = list_to_data_tree(core_poly)
+            skeleton.extend([from_linesegment3d(lin) for lin in skel_3d])
