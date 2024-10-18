@@ -32,7 +32,7 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Load Objects'
 ghenv.Component.NickName = 'LoadObjects'
-ghenv.Component.Message = '1.8.1'
+ghenv.Component.Message = '1.8.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -124,7 +124,7 @@ if all_required_inputs(ghenv.Component) and _load:
         data = json.load(inf)
 
     version_check(data)  # try to check the version
-    try:
+    if 'type' in data:
         hb_objs = hb_dict_util.dict_to_object(data, False)  # re-serialize as a core object
         if hb_objs is None:  # try to re-serialize it as an energy object
             hb_objs = energy_dict_util.dict_to_object(data, False)
@@ -132,7 +132,7 @@ if all_required_inputs(ghenv.Component) and _load:
                 hb_objs = radiance_dict_util.dict_to_object(data, False)
         elif isinstance(hb_objs, Model):
             model_units_tolerance_check(hb_objs)
-    except ValueError:  # no 'type' key; assume that its a group of objects
+    else:  # no 'type' key; assume that its a group of objects
         hb_objs = []
         for hb_dict in data.values():
             hb_obj = hb_dict_util.dict_to_object(hb_dict, False)  # re-serialize as a core object
