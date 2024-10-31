@@ -146,9 +146,12 @@ if all_required_inputs(ghenv.Component):
             for ap in obj.orphaned_apertures:
                 add_aperture(ap)
             for dr in obj.orphaned_doors:
-                add_door(dr)
-            outdoor_shades.extend(obj.orphaned_shades)
-            outdoor_shades.extend(obj.shade_meshes)
+                add_door(dr) 
+            for shade in obj.shades:
+                if shade.is_indoor:
+                    indoor_shades.append(shade)
+                elif shade.is_indoor == False:
+                    outdoor_shades.append(shade)
         elif isinstance(obj, Room):
             add_shade(obj)
             for face in obj:
@@ -159,6 +162,7 @@ if all_required_inputs(ghenv.Component):
             add_aperture(obj)
         elif isinstance(obj, Door):
             add_door(obj)
+            shadeobjs = [model.shades]
         elif isinstance(obj, Shade):
             outdoor_shades.append(obj)
         elif isinstance(obj, ShadeMesh):
