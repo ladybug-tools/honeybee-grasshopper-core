@@ -162,7 +162,6 @@ if all_required_inputs(ghenv.Component):
             add_aperture(obj)
         elif isinstance(obj, Door):
             add_door(obj)
-            shadeobjs = [model.shades]
         elif isinstance(obj, Shade):
             outdoor_shades.append(obj)
         elif isinstance(obj, ShadeMesh):
