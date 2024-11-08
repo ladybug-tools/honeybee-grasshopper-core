@@ -36,7 +36,7 @@ by object and face type.
 
 ghenv.Component.Name = 'HB Faces by Type'
 ghenv.Component.NickName = 'FacesByType'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.8.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -139,6 +139,7 @@ if all_required_inputs(ghenv.Component):
     for obj in _hb_objs:
         if isinstance(obj, Model):
             for room in obj.rooms:
+                add_shade(room)
                 for face in room.faces:
                     add_face(face)
             for face in obj.orphaned_faces:
@@ -160,6 +161,9 @@ if all_required_inputs(ghenv.Component):
         elif isinstance(obj, Door):
             add_door(obj)
         elif isinstance(obj, Shade):
-            outdoor_shades.append(obj)
+            if obj.is_indoor:
+                indoor_shades.append(obj)
+            else:
+                outdoor_shades.append(obj)
         elif isinstance(obj, ShadeMesh):
             outdoor_shades.append(obj)
