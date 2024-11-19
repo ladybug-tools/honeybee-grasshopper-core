@@ -23,95 +23,17 @@ scene, including all sub-faces and assigned shades.
 
 ghenv.Component.Name = 'HB Visualize Wireframe'
 ghenv.Component.NickName = 'VizWireF'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.8.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
 
-try:  # import the core honeybee dependencies
-    from honeybee.model import Model
-    from honeybee.room import Room
-    from honeybee.face import Face
-    from honeybee.aperture import Aperture
-    from honeybee.door import Door
-    from honeybee.shade import Shade
-    from honeybee.shademesh import ShadeMesh
-except ImportError as e:
-    raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
-
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.fromgeometry import from_face3d_to_wireframe, \
-        from_mesh3d_to_wireframe
+    from ladybug_rhino.fromhoneybee import from_hb_objects_to_wireframe
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 
-def add_door(door, geo):
-    """Add Door geometry to a geo list."""
-    geo.extend(from_face3d_to_wireframe(door.geometry))
-    for shd in door.shades:
-        geo.extend(from_face3d_to_wireframe(shd.geometry))
-
-def add_aperture(aperture, geo):
-    """Add Aperture geometry to a geo list."""
-    geo.extend(from_face3d_to_wireframe(aperture.geometry))
-    for shd in aperture.shades:
-        geo.extend(from_face3d_to_wireframe(shd.geometry))
-
-def add_face(face, geo):
-    """Add Face geometry to a geo list."""
-    geo.extend(from_face3d_to_wireframe(face.geometry))
-    for ap in face.apertures:
-        add_aperture(ap, geo)
-    for dr in face.doors:
-        add_door(dr, geo)
-    for shd in face.shades:
-        geo.extend(from_face3d_to_wireframe(shd.geometry))
-
-def add_room(room, geo):
-    """Add Room geometry to a geo list."""
-    for face in room.faces:
-        add_face(face, geo)
-    for shd in room.shades:
-        geo.extend(from_face3d_to_wireframe(shd.geometry))
-
-def add_model(model, geo):
-    """Add Model geometry to a geo list."""
-    for room in model.rooms:
-        add_room(room, geo)
-    for face in model.orphaned_faces:
-        add_face(face, geo)
-    for ap in model.orphaned_apertures:
-        add_aperture(ap, geo)
-    for dr in model.orphaned_doors:
-        add_door(dr, geo)
-    for shd in model.orphaned_shades:
-        geo.extend(from_face3d_to_wireframe(shd.geometry))
-    for sm in model.shade_meshes:
-        geo.extend(from_mesh3d_to_wireframe(sm.geometry))
-
-
 if all_required_inputs(ghenv.Component):
-    # list of rhino geometry to be filled with content
-    geo = []
-    
-    # loop through all objects and add them
-    for hb_obj in _hb_objs:
-        if isinstance(hb_obj, Room):
-            add_room(hb_obj, geo)
-        elif isinstance(hb_obj, Face):
-            add_face(hb_obj, geo)
-        elif isinstance(hb_obj, Aperture):
-            add_aperture(hb_obj, geo)
-        elif isinstance(hb_obj, Door):
-            add_door(hb_obj, geo)
-        elif isinstance(hb_obj, Shade):
-            geo.extend(from_face3d_to_wireframe(hb_obj.geometry))
-        elif isinstance(hb_obj, ShadeMesh):
-            geo.extend(from_mesh3d_to_wireframe(hb_obj.geometry))
-        elif isinstance(hb_obj, Model):
-            add_model(hb_obj, geo)
-        else:
-            raise TypeError(
-                'Unrecognized honeybee object type: {}'.format(type(hb_obj)))
+    geo = from_hb_objects_to_wireframe(_hb_objs)
