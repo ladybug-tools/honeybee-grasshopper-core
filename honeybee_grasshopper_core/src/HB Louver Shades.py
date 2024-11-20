@@ -79,7 +79,7 @@ that are Walls (not Floors or Roofs).
 
 ghenv.Component.Name = 'HB Louver Shades'
 ghenv.Component.NickName = 'LouverShades'
-ghenv.Component.Message = '1.8.1'
+ghenv.Component.Message = '1.8.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
@@ -124,21 +124,13 @@ except ImportError as e:
 
 def can_host_louvers(face):
     """Test if a face is intended to host louvers (according to this component)."""
-    return isinstance(face.boundary_condition, Outdoors) and \
-        isinstance(face.type, Wall)
+    return face.is_exterior and isinstance(face.type, Wall)
 
 
 def assign_louvers(ap, depth, count, dist, off, angle, vec, flip, indr, ep, ep_tr, rad, bn):
     """Assign louvers to an Aperture based on a set of inputs."""
-    if depth == 0 or count == 0:
-        return None
-    if dist is None:
-        louvers = ap.louvers_by_count(
-            count, depth, off, angle, vec, flip, indr, tolerance, base_name=bn)
-    else:
-        louvers = ap.louvers_by_distance_between(
-            dist, depth, off, angle, vec, flip, indr, tolerance,
-            max_count=count, base_name=bn)
+    louvers = ap.louvers(depth, count, dist, off, angle, vec, flip, indr,
+                         tolerance=tolerance, base_name=bn)
 
     # try to assign the energyplus construction and transmittance schedule
     if ep is not None:
@@ -167,15 +159,8 @@ if all_required_inputs(ghenv.Component):
     b_name = 'Louver{}'.format(document_counter('louver_count'))
 
     # process the defaults for _shade_count_ vs _dist_between
-    if len(_shade_count_) != 0 and len(_dist_between_) != 0:
-        pass
-    elif len(_shade_count_) == 0 and len(_dist_between_) == 0:
-        _shade_count_ = [1]
-        _dist_between_ = [None]
-    elif len(_shade_count_) != 0:
-        _dist_between_ = [None]
-    else:
-        _shade_count_ = [None]
+    _shade_count_ = [None] if len(_shade_count_) == 0 else _shade_count_
+    _dist_between_ = [None] if len(_dist_between_) == 0 else _dist_between_
 
     # process the vertical_ input into a direction vector
     if len(vertical_) != 0:
