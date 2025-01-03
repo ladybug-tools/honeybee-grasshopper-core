@@ -1,0 +1,36 @@
+{
+  "version": "1.8.0", 
+  "nickname": "SetZone", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "rooms", 
+        "description": "The input Rooms with their zones set.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_rooms", 
+      "description": "Honeybee Rooms to which the input _zone identifier should be assigned.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_zone", 
+      "description": "Text for the zone identifier to which the rooms belong.", 
+      "type": "string", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\n\ntry:  # import the honeybee-energy extension\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, longest_list\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    rooms = []\n    for i, room in enumerate(_rooms):\n        assert isinstance(room, Room), \\\n            'Expected honeybee room. Got {}.'.format(type(room))\n        zone_id = longest_list(_zone, i)\n        room_dup = room.duplicate()\n        room_dup.zone = zone_id\n        rooms.append(room_dup)\n", 
+  "category": "Honeybee", 
+  "name": "HB Set Zone", 
+  "description": "Set text for the zone identifier for honeybee Rooms.\n_\nRooms sharing the same zone identifier are considered part of the same zone\nin a Model. If a zone identifier has not been specified for a given Room, it\nwill be the same as the Room identifier.\n-"
+}
