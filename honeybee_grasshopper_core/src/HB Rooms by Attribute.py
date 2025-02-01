@@ -21,7 +21,12 @@ This can be used to group rooms by program, whether rooms are conditioned, etc.
             lists all of the core attributes of the room. Also, each Honeybee
             extension (ie. Radiance, Energy) includes its own component that
             lists the Room attributes of that extension.
-    
+        value_: An optional value of the attribute that can be used to filter
+            the output rooms. For example, if the input attribute is "Program"
+            a value for the name of a program can be plugged in here
+            (eg. "2019::LargeOffice::OpenOffice") in order to get only the
+            rooms that have this program assigned.
+
     Returns:
         values: A list of values with one attribute value for each branch of the
             output rooms.
@@ -31,13 +36,14 @@ This can be used to group rooms by program, whether rooms are conditioned, etc.
 
 ghenv.Component.Name = "HB Rooms by Attribute"
 ghenv.Component.NickName = 'RoomsByAttr'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.8.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
+    from honeybee.room import Room
     from honeybee.colorobj import ColorRoom
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
@@ -53,18 +59,28 @@ if all_required_inputs(ghenv.Component):
     # extract any rooms from input Models
     in_rooms = []
     for hb_obj in _rooms:
-        if isinstance(hb_obj, Model):
+        if isinstance(hb_obj, Room):
+            in_rooms.append(hb_obj)
+        elif isinstance(hb_obj, Model):
             in_rooms.extend(hb_obj.rooms)
         else:
-            in_rooms.append(hb_obj)
+            raise TypeError('Expected Room or Model. Got {}.'.format(type(hb_obj)))
 
     # use the ColorRoom object to get a set of attributes assigned to the rooms
     color_obj = ColorRoom(in_rooms, _attribute)
-    values = color_obj.attributes_unique
 
     # loop through each of the rooms and get the attributes
-    rooms = [[] for val in values]
-    for atr, room in zip(color_obj.attributes, in_rooms):
-        atr_i = values.index(atr)
-        rooms[atr_i].append(room)
+    if len(value_) == 0:
+        values = color_obj.attributes_unique
+        rooms = [[] for val in values]
+        for atr, room in zip(color_obj.attributes, in_rooms):
+            atr_i = values.index(atr)
+            rooms[atr_i].append(room)
+    else:
+        values = [atr for atr in color_obj.attributes_unique if atr in value_]
+        rooms = [[] for val in values]
+        for atr, room in zip(color_obj.attributes, in_rooms):
+            if atr in values:
+                atr_i = values.index(atr)
+                rooms[atr_i].append(room)
     rooms = list_to_data_tree(rooms)
