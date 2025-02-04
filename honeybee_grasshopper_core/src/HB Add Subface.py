@@ -28,11 +28,13 @@ Add a Honeybee Aperture or Door to a parent Face or Room.
         report: Reports, errors, warnings, etc.
         hb_obj: The input Honeybee Face or a Room with the input _sub_faces added
             to it.
+        unmatched: A list of any Apertures or Doors that could not be matched and
+            assigned to a parent Face.
 """
 
 ghenv.Component.Name = "HB Add Subface"
 ghenv.Component.NickName = 'AddSubface'
-ghenv.Component.Message = '1.8.1'
+ghenv.Component.Message = '1.8.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -97,13 +99,13 @@ def check_and_add_sub_face(face, sub_faces, dist):
                         indoor_faces[face.identifier][1].append(sf)
                     except KeyError:  # the first time we're encountering the face
                         indoor_faces[face.identifier] = [face, [sf]]
-                    sf_ids[i] = None
+                    unmatched_sfs[i] = None
                 else:
                     if sf.identifier in already_added_ids:
                         sf = sf.duplicate()  # make sure the sub-face isn't added twice
                         sf.add_prefix('Ajd')
                     already_added_ids.add(sf.identifier)
-                    sf_ids[i] = None
+                    unmatched_sfs[i] = None
                     add_sub_face(face, sf)
 
 
@@ -111,7 +113,7 @@ if all_required_inputs(ghenv.Component):
     # duplicate the initial objects
     hb_obj = [obj.duplicate() for obj in _hb_obj]
     sub_faces = [sf.duplicate() for sf in _sub_faces]
-    sf_ids = [sf.identifier for sf in sub_faces]
+    unmatched_sfs = sub_faces[:]  # copy the input list
 
     # gather all of the parent Faces to be checked
     rel_faces = []
@@ -161,7 +163,8 @@ if all_required_inputs(ghenv.Component):
                     offset_distance=tolerance * 5, tolerance=tolerance)
 
     # if any of the sub-faces were not added, give a warning
-    unmatched_ids = [sf_id for sf_id in sf_ids if sf_id is not None]
+    unmatched = [sf for sf in unmatched_sfs if sf is not None]
+    unmatched_ids = [sf.display_name for sf in unmatched]
     msg = 'The following sub-faces were not matched with any parent Face:' \
         '\n{}'.format('\n'.join(unmatched_ids))
     if len(unmatched_ids) != 0:
