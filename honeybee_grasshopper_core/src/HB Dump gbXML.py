@@ -51,14 +51,15 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.8.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
 
-import sys
 import os
 import json
+import subprocess
+import tempfile
 
 try:  # import the core honeybee dependencies
     from honeybee.model import Model
@@ -66,12 +67,10 @@ try:  # import the core honeybee dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
-try:  # import the honeybee_energy dependencies
-    from honeybee_energy.result.osw import OSW
-    from honeybee_energy.run import to_gbxml_osw, run_osw, set_gbxml_floor_types, \
-        add_gbxml_space_boundaries
-except ImportError as e:
-    raise ImportError('\nFailed to import honeybee_energy:\n\t{}'.format(e))
+try:
+    from honeybee_openstudio.writer import model_to_gbxml
+except (ImportError, AssertionError):  # openstudio .NET bindings are not available
+    model_to_gbxml = None
 
 try:
     from lbt_recipes.version import check_openstudio_version
@@ -97,41 +96,36 @@ if all_required_inputs(ghenv.Component) and _dump:
         else '{}.xml'.format(name)
     folder = _folder_ if _folder_ is not None else folders.default_simulation_folder
     gbxml = os.path.join(folder, gbxml_file)
+    triangulate_subfaces = True if triangulate_ else False
+    full_geometry = True if full_geo_ else False
+    interior_face_type = 'InteriorFloor' if int_floors_ else None
 
-    # duplicate model to avoid mutating it as we edit it for energy simulation
-    _model = _model.duplicate()
-    # scale the model if the units are not meters
-    _model.convert_to_units('Meters')
-    # remove degenerate geometry within native E+ tolerance of 1 cm
-    _model.remove_degenerate_geometry(0.01)
-
-    # write out the HBJSON and OpenStudio Workflow (OSW) that translates models to gbXML
-    out_directory = os.path.join(folders.default_simulation_folder, 'temp_translate')
-    if not os.path.isdir(out_directory):
-        os.makedirs(out_directory)
-    triangulate_ = False if triangulate_ is None else triangulate_
-    model_dict = _model.to_dict(included_prop=['energy'], triangulate_sub_faces=triangulate_)
-    _model.properties.energy.add_autocal_properties_to_dict(model_dict)
-    _model.properties.energy.simplify_window_constructions_in_dict(model_dict)
-    hb_file = os.path.join(out_directory, '{}.hbjson'.format(_model.identifier))
-    if (sys.version_info < (3, 0)):  # we need to manually encode it as UTF-8
-        with open(hb_file, 'wb') as fp:
-            obj_str = json.dumps(model_dict, indent=4, ensure_ascii=False)
-            fp.write(obj_str.encode('utf-8'))
-    else:
-        with open(hb_file, 'w', encoding='utf-8') as fp:
-            obj_str = json.dump(model_dict, fp, indent=4, ensure_ascii=False)
-    osw = to_gbxml_osw(hb_file, gbxml, out_directory)
-
-    # run the measure to translate the model JSON to an openstudio measure
-    osm, idf = run_osw(osw, silent=True)
-    if idf is None:
-        log_osw = OSW(os.path.join(out_directory, 'out.osw'))
-        raise Exception(
-            'Failed to run OpenStudio CLI:\n{}'.format('\n'.join(log_osw.errors)))
-
-    # add in the space boundary geometry or reset floor types if the user requested it
-    if int_floors_:
-        set_gbxml_floor_types(gbxml, interior_type='InteriorFloor')
-    if full_geo_:
-        add_gbxml_space_boundaries(gbxml, _model)
+    # write the Model to a gbXML file
+    if model_to_gbxml is not None:  # run the whole translation in IronPython
+        gbxml_str = model_to_gbxml(
+            _model, triangulate_subfaces=triangulate_subfaces,
+            full_geometry=full_geometry, interior_face_type=interior_face_type
+        )
+        with open(gbxml, 'w') as outf:
+            outf.write(gbxml_str)
+    else:  # do the translation using cPython through the CLI
+        # write the model to a HBJSON
+        temp_dir = tempfile.gettempdir()
+        model_file = os.path.join(temp_dir, 'in.hbjson')
+        with open(model_file, 'w') as fp:
+            model_str = json.dumps(_model.to_dict(), ensure_ascii=False)
+            fp.write(model_str.encode('utf-8'))
+        # execute the command to convert the HBJSON to gbXML
+        cmds = [folders.python_exe_path, '-m', 'honeybee_energy', 'translate',
+                'model-to-gbxml', model_file, '--output-file', gbxml]
+        if triangulate_subfaces:
+            cmds.append('--triangulate-subfaces')
+        if full_geometry:
+            cmds.append('--full-geometry')
+        if int_floors_:
+            cmds.append('--interior-face-type')
+            cmds.append(interior_face_type)
+        custom_env = os.environ.copy()
+        custom_env['PYTHONHOME'] = ''
+        process = subprocess.Popen(cmds, shell=True, env=custom_env)
+        result = process.communicate()  # freeze the canvas while running
