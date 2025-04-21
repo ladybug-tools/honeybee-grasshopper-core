@@ -1,0 +1,50 @@
+{
+  "version": "1.8.0", 
+  "nickname": "AutoZone", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "rooms", 
+        "description": "The input Rooms with their zones assigned based on the input criteria.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_rooms", 
+      "description": "A list of honeybee honeybee Rooms to which zones will be assigned.\nThis can also be an entire Honeybee Model.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_orient_count_", 
+      "description": "An optional positive integer to set the number of orientation\ngroups to use for zoning. For example, setting this to 4 will result\nin zones being established based on the four orientations (North,\nEast, South, West). Default: 8.", 
+      "type": "int", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "north_", 
+      "description": "A number between 0 and 360 to set the clockwise north direction in\ndegrees. This can also be a vector to set the North. Default is 0\nfor the world Y-axis.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "ignore_programs_", 
+      "description": "Boolean for whether the Programs assigned to the Rooms\nshould be ignored during the automatic zoning process in which\ncase rooms with different programs may appear in the same\nzone. (Default: False).", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the ladybug_geometry dependencies\n    from ladybug_geometry.geometry2d.pointvector import Vector2D\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_geometry:\\n\\t{}'.format(e))\n\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_geometry:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import conversion_to_meters\n    from ladybug_{{cad}}.togeometry import to_vector2d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, list_to_data_tree\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nimport math\n\n\nif all_required_inputs(ghenv.Component):\n    # duplicate the input\n    rooms = [obj.duplicate() for obj in _rooms]\n    # extract any rooms from input Models\n    in_rooms = []\n    for hb_obj in rooms:\n        if isinstance(hb_obj, Model):\n            in_rooms.extend(hb_obj.rooms)\n        else:\n            in_rooms.append(hb_obj)\n\n    # process the north_ input\n    if north_ is not None:\n        try:\n            north_vec = to_vector2d(north_)\n        except AttributeError:  # north angle instead of vector\n            north_vec = Vector2D(0, 1).rotate(-math.radians(float(north_)))\n    else:\n        north_vec = Vector2D(0, 1)\n\n    # assign default values\n    orient_count = 8 if _orient_count_ is None else _orient_count_\n    attr_name = 'properties.energy.program_type.display_name' \\\n        if not ignore_programs_ else None\n\n    # assign stories if the rooms do not already have them\n    if any(r.story is None for r in in_rooms):\n        min_diff = 2.0 / conversion_to_meters()\n        Room.stories_by_floor_height(in_rooms, min_diff)\n\n    # automatically assign zones to the input rooms\n    Room.automatically_zone(in_rooms, orient_count, north_vec, attr_name)\n", 
+  "category": "Honeybee", 
+  "name": "HB Automatic Zoning", 
+  "description": "Automatically group zones with a similar story, orientation, and (optionally)\nprogram into zones that share a common thermostat in energy simulation.\n_\nThis can often significnatly reduce simulation time without greatly impacting\nenergy use results.\n-"
+}
