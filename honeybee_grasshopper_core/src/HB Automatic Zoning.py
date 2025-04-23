@@ -8,36 +8,41 @@
 # @license AGPL-3.0-or-later <https://spdx.org/licenses/AGPL-3.0-or-later>
 
 """
-Automatically group zones with a similar story, orientation, and (optionally)
-program into zones that share a common thermostat in energy simulation.
+Automatically group rooms with similar properties and use the groups to assign zones.
 _
+Relevant properties that are used to group Room2Ds into zones include story,
+orientation, and (optionally) energy programs.
+_
+Rooms that share the same zone have a common thermostat in energy simulation.
 This can often significnatly reduce simulation time without greatly impacting
 energy use results.
 -
 
     Args:
         _rooms: A list of honeybee honeybee Rooms to which zones will be assigned.
-            This can also be an entire Honeybee Model.
-        _orient_count_: An optional positive integer to set the number of orientation
-            groups to use for zoning. For example, setting this to 4 will result
+            This can also be an entire Honeybee Model. Note that these rooms
+            should have adjacencies solved in order for them to be correctly
+            zoned based on orientation.
+        _orient_count_: A positive integer to set the number of orientation groups to
+            use for zoning. For example, setting this to 4 will result
             in zones being established based on the four orientations (North,
-            East, South, West). Default: 8.
+            East, South, West). (Default: 8).
         north_: A number between 0 and 360 to set the clockwise north direction in
             degrees. This can also be a vector to set the North. Default is 0
             for the world Y-axis.
         ignore_programs_: Boolean for whether the Programs assigned to the Rooms
             should be ignored during the automatic zoning process in which
-            case rooms with different programs may appear in the same
+            case rooms with different programs can appear in the same
             zone. (Default: False).
 
     Returns:
         report: Errors, warnings, etc.
-        rooms: The input Rooms with their zones assigned based on the input criteria.
+        rooms: The input Rooms (or Model) with zones assigned based on the input criteria.
 """
 
 ghenv.Component.Name = 'HB Automatic Zoning'
 ghenv.Component.NickName = 'AutoZone'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.8.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
