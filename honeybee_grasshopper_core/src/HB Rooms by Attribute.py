@@ -36,7 +36,7 @@ This can be used to group rooms by program, whether rooms are conditioned, etc.
 
 ghenv.Component.Name = "HB Rooms by Attribute"
 ghenv.Component.NickName = 'RoomsByAttr'
-ghenv.Component.Message = '1.8.1'
+ghenv.Component.Message = '1.8.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -48,6 +48,13 @@ try:  # import the core honeybee dependencies
 except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
+try:  # import the core dragonfly dependencies
+    from dragonfly.room2d import Room2D
+    from dragonfly.colorobj import ColorRoom2D
+except ImportError as e:  # dragonfly not available
+    Room2D = Room
+    ColorRoom2D = ColorRoom
+
 try:  # import the ladybug_rhino dependencies
     
     from ladybug_rhino.grasshopper import all_required_inputs, list_to_data_tree
@@ -57,17 +64,20 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     # extract any rooms from input Models
-    in_rooms = []
+    in_rooms, ColorClass = [], ColorRoom
     for hb_obj in _rooms:
         if isinstance(hb_obj, Room):
             in_rooms.append(hb_obj)
         elif isinstance(hb_obj, Model):
             in_rooms.extend(hb_obj.rooms)
+        elif isinstance(hb_obj, Room2D):
+            in_rooms.append(hb_obj)
+            ColorClass = ColorRoom2D
         else:
             raise TypeError('Expected Room or Model. Got {}.'.format(type(hb_obj)))
 
     # use the ColorRoom object to get a set of attributes assigned to the rooms
-    color_obj = ColorRoom(in_rooms, _attribute)
+    color_obj = ColorClass(in_rooms, _attribute)
 
     # loop through each of the rooms and get the attributes
     if len(value_) == 0:

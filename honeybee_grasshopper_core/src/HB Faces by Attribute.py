@@ -37,7 +37,7 @@ This can be used to group faces by construction, modifier, etc.
 
 ghenv.Component.Name = "HB Faces by Attribute"
 ghenv.Component.NickName = 'FacesByAttr'
-ghenv.Component.Message = '1.8.1'
+ghenv.Component.Message = '1.8.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -64,7 +64,7 @@ if all_required_inputs(ghenv.Component):
         if isinstance(hb_obj, Room):
             faces.extend(hb_obj.faces)
             faces.extend(hb_obj.shades)
-        elif isinstance(hb_obj, Room):
+        elif isinstance(hb_obj, Face):
             faces.append(hb_obj)
         elif isinstance(hb_obj, Model):
             for room in hb_obj.rooms:
