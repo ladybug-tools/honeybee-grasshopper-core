@@ -1,7 +1,7 @@
 # Honeybee: A Plugin for Environmental Analysis (GPL)
 # This file is part of Honeybee.
 #
-# Copyright (c) 2024, Ladybug Tools.
+# Copyright (c) 2025, Ladybug Tools.
 # You should have received a copy of the GNU Affero General Public License
 # along with Honeybee; If not, see <http://www.gnu.org/licenses/>.
 # 
@@ -44,7 +44,7 @@ different Rooms.
 
 ghenv.Component.Name = 'HB Color Room Attributes'
 ghenv.Component.NickName = 'ColorRoomAttr'
-ghenv.Component.Message = '1.8.0'
+ghenv.Component.Message = '1.9.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
