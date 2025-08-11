@@ -58,7 +58,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room from Solid"
 ghenv.Component.NickName = 'RoomSolid'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -71,7 +71,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance, angle_tolerance
+    from ladybug_rhino.config import tolerance
     from ladybug_rhino.togeometry import to_polyface3d
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning, \
         document_counter, longest_list
@@ -123,7 +123,7 @@ if all_required_inputs(ghenv.Component):
         room.display_name = display_name
 
         # check that the Room geometry is closed.
-        if room.check_solid(tolerance, angle_tolerance, False) != '':
+        if room.check_solid(tolerance, raise_exception=False) != '':
             msg = 'Input _geo is not a closed volume.\n' \
                 'Room volume must be closed to access most honeybee features.\n' \
                 'Preview the output Room to see the holes in your model.'
