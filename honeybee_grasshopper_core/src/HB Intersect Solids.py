@@ -33,7 +33,7 @@ interior faces when their surface areas do not match.
 
 ghenv.Component.Name = 'HB Intersect Solids'
 ghenv.Component.NickName = 'IntSolid'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -70,6 +70,7 @@ if all_required_inputs(ghenv.Component) and _run:
                 rel_room = int_rooms[r_count]
                 other_rooms = room_geos[:r_count] + room_geos[r_count + 1:]
                 rel_room.coplanar_split(other_rooms, tolerance, angle_tolerance)
+                rel_room.remove_duplicate_faces(tolerance)
             run_function_in_parallel(intersect_room, len(room_geos), workers)
     else:
         # assume that all inputs are closed Rhino Breps
