@@ -51,7 +51,7 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -78,6 +78,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import lbt_recipes:\n\t{}'.format(e))
 
 try:  # import the core ladybug_rhino dependencies
+    from ladybug_rhino.config import folders as lbr_folders
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -99,12 +100,15 @@ if all_required_inputs(ghenv.Component) and _dump:
     triangulate_subfaces = True if triangulate_ else False
     full_geometry = True if full_geo_ else False
     interior_face_type = 'InteriorFloor' if int_floors_ else None
+    prog_name = 'Ladybug Tools for Grasshopper'
+    lbt_gh = lbr_folders.lbt_grasshopper_version_str
 
     # write the Model to a gbXML file
     if model_to_gbxml is not None:  # run the whole translation in IronPython
         gbxml_str = model_to_gbxml(
             _model, triangulate_subfaces=triangulate_subfaces,
-            full_geometry=full_geometry, interior_face_type=interior_face_type
+            full_geometry=full_geometry, interior_face_type=interior_face_type,
+            program_name=prog_name, program_version=lbr_folders.lbt_grasshopper_version_str
         )
         with open(gbxml, 'w') as outf:
             outf.write(gbxml_str)
@@ -125,6 +129,11 @@ if all_required_inputs(ghenv.Component) and _dump:
         if int_floors_:
             cmds.append('--interior-face-type')
             cmds.append(interior_face_type)
+        cmds.append('--program-name')
+        cmds.append(prog_name)
+        if lbr_folders.lbt_grasshopper_version_str is not None:
+            cmds.append('--program-version')
+            cmds.append(lbr_folders.lbt_grasshopper_version_str)
         custom_env = os.environ.copy()
         custom_env['PYTHONHOME'] = ''
         process = subprocess.Popen(cmds, shell=True, env=custom_env)
