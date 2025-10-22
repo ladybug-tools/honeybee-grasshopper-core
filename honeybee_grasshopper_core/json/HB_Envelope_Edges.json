@@ -1,0 +1,92 @@
+{
+  "version": "1.9.0", 
+  "nickname": "EnvelopeEdges", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "ext_apertures", 
+        "description": "A list of line segments for the borders around exterior apertures.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "ext_doors", 
+        "description": "A list of line segments for the borders around exterior doors.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "roofs_to_walls", 
+        "description": "A list of line segments where roofs meet exterior walls (or floors).\nNote that both the roof Face and the wall/floor Face must be next to one\nanother in the model's outer envelope and have outdoor boundary conditions for\nthe edge to show up in this list.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "slabs_to_walls", 
+        "description": "A list of line segments where ground floor slabs meet exterior\nwalls or roofs. Note that the floor Face must have a ground boundary\ncondition and the wall or roof Face must have an outdoor boundary\ncondition for the edge between the two Faces to show up in this list.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "exp_floors_to_walls", 
+        "description": "A list of line segments where exposed floors meet exterior\nwalls. Note that both the wall Face and the floor Face must be next\nto one another in the model's outer envelope and have outdoor boundary\nconditions for the edge to show up in this list.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "ext_walls_to_walls", 
+        "description": "A list of line segments where exterior walls meet one another.\nNote that both wall Faces must be next to one another in the model's\nouter envelope and have outdoor boundary conditions for the edge to\nshow up in this list.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "roof_ridges", 
+        "description": "A list of line segments where exterior roofs meet one another.\nNote that both roof Faces must be next to one another in the model's\nouter envelope and have outdoor boundary conditions for the edge to\nshow up in this list.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "exp_floors_to_floors", 
+        "description": "A list of line segments where exposed floors meet one another.\nNote that both floor Faces must be next to one another in the model's\nouter envelope and have outdoor boundary conditions for the edge to\nshow up in this list.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "underground", 
+        "description": "A list of line segments where underground Faces meet one another.\nNote that both Faces must be next to one another in the model's\nouter envelope and have ground boundary conditions for the edge\nto show up in this list.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_model", 
+      "description": "A honeybee Model with rooms for which adjacencies have been solved.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "ex_coplanar_", 
+      "description": "Boolean to note whether edges falling between two coplanar Faces\nin the building envelope should be included in the result (False) or\nexcluded from it (True). (Default: False).", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "1 :: Visualize", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\n    from ladybug_{{cad}}.fromgeometry import from_linesegment3d\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\n\nif all_required_inputs(ghenv.Component):\n    # get the edges of the envelope components\n    assert isinstance(_model, Model), 'Expected Honeybee Model. Got {}.'.format(type(_model))\n    roofs_to_walls, slabs_to_walls, exp_floors_to_walls, ext_walls_to_walls, \\\n        roof_ridges, exp_floors_to_floors, underground = \\\n        _model.classified_envelope_edges(exclude_coplanar=ex_coplanar_)\n\n    # translate edges to {{Cad}} lines\n    ext_apertures = [from_linesegment3d(lin) for lin in _model.exterior_aperture_edges]\n    ext_doors = [from_linesegment3d(lin) for lin in _model.exterior_door_edges]\n    roofs_to_walls = [from_linesegment3d(lin) for lin in roofs_to_walls]\n    slabs_to_walls = [from_linesegment3d(lin) for lin in slabs_to_walls]\n    exp_floors_to_walls = [from_linesegment3d(lin) for lin in exp_floors_to_walls]\n    ext_walls_to_walls = [from_linesegment3d(lin) for lin in ext_walls_to_walls]\n    roof_ridges = [from_linesegment3d(lin) for lin in roof_ridges]\n    exp_floors_to_floors = [from_linesegment3d(lin) for lin in exp_floors_to_floors]\n    underground = [from_linesegment3d(lin) for lin in underground]\n", 
+  "category": "Honeybee", 
+  "name": "HB Envelope Edges", 
+  "description": "Get the edges of a Model's envelope grouped based on the objects they adjoin.\n_\nThe edges returned by this component will only exist along the exterior\nenvelope of the Model's rooms as defined by the contiguous volume across\nall interior adjacencies. In this way, edges that adjoin two honeybee rooms\nwill only be represented once in the list (and not twice for the two rooms).\n_\nThe lengths of the resulting edges are useful for evaluating thermal bridges\nacross the model.\n-"
+}
