@@ -23,11 +23,20 @@ across the model.
         _model: A honeybee Model with rooms for which adjacencies have been solved.
         ex_coplanar_: Boolean to note whether edges falling between two coplanar Faces
             in the building envelope should be included in the result (False) or
-            excluded from it (True). (Default: False).
+            excluded from it (True). (Default: True).
+        mullion_thick_: The maximum difference that apertures or doors can be from
+            one another for the edges to be considered a mullion rather than
+            a frame. If None, all edges of apertures and doors will be considered
+            frames rather than mullions.
 
     Returns:
-        ext_apertures: A list of line segments for the borders around exterior apertures.
-        ext_doors: A list of line segments for the borders around exterior doors.
+        aperture_frames: A list of line segments for where exterior apertures meet
+            their parent exterior wall or roof.
+        aperture_mullions: A list of line segments for where exterior apertures meet
+            one another.
+        door_frames: A list of line segments for where exterior doors meet their
+            parent exterior wall or roof.
+        door_mullions: A list of line segments for where exterior doors meet one another.
         roofs_to_walls: A list of line segments where roofs meet exterior walls (or floors).
             Note that both the roof Face and the wall/floor Face must be next to one
             another in the model's outer envelope and have outdoor boundary conditions for
@@ -60,7 +69,7 @@ across the model.
 
 ghenv.Component.Name = 'HB Envelope Edges'
 ghenv.Component.NickName = 'EnvelopeEdges'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -81,13 +90,24 @@ except ImportError as e:
 if all_required_inputs(ghenv.Component):
     # get the edges of the envelope components
     assert isinstance(_model, Model), 'Expected Honeybee Model. Got {}.'.format(type(_model))
+    ex_coplanar_ = True if ex_coplanar_ is None else ex_coplanar_
     roofs_to_walls, slabs_to_walls, exp_floors_to_walls, ext_walls_to_walls, \
         roof_ridges, exp_floors_to_floors, underground = \
         _model.classified_envelope_edges(exclude_coplanar=ex_coplanar_)
+    if mullion_thick_ is not None:
+        aperture_frames, aperture_mullions, door_frames, door_mullions = \
+            _model.classified_sub_face_edges(mullion_thickness=mullion_thick_)
+    else:
+        aperture_frames = _model.exterior_aperture_edges
+        aperture_mullions = []
+        door_frames = _model.exterior_door_edges
+        door_mullions = []
 
     # translate edges to Rhino lines
-    ext_apertures = [from_linesegment3d(lin) for lin in _model.exterior_aperture_edges]
-    ext_doors = [from_linesegment3d(lin) for lin in _model.exterior_door_edges]
+    aperture_frames = [from_linesegment3d(lin) for lin in aperture_frames]
+    aperture_mullions = [from_linesegment3d(lin) for lin in aperture_mullions]
+    door_frames = [from_linesegment3d(lin) for lin in door_frames]
+    door_mullions = [from_linesegment3d(lin) for lin in door_mullions]
     roofs_to_walls = [from_linesegment3d(lin) for lin in roofs_to_walls]
     slabs_to_walls = [from_linesegment3d(lin) for lin in slabs_to_walls]
     exp_floors_to_walls = [from_linesegment3d(lin) for lin in exp_floors_to_walls]
