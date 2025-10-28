@@ -1,19 +1,33 @@
 {
-  "version": "1.9.0", 
+  "version": "1.9.1", 
   "nickname": "EnvelopeEdges", 
   "outputs": [
     [
       {
         "access": "None", 
-        "name": "ext_apertures", 
-        "description": "A list of line segments for the borders around exterior apertures.", 
+        "name": "aperture_frames", 
+        "description": "A list of line segments for where exterior apertures meet\ntheir parent exterior wall or roof.", 
         "type": null, 
         "default": null
       }, 
       {
         "access": "None", 
-        "name": "ext_doors", 
-        "description": "A list of line segments for the borders around exterior doors.", 
+        "name": "aperture_mullions", 
+        "description": "A list of line segments for where exterior apertures meet\none another.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "door_frames", 
+        "description": "A list of line segments for where exterior doors meet their\nparent exterior wall or roof.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "door_mullions", 
+        "description": "A list of line segments for where exterior doors meet one another.", 
         "type": null, 
         "default": null
       }, 
@@ -79,13 +93,20 @@
     {
       "access": "item", 
       "name": "ex_coplanar_", 
-      "description": "Boolean to note whether edges falling between two coplanar Faces\nin the building envelope should be included in the result (False) or\nexcluded from it (True). (Default: False).", 
+      "description": "Boolean to note whether edges falling between two coplanar Faces\nin the building envelope should be included in the result (False) or\nexcluded from it (True). (Default: True).", 
       "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "mullion_thick_", 
+      "description": "The maximum difference that apertures or doors can be from\none another for the edges to be considered a mullion rather than\na frame. If None, all edges of apertures and doors will be considered\nframes rather than mullions.", 
+      "type": "double", 
       "default": null
     }
   ], 
   "subcategory": "1 :: Visualize", 
-  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\n    from ladybug_{{cad}}.fromgeometry import from_linesegment3d\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\n\nif all_required_inputs(ghenv.Component):\n    # get the edges of the envelope components\n    assert isinstance(_model, Model), 'Expected Honeybee Model. Got {}.'.format(type(_model))\n    roofs_to_walls, slabs_to_walls, exp_floors_to_walls, ext_walls_to_walls, \\\n        roof_ridges, exp_floors_to_floors, underground = \\\n        _model.classified_envelope_edges(exclude_coplanar=ex_coplanar_)\n\n    # translate edges to {{Cad}} lines\n    ext_apertures = [from_linesegment3d(lin) for lin in _model.exterior_aperture_edges]\n    ext_doors = [from_linesegment3d(lin) for lin in _model.exterior_door_edges]\n    roofs_to_walls = [from_linesegment3d(lin) for lin in roofs_to_walls]\n    slabs_to_walls = [from_linesegment3d(lin) for lin in slabs_to_walls]\n    exp_floors_to_walls = [from_linesegment3d(lin) for lin in exp_floors_to_walls]\n    ext_walls_to_walls = [from_linesegment3d(lin) for lin in ext_walls_to_walls]\n    roof_ridges = [from_linesegment3d(lin) for lin in roof_ridges]\n    exp_floors_to_floors = [from_linesegment3d(lin) for lin in exp_floors_to_floors]\n    underground = [from_linesegment3d(lin) for lin in underground]\n", 
+  "code": "\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\n    from ladybug_{{cad}}.fromgeometry import from_linesegment3d\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\n\nif all_required_inputs(ghenv.Component):\n    # get the edges of the envelope components\n    assert isinstance(_model, Model), 'Expected Honeybee Model. Got {}.'.format(type(_model))\n    ex_coplanar_ = True if ex_coplanar_ is None else ex_coplanar_\n    roofs_to_walls, slabs_to_walls, exp_floors_to_walls, ext_walls_to_walls, \\\n        roof_ridges, exp_floors_to_floors, underground = \\\n        _model.classified_envelope_edges(exclude_coplanar=ex_coplanar_)\n    if mullion_thick_ is not None:\n        aperture_frames, aperture_mullions, door_frames, door_mullions = \\\n            _model.classified_sub_face_edges(mullion_thickness=mullion_thick_)\n    else:\n        aperture_frames = _model.exterior_aperture_edges\n        aperture_mullions = []\n        door_frames = _model.exterior_door_edges\n        door_mullions = []\n\n    # translate edges to {{Cad}} lines\n    aperture_frames = [from_linesegment3d(lin) for lin in aperture_frames]\n    aperture_mullions = [from_linesegment3d(lin) for lin in aperture_mullions]\n    door_frames = [from_linesegment3d(lin) for lin in door_frames]\n    door_mullions = [from_linesegment3d(lin) for lin in door_mullions]\n    roofs_to_walls = [from_linesegment3d(lin) for lin in roofs_to_walls]\n    slabs_to_walls = [from_linesegment3d(lin) for lin in slabs_to_walls]\n    exp_floors_to_walls = [from_linesegment3d(lin) for lin in exp_floors_to_walls]\n    ext_walls_to_walls = [from_linesegment3d(lin) for lin in ext_walls_to_walls]\n    roof_ridges = [from_linesegment3d(lin) for lin in roof_ridges]\n    exp_floors_to_floors = [from_linesegment3d(lin) for lin in exp_floors_to_floors]\n    underground = [from_linesegment3d(lin) for lin in underground]\n", 
   "category": "Honeybee", 
   "name": "HB Envelope Edges", 
   "description": "Get the edges of a Model's envelope grouped based on the objects they adjoin.\n_\nThe edges returned by this component will only exist along the exterior\nenvelope of the Model's rooms as defined by the contiguous volume across\nall interior adjacencies. In this way, edges that adjoin two honeybee rooms\nwill only be represented once in the list (and not twice for the two rooms).\n_\nThe lengths of the resulting edges are useful for evaluating thermal bridges\nacross the model.\n-"
