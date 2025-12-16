@@ -51,7 +51,7 @@ model geometry and properties.
 
 ghenv.Component.Name = 'HB Dump gbXML'
 ghenv.Component.NickName = 'DumpGBXML'
-ghenv.Component.Message = '1.9.1'
+ghenv.Component.Message = '1.9.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -136,5 +136,6 @@ if all_required_inputs(ghenv.Component) and _dump:
             cmds.append(lbr_folders.lbt_grasshopper_version_str)
         custom_env = os.environ.copy()
         custom_env['PYTHONHOME'] = ''
-        process = subprocess.Popen(cmds, shell=True, env=custom_env)
+        use_shell = True if os.name == 'nt' else False
+        process = subprocess.Popen(cmds, shell=use_shell, env=custom_env)
         result = process.communicate()  # freeze the canvas while running
