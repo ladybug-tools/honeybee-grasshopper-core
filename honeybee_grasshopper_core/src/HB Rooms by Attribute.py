@@ -87,10 +87,17 @@ if all_required_inputs(ghenv.Component):
             atr_i = values.index(atr)
             rooms[atr_i].append(room)
     else:
-        values = [atr for atr in color_obj.attributes_unique if atr in value_]
+        values = []
+        for unique_atr in color_obj.attributes_unique:
+            for kw in value_:
+                if kw.lower() in str(unique_atr).lower():
+                    values.append(unique_atr)
+                    break 
+        
         rooms = [[] for val in values]
         for atr, room in zip(color_obj.attributes, in_rooms):
             if atr in values:
                 atr_i = values.index(atr)
                 rooms[atr_i].append(room)
+                
     rooms = list_to_data_tree(rooms)
