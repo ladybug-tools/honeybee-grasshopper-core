@@ -90,10 +90,17 @@ if all_required_inputs(ghenv.Component):
             atr_i = values.index(atr)
             hb_objs[atr_i].append(face)
     else:
-        values = [atr for atr in color_obj.attributes_unique if atr in value_]
+        values = []
+        for unique_atr in color_obj.attributes_unique:
+            for kw in value_:
+                if kw.lower() in str(unique_atr).lower():
+                    values.append(unique_atr)
+                    break
+        
         hb_objs = [[] for val in values]
         for atr, face in zip(color_obj.attributes, color_obj.flat_faces):
             if atr in values:
                 atr_i = values.index(atr)
                 hb_objs[atr_i].append(face)
+
     hb_objs = list_to_data_tree(hb_objs)
