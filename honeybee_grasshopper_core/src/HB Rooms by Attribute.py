@@ -36,7 +36,7 @@ This can be used to group rooms by program, whether rooms are conditioned, etc.
 
 ghenv.Component.Name = "HB Rooms by Attribute"
 ghenv.Component.NickName = 'RoomsByAttr'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -93,11 +93,9 @@ if all_required_inputs(ghenv.Component):
                 if kw.lower() in str(unique_atr).lower():
                     values.append(unique_atr)
                     break 
-        
         rooms = [[] for val in values]
         for atr, room in zip(color_obj.attributes, in_rooms):
             if atr in values:
                 atr_i = values.index(atr)
                 rooms[atr_i].append(room)
-                
     rooms = list_to_data_tree(rooms)

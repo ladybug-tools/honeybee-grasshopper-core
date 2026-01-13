@@ -37,7 +37,7 @@ This can be used to group faces by construction, modifier, etc.
 
 ghenv.Component.Name = "HB Faces by Attribute"
 ghenv.Component.NickName = 'FacesByAttr'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -96,11 +96,9 @@ if all_required_inputs(ghenv.Component):
                 if kw.lower() in str(unique_atr).lower():
                     values.append(unique_atr)
                     break
-        
         hb_objs = [[] for val in values]
         for atr, face in zip(color_obj.attributes, color_obj.flat_faces):
             if atr in values:
                 atr_i = values.index(atr)
                 hb_objs[atr_i].append(face)
-
     hb_objs = list_to_data_tree(hb_objs)
