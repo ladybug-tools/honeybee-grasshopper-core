@@ -60,7 +60,7 @@ is clearly rectangular.
 
 ghenv.Component.Name = 'HB Apertures by Width Height'
 ghenv.Component.NickName = 'AperturesByWH'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -77,7 +77,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance, conversion_to_meters
+    from ladybug_rhino.config import current_tolerance, conversion_to_meters
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -91,7 +91,7 @@ def can_host_apeture(face):
 
 def assign_apertures(face, hgt, wth, sil, hor, op):
     """Assign apertures to a Face based on a set of inputs."""
-    face.apertures_by_width_height_rectangle(hgt, wth, sil, hor, tolerance)
+    face.apertures_by_width_height_rectangle(hgt, wth, sil, hor, current_tolerance())
 
     # try to assign the operable property
     if op:

@@ -30,7 +30,7 @@ Separate and group honeybee rooms with the same average floor height.
 
 ghenv.Component.Name = "HB Rooms by Floor Height"
 ghenv.Component.NickName = 'FloorHeight'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -43,7 +43,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance
+    from ladybug_rhino.config import current_tolerance
     from ladybug_rhino.grasshopper import all_required_inputs, list_to_data_tree
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -59,7 +59,7 @@ if all_required_inputs(ghenv.Component):
             in_rooms.append(hb_obj)
 
     # loop through each of the rooms and get the floor height
-    grouped_rooms, flr_hgts = Room.group_by_floor_height(in_rooms, tolerance)
+    grouped_rooms, flr_hgts = Room.group_by_floor_height(in_rooms, current_tolerance())
 
     # convert matrix to data tree
     rooms = list_to_data_tree(grouped_rooms)

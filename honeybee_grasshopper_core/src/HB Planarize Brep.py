@@ -30,13 +30,12 @@ of curved edges.
 
 ghenv.Component.Name = "HB Planarize Brep"
 ghenv.Component.NickName = 'Planarize'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance
     from ladybug_rhino.planarize import curved_solid_faces
     from ladybug_rhino.fromgeometry import from_face3ds_to_joined_brep, from_face3d
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning

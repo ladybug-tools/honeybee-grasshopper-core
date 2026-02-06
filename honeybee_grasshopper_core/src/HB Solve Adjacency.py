@@ -52,7 +52,7 @@ adjacent.
 
 ghenv.Component.Name = "HB Solve Adjacency"
 ghenv.Component.NickName = 'SolveAdj'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -65,7 +65,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the core ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance
+    from ladybug_rhino.config import current_tolerance
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -188,6 +188,7 @@ def apply_rad_int_mod(adj_info, rad_int_mod):
 
 
 if all_required_inputs(ghenv.Component) and _run:
+    tolerance = current_tolerance()
     adj_rooms = [room.duplicate() for room in _rooms] # duplicate the initial objects
 
     # solve adjacnecy

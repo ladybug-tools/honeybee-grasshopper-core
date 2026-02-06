@@ -34,7 +34,7 @@ this is intersection should be done prior to the creation of the Honeybee Rooms.
 
 ghenv.Component.Name = 'HB Custom Ground'
 ghenv.Component.NickName = 'CustomGround'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -45,7 +45,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance, angle_tolerance
+    from ladybug_rhino.config import current_tolerance, angle_tolerance
     from ladybug_rhino.togeometry import to_face3d
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
@@ -54,6 +54,7 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     # process the inputs
+    tolerance = current_tolerance()
     rooms = [room.duplicate() for room in _rooms]  # duplicate to avoid editing input
     ground_faces = [g for geo in _ground for g in to_face3d(geo)]  # convert to lb geometry
 

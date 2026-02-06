@@ -45,7 +45,7 @@ True to only run the repair operation.
 
 ghenv.Component.Name = 'HB Offset Aperture Edges'
 ghenv.Component.NickName = 'OffsetApertures'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -58,7 +58,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance
+    from ladybug_rhino.config import current_tolerance
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -66,6 +66,7 @@ except ImportError as e:
 
 def offset_face(face):
     """Offset and repair the Apertures of a Face."""
+    tolerance = current_tolerance()
     if _offset != 0:
         orig_area = [ap.area for ap in face.apertures]
         face.offset_aperture_edges(_offset, tolerance)

@@ -34,7 +34,7 @@ Add a Honeybee Aperture or Door to a parent Face or Room.
 
 ghenv.Component.Name = "HB Add Subface"
 ghenv.Component.NickName = 'AddSubface'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "4"
@@ -57,11 +57,12 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance, angle_tolerance
+    from ladybug_rhino.config import current_tolerance, angle_tolerance
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
+tolerance = current_tolerance()
 a_tol_min = math.radians(angle_tolerance)  # min tolerance for projection
 a_tol_max = math.pi - angle_tolerance  # max tolerance for projection
 already_added_ids = set()  # track whether a given sub-face is already added

@@ -33,7 +33,7 @@ interior faces when their surface areas do not match.
 
 ghenv.Component.Name = 'HB Intersect Solids'
 ghenv.Component.NickName = 'IntSolid'
-ghenv.Component.Message = '1.9.1'
+ghenv.Component.Message = '1.9.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -47,7 +47,7 @@ except ImportError as e:
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.intersect import bounding_box, intersect_solids, \
         intersect_solids_parallel
-    from ladybug_rhino.config import tolerance, angle_tolerance
+    from ladybug_rhino.config import current_tolerance, angle_tolerance
     from ladybug_rhino.grasshopper import all_required_inputs, \
         recommended_processor_count, run_function_in_parallel
 except ImportError as e:
@@ -57,6 +57,7 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component) and _run:
     # get the number of CPUs to use
+    tolerance = current_tolerance()
     workers = _cpu_count_ if _cpu_count_ is not None else recommended_processor_count()
 
     if isinstance(_rooms[0], Room):

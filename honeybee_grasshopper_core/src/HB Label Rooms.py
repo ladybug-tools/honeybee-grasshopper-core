@@ -40,7 +40,7 @@ different Rooms.
 
 ghenv.Component.Name = "HB Label Rooms"
 ghenv.Component.NickName = 'LabelRooms'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -62,7 +62,7 @@ except ImportError as e:
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_polyface3d_to_wireframe, from_plane
     from ladybug_rhino.text import text_objects
-    from ladybug_rhino.config import conversion_to_meters, units_system, tolerance
+    from ladybug_rhino.config import conversion_to_meters, units_system, current_tolerance
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -96,6 +96,7 @@ if all_required_inputs(ghenv.Component):
             rooms.extend(hb_obj.rooms)
         else:
             rooms.append(hb_obj)
+    tolerance = current_tolerance()
 
     for room in rooms:
         # get the attribute to be displayed

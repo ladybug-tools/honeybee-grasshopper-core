@@ -33,7 +33,7 @@ for missing properites.
 
 ghenv.Component.Name = 'HB Load gbXML OSM IDF'
 ghenv.Component.NickName = 'LoadEModel'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -74,9 +74,10 @@ except ImportError as e:
 try:  # import the core ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning
     from ladybug_rhino.config import conversion_to_meters, units_system, \
-        tolerance, angle_tolerance
+        current_tolerance, angle_tolerance
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
+tolerance = current_tolerance()
 
 
 def model_units_tolerance_check(model):

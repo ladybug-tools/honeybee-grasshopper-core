@@ -50,7 +50,7 @@ avoid light leaks in Radiance simulations.
 
 ghenv.Component.Name = "HB Room"
 ghenv.Component.NickName = 'Room'
-ghenv.Component.Message = '1.9.1'
+ghenv.Component.Message = '1.9.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = "2"
@@ -63,7 +63,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import honeybee:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance
+    from ladybug_rhino.config import current_tolerance
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning, \
         document_counter
 except ImportError as e:
@@ -90,6 +90,7 @@ except ImportError as e:
     if _mod_set_ is not None:
         raise ValueError('_mod_set_ has been specified but honeybee-radiance '
                          'has failed to import.\n{}'.format(e))
+tolerance = current_tolerance()
 
 
 if all_required_inputs(ghenv.Component):
