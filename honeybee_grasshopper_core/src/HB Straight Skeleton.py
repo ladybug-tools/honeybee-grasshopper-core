@@ -40,7 +40,7 @@ Straight skeleton implementation
 
 ghenv.Component.Name = 'HB Straight Skeleton'
 ghenv.Component.NickName = 'Skeleton'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -57,7 +57,7 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug_geometry:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.config import tolerance
+    from ladybug_rhino.config import current_tolerance
     from ladybug_rhino.togeometry import to_face3d
     from ladybug_rhino.fromgeometry import from_face3d, from_linesegment3d
     from ladybug_rhino.grasshopper import all_required_inputs, list_to_data_tree
@@ -67,6 +67,7 @@ except ImportError as e:
 
 if all_required_inputs(ghenv.Component):
     # extract the straight skeleton and sub-faces from the geometry
+    tolerance = current_tolerance()
     skeleton, perim_poly, core_poly = [], [], []
     for face in to_face3d(_floor_geo):
         face = face.remove_colinear_vertices(tolerance)

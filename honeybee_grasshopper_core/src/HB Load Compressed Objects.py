@@ -31,7 +31,7 @@ Schedule, Load, ProgramType, or Simulation object.
 
 ghenv.Component.Name = 'HB Load Compressed Objects'
 ghenv.Component.NickName = 'LoadCompressed'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '3 :: Serialize'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -55,11 +55,12 @@ except ImportError as e:
 
 try:  # import the core ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning
-    from ladybug_rhino.config import units_system, tolerance
+    from ladybug_rhino.config import units_system, current_tolerance
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 import cPickle as pickle
+tolerance = current_tolerance()
 
 
 def model_units_tolerance_check(model):

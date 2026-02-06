@@ -40,7 +40,7 @@ different faces and sub-faces.
 
 ghenv.Component.Name = 'HB Label Faces'
 ghenv.Component.NickName = 'LableFaces'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -66,7 +66,7 @@ except ImportError as e:
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.fromgeometry import from_face3d_to_wireframe, from_plane
     from ladybug_rhino.text import text_objects
-    from ladybug_rhino.config import tolerance, conversion_to_meters, units_system
+    from ladybug_rhino.config import current_tolerance, conversion_to_meters, units_system
     from ladybug_rhino.grasshopper import all_required_inputs
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
@@ -77,6 +77,7 @@ ghenv.Component.Params.Output[1].Hidden = True
 # maximum text height in meters - converted to model units
 max_txt_h = 0.25 / conversion_to_meters()
 # tolerance for computing the pole of inaccessibility
+tolerance = current_tolerance()
 units = units_system()
 p_tol = parse_distance_string('0.01m', units)
 # dictionary of unit-sensitive propperties to be handled specially

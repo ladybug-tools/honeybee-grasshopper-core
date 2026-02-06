@@ -33,7 +33,7 @@ Get geometry properties of honeybee Rooms or a honeybee Model.
 
 ghenv.Component.Name = 'HB Geometry Properties'
 ghenv.Component.NickName = 'GeoProp'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
@@ -46,13 +46,14 @@ except ImportError as e:
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs
-    from ladybug_rhino.config import units_system, tolerance
+    from ladybug_rhino.config import units_system, current_tolerance
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 
 if all_required_inputs(ghenv.Component):
     # extract any rooms from input Models
+    tolerance = current_tolerance()
     rooms, is_model = [], False
     for hb_obj in _rooms:
         if isinstance(hb_obj, Room):
