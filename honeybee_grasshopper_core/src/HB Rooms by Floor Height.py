@@ -30,7 +30,7 @@ Separate and group honeybee rooms with the same average floor height.
 
 ghenv.Component.Name = "HB Rooms by Floor Height"
 ghenv.Component.NickName = 'FloorHeight'
-ghenv.Component.Message = '1.9.1'
+ghenv.Component.Message = '1.9.2'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '2 :: Organize'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -59,7 +59,8 @@ if all_required_inputs(ghenv.Component):
             in_rooms.append(hb_obj)
 
     # loop through each of the rooms and get the floor height
-    grouped_rooms, flr_hgts = Room.group_by_floor_height(in_rooms, current_tolerance())
+    min_diff = min_diff_ if min_diff_ is not None else current_tolerance()  
+    grouped_rooms, flr_hgts = Room.group_by_floor_height(in_rooms, min_diff)
 
     # convert matrix to data tree
     rooms = list_to_data_tree(grouped_rooms)

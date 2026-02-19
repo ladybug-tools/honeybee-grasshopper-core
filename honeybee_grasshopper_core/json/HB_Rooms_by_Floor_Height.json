@@ -1,5 +1,5 @@
 {
-  "version": "1.9.1", 
+  "version": "1.9.2", 
   "nickname": "FloorHeight", 
   "outputs": [
     [
@@ -36,7 +36,7 @@
     }
   ], 
   "subcategory": "2 :: Organize", 
-  "code": "\n\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_geometry:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import current_tolerance\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, list_to_data_tree\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # extract any rooms from input Models\n    in_rooms = []\n    for hb_obj in _rooms:\n        if isinstance(hb_obj, Model):\n            in_rooms.extend(hb_obj.rooms)\n        else:\n            in_rooms.append(hb_obj)\n\n    # loop through each of the rooms and get the floor height\n    grouped_rooms, flr_hgts = Room.group_by_floor_height(in_rooms, current_tolerance())\n\n    # convert matrix to data tree\n    rooms = list_to_data_tree(grouped_rooms)\n", 
+  "code": "\n\ntry:  # import the core honeybee dependencies\n    from honeybee.model import Model\n    from honeybee.room import Room\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_geometry:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import current_tolerance\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, list_to_data_tree\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # extract any rooms from input Models\n    in_rooms = []\n    for hb_obj in _rooms:\n        if isinstance(hb_obj, Model):\n            in_rooms.extend(hb_obj.rooms)\n        else:\n            in_rooms.append(hb_obj)\n\n    # loop through each of the rooms and get the floor height\n    min_diff = min_diff_ if min_diff_ is not None else current_tolerance()  \n    grouped_rooms, flr_hgts = Room.group_by_floor_height(in_rooms, min_diff)\n\n    # convert matrix to data tree\n    rooms = list_to_data_tree(grouped_rooms)\n", 
   "category": "Honeybee", 
   "name": "HB Rooms by Floor Height", 
   "description": "Separate and group honeybee rooms with the same average floor height.\n-"
