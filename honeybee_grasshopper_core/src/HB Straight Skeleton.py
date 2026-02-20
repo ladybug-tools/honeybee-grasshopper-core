@@ -1,7 +1,7 @@
 # Honeybee: A Plugin for Environmental Analysis (GPL)
 # This file is part of Honeybee.
 #
-# Copyright (c) 2025, Ladybug Tools.
+# Copyright (c) 2026, Ladybug Tools.
 # You should have received a copy of the GNU Affero General Public License
 # along with Honeybee; If not, see <http://www.gnu.org/licenses/>.
 # 
@@ -40,7 +40,7 @@ Straight skeleton implementation
 
 ghenv.Component.Name = 'HB Straight Skeleton'
 ghenv.Component.NickName = 'Skeleton'
-ghenv.Component.Message = '1.9.1'
+ghenv.Component.Message = '1.10.0'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '0'
