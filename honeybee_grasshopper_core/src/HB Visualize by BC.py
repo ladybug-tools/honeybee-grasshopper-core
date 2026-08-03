@@ -16,7 +16,6 @@ Visualize room geometry in the Rhino scene organized by boundary condition.
             previewed in the Rhino scene based on boundary condition.
 
     Returns:
-        outdoors: Rhino geometry for the objects with an Outdoors boundary condition.
         surface: Rhino geometry for the objects with a Surface (interior) boundary
             condition.
         ground: Rhino geometry for the objects with a Ground boundary condition.
@@ -24,12 +23,13 @@ Visualize room geometry in the Rhino scene organized by boundary condition.
             boundary condition.
         other: Rhino geometry for all objects with a boundary condition other than
             the four above. All shade geometry will also be added to this list.
+        outdoors: Rhino geometry for the objects with an Outdoors boundary condition.
         wire_frame: A list of lines representing the outlines of the rooms.
 """
 
 ghenv.Component.Name = "HB Visualize by BC"
 ghenv.Component.NickName = 'VizByBC'
-ghenv.Component.Message = '1.10.0'
+ghenv.Component.Message = '1.10.1'
 ghenv.Component.Category = 'Honeybee'
 ghenv.Component.SubCategory = '1 :: Visualize'
 ghenv.Component.AdditionalHelpFromDocStrings = '5'
